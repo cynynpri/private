@@ -1,11 +1,9 @@
-package samples;
-
 import java.math.*;
 import java.util.*;
 
 class Test{
 	public static double lanescr(int[] note,double base){
-		return note[0]*base+note[1]*1.25*base+note[2]*1.10*base+note[3]*1.10*1.25*base+note[4]*1.15*base+note[5]*1.15*1.25*base+note[6]*1.20*base+note[7]*1.20*1.25*base+note[8]*1.25*base+note[9]*1.25*1.25*base;
+		return note[0]*base+note[1]*1.25*base+note[2]*1.10*base+note[3]*1.10*1.25*base+note[4]*1.15*base+note[5]*1.15*1.25*base+note[6]*1.20*base+note[7]*1.20*1.25*base+note[8]*1.25*base+note[9]*1.25*1.25*base; 
 	}
 	public static String setUnitsf(Card_datas[] unit, Card_datas frend){
 		//スコア計算におけるBaseを計算するメソッドとする。
@@ -51,7 +49,7 @@ class Test{
 				}
 			}
 		}else if(centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1 || centersklnm.indexOf("プリンセス") != -1){
-			//わからないーわからないーままでーなんとかなるさ と さぁ　はじめよう　君のこころは　かｇ（ry
+			//わからないーわからないーままでーなんとかなるさ と Ah　はじめよう　君のこころは　かｇ（ry
 			if(centersklnm.indexOf("エンジェル") != -1){
 				for(int len = 0;len < unit.length;len++){
 					if(subcentersklnm.equals(unit[len].getgrade())||subcentersklnm.equals(unit[len].getsubuntnm())){
@@ -106,7 +104,7 @@ class Test{
 			}
 		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 				|| centersklnm.indexOf("プリンセス") != -1) {
-			//わからないーわからないーままでーなんとかなるさ と さぁ　はじめよう　君のこころは　かｇ（ry
+			//わからないーわからないーままでーなんとかなるさ と Ah　はじめよう　君のこころは　かｇ（ry
 			if (centersklnm.indexOf("エンジェル") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
@@ -148,7 +146,7 @@ class Test{
 
 		return rtnstr;
 	}
-
+	
 	//https://teratail.com/questions/9363
 	//上記のpythonプログラムを参考にした。
 	public static double nCr(int n, int r){
@@ -199,8 +197,76 @@ class Test{
 		return bf_p;
 	}
 
+	public static int setMaxactcnt(Card_datas ondt, int maxcombo, double perper, int musictm, String sf, int star_icon/*, Card_datas[] unit*/){
+		int mactct = 0;
+		int base = Integer.parseInt(sf.split(",",0)[0]);
+		String skitp = ondt.gskitp();
+		//check Card_datas line 521
+		if(ondt.gskitp().equals("タイマー")){
+			mactct = (int)Math.floor(musictm/ondt.gfactv());
+		}else if(ondt.gskitp().equals("リズムアイコン")){
+			mactct = (int)Math.floor(maxcombo/ondt.gfactv());
+		}else if(ondt.gskitp().equals("パーフェクト")){
+			mactct = (int)Math.floor(maxcombo * perper/ondt.gfactv());
+		}else if(ondt.gskitp().equals("コンボ")){
+			mactct = (int)Math.floor(maxcombo / ondt.gfactv());
+		}else if(ondt.gskitp().equals("スコア")){
+			mactct = (int)Math.floor(base * maxcombo * 1.3 / (80 * ondt.gfactv()));
+		}else if(ondt.gskitp().equals("スターアイコン")){
+			mactct = (int)Math.floor(star_icon / ondt.gfactv());
+		}else if(ondt.gskitp().equals("チェイン")){
+			//処理が思いつかない
+			/*for(int len = 0;len < unit.length;len++){
+				if(ondt.getgrade().equals(unit[len].getgrade())){
+
+				}
+			}*/
+			//仕方ないので未実装
+		}
+		return mactct;
+	}
+
 	public static void main(String[] args){
-		double[] probs = {0.47,0.43,0.37,0.23,0.44,0.44,0.49,0.43,0.17};
+		int musictm = 98;//楽曲時間
+		Card_datas[] unit = new Card_datas[9];
+		unit[0] = new Card_datas(1, "桜内梨子", "スマイル", "UR", "私の声聞こえますか", true, 4, 4, "スコア", "リズムアイコン", 23, 47, 0.0, 1580,
+				6320, 4100, 4490, "スマイルプリンセス", "Guilty Kiss");
+		unit[1] = new Card_datas(2, "松浦果南", "クール", "UR", "わんわん巡回", true, 4, 4, "スコア", "コンボ", 22, 43, 0.0, 1670, 4100,
+				4460, 6360, "クールエンプレス", "AZELEA");
+		unit[2] = new Card_datas(3, "渡辺曜", "ピュア", "SSR", "アイドルも水泳も", true, 6, 1, "回復", "リズムアイコン", 15, 23, 0.0, 3, 3440,
+				5920, 4340, "ピュアパワー", "Aqours");
+		unit[3] = new Card_datas(4, "西木野真姫", "ピュア", "SSR", "暑い日に2人で", true, 6, 3, "スコア", "コンボ", 19, 37, 0.0, 780, 3520,
+				5850, 4240, "ピュアパワー", "BiBi");
+		unit[4] = new Card_datas(5, "南ことり", "ピュア", "UR", "プールで２人きり", true, 4, 3, "回復", "リズムアイコン", 21, 44, 0.0, 5, 4120,
+				6370, 4420, "ピュアエンジェル", "2年生");
+		unit[5] = new Card_datas(6, "園田海未", "ピュア", "UR", "クラシックメイド", true, 4, 4, "回復", "リズムアイコン", 23, 49, 0.0, 5, 4170,
+				6320, 4370, "ピュアエンジェル", "μ's");
+		unit[6] = new Card_datas(7, "津島善子", "ピュア", "UR", "たゆたうクラゲ", true, 4, 3, "スコア", "パーフェクト", 26, 44, 0.0, 1415,
+				4040, 6310, 4540, "ピュアエンジェル", "1年生");
+		unit[7] = new Card_datas(8, "小泉花陽", "ピュア", "UR", "花陽のにぎりめし", true, 4, 3, "スコア", "パーフェクト", 20, 43, 0.0, 1160,
+				4530, 6300, 4040, "ピュアエンジェル", "Printemps");
+		unit[8] = new Card_datas(9, "園田海未", "ピュア", "SR", "敏腕マネージャー", true, 4, 5, "スコア", "スコア", 13500, 17, 0.0, 1290,
+				3650, 5260, 3820, "ピュアエンジェル", "2年生");
+		Card_datas frend = new Card_datas(5, "南ことり", "ピュア", "UR", "プールで２人きり", true, 4, 3, "回復", "リズムアイコン", 21, 44, 0.0,
+				5, 4120, 6370, 4420, "ピュアエンジェル", "2年生");
+		//double[] probs = new double[unit.length];
+		//int maxcombo = 496;
+		//double perper = 0.93;
+		/*for(int len = 0;len < unit.length;len++){
+			probs[len] = unit[len].gprob/100.0;
+		}
+		int[] effects = new int[9];
+		for(int len = 0;len < unit.length;len++){
+			effects[len] = unit[len].gefsz();
+		}
+		int star_icon = 63;
+		double perper = 0.93;
+		int[] runskl = new int[9];
+		for(int len = 0;len < unit.length;len++){
+			runskl[len] = setMaxactcnt(unit[len], maxcombo, perper, musictm, setUnitsf(unit,frend), star_icon)
+		}
+		*/
+		double[] probs = {0.47,0.43,0.37,0.23,0.44,0.44,0.49,0.43,0.17};//ここの即値をCard_datasだけで表現できたらこのjavaファイルの役目は終わり
 		int[] runskl = {21,22,26,33,23,17,21,23,57};
 		int[] effects = {1580,1670,780,0,5,1415,5,1160,1290};
 		effects[0] *= 2.5;
@@ -273,17 +339,6 @@ class Test{
 		System.out.println("特技スコアアップ期待値:"+tempscr+"("+sumprob*100+"%)");
 		System.out.println("計算した数値が条件を満たすまでに計算がループした回数:"+steps);
 		System.out.println("ベーススコア計算");
-		Card_datas[] unit = new Card_datas[9];
-		unit[0] = new Card_datas(1,"桜内梨子","スマイル","UR","私の声聞こえますか",true,4,4,"スコア","リズムアイコン",23,47,0.0,1580,6320,4100,4490,"スマイルプリンセス","Guilty Kiss");
-		unit[1] = new Card_datas(2,"松浦果南","クール","UR","わんわん巡回",true,4,4,"スコア","コンボ",22,43,0.0,1670,4100,4460,6360,"クールエンプレス","AZELEA");
-		unit[2] = new Card_datas(3,"渡辺曜","ピュア","SSR","アイドルも水泳も",true,6,1,"回復","リズムアイコン",15,23,0.0,3,3440,5920,4340,"ピュアパワー","Aqours");
-		unit[3] = new Card_datas(4,"西木野真姫","ピュア","SSR","暑い日に2人で",true,6,3,"スコア","コンボ",19,37,0.0,780,3520,5850,4240,"ピュアパワー","BiBi");
-		unit[4] = new Card_datas(5,"南ことり","ピュア","UR","プールで２人きり",true,4,3,"回復","リズムアイコン",21,44,0.0,5,4120,6370,4420,"ピュアエンジェル","2年生");
-		unit[5] = new Card_datas(6,"園田海未","ピュア","UR","クラシックメイド",true,4,4,"回復","リズムアイコン",23,49,0.0,5,4170,6320,4370,"ピュアエンジェル","μ's");
-		unit[6] = new Card_datas(7,"津島善子","ピュア","UR","たゆたうクラゲ",true,4,3,"スコア","パーフェクト",26,44,0.0,1415,4040,6310,4540,"ピュアエンジェル","1年生");
-		unit[7] = new Card_datas(8,"小泉花陽","ピュア","UR","花陽のにぎりめし",true,4,3,"スコア","パーフェクト",20,43,0.0,1160,4530,6300,4040,"ピュアエンジェル","Printemps");
-		unit[8] = new Card_datas(9,"園田海未","ピュア","SR","敏腕マネージャー",true,4,5,"スコア","スコア",13500,17,0.0,1290,3650,5260,3820,"ピュアエンジェル","2年生");
-		Card_datas frend = new Card_datas(5, "南ことり", "ピュア", "UR", "プールで２人きり", true, 4, 3, "回復", "リズムアイコン", 21, 44, 0.0, 5,4120, 6370, 4420, "ピュアエンジェル", "2年生");
 		unit[2].spcross(1); unit[2].spaura(1);
 		unit[3].spcross(1); unit[3].spaura(1);
 		String sfstr = setUnitsf(unit,frend);
