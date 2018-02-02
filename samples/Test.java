@@ -1,9 +1,11 @@
+package samples;
+
 import java.math.*;
 import java.util.*;
 
 class Test{
 	public static double lanescr(int[] note,double base){
-		return note[0]*base+note[1]*1.25*base+note[2]*1.10*base+note[3]*1.10*1.25*base+note[4]*1.15*base+note[5]*1.15*1.25*base+note[6]*1.20*base+note[7]*1.20*1.25*base+note[8]*1.25*base+note[9]*1.25*1.25*base; 
+		return note[0]*base+note[1]*1.25*base+note[2]*1.10*base+note[3]*1.10*1.25*base+note[4]*1.15*base+note[5]*1.15*1.25*base+note[6]*1.20*base+note[7]*1.20*1.25*base+note[8]*1.25*base+note[9]*1.25*1.25*base;
 	}
 	public static String setUnitsf(Card_datas[] unit, Card_datas frend){
 		//スコア計算におけるBaseを計算するメソッドとする。
@@ -146,7 +148,7 @@ class Test{
 
 		return rtnstr;
 	}
-	
+
 	//https://teratail.com/questions/9363
 	//上記のpythonプログラムを参考にした。
 	public static double nCr(int n, int r){
