@@ -95,9 +95,9 @@ class Music_data {
 		throw new DataNotFoundException(err);
 	}
 
-	public static Music_data[] R_rdata()throws FileNotFoundException, IOException{
+	public static Music_data[] r_Rdata()throws FileNotFoundException, IOException{
 		ArrayList<Music_data> aL_mscdts = new ArrayList<Music_data>();
-		String dPath = System.getProperty("user.dir"+ "/Datalist/FullMusicData.csv");
+		String dPath = System.getProperty("user.dir") + "\\Datalist\\FullMusicData.csv";
 		BufferedReader br = new BufferedReader(new FileReader(dPath));
 		String liner = new String();
 		liner = br.readLine();
@@ -112,6 +112,7 @@ class Music_data {
 		int[] hlane = new int[10];
 		int[] ilane = new int[10];
 		while(liner != null){
+			arbf_str = liner.split(",",0);
 			for(int len = 0;len < 10;len++){
 				alane[len] = Integer.parseInt(arbf_str[8].split(" ",0)[len]);
 				blane[len] = Integer.parseInt(arbf_str[9].split(" ",0)[len]);
