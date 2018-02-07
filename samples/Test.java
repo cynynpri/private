@@ -33,6 +33,7 @@ class Test{
 			}
 		}
 
+		//自ユニットのセンターサブセンター処理 SSRセンターとSRセンター処理できてませんねぇ？！
 		if(subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")){
 			subcenup = 0.03;
 		}else{
@@ -86,7 +87,27 @@ class Test{
 						//round up してほしい。
 				}
 			}
+		} else if (centersklnm.indexOf("スター") != -1) {
+			cenup = 0.07;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else {
+			cenup = 0.06;
+			for (int len = 0; len < unit.length; len++) {
+				tmpsu += sa[len];
+				su[len] = (int) Math.ceil(sa[len] * cenup);
+			}
 		}
+
+
+
 		subcentersklnm = frend.getacskn();
 		centersklnm = frend.getcskin();
 		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
@@ -137,6 +158,20 @@ class Test{
 					}
 					//round up してほしい。
 				}
+			}
+		} else if (centersklnm.indexOf("スター") != -1) {
+			cenup = 0.07;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else {
+			cenup = 0.06;
+			for (int len = 0; len < unit.length; len++) {
+				su[len] = (int) Math.ceil(sa[len] * cenup);
 			}
 		}
 		int allsu = 0;
@@ -265,7 +300,7 @@ class Test{
 		double perper = 0.93;
 		int[] runskl = new int[9];
 		for(int len = 0;len < unit.length;len++){
-			runskl[len] = setMaxactcnt(unit[len], maxcombo, perper, musictm, setUnitsf(unit,frend), star_icon)
+			runskl[len] = setMaxactcnt(unit[len], maxcombo, perper, musictm, setUnitsf(unit,frend), star_icon);
 		}
 		*/
 		double[] probs = {0.47,0.43,0.37,0.23,0.44,0.44,0.49,0.43,0.17};//ここの即値をCard_datasだけで表現できたらこのjavaファイルの役目は終わり
@@ -280,7 +315,7 @@ class Test{
 		effects[4] *= 480;
 		effects[6] *= 480;
 		ArrayList<double[]> ar_rprobs = new ArrayList<double[]>();
-		double k = 5/100.0;//分母の最小値は78.12
+		double k = 1/120.0;//分母の最小値は78.12
 		for(int len = 0;len < 9;len++){
 			double[] temp = prob(runskl[len]+1,probs[len]);
 			ar_rprobs.add(temp);
@@ -298,18 +333,42 @@ class Test{
 		//kを超えるまでの確率分布を作成する(probでやってるような処理。※逆からなので0+=probとなる。);
 		double sumprob = 0.0;
 		label:for(int a = rprobs[1].length-1;a > Math.floor((rprobs[1].length-1)*probs[1]);a--){
+			/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。 */
 			for(int b = rprobs[0].length-1;b > Math.floor((rprobs[0].length-1)*probs[0]);b--){
+				/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。 */
 				for(int c = rprobs[8].length-1;c > Math.floor((rprobs[8].length-1)*probs[8]);c--){
+					/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
+					 */
 					for(int d = rprobs[7].length-1;d > Math.floor((rprobs[7].length-1)*probs[7]);d--){
+						/* gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
+						 */
 						for(int e = rprobs[5].length-1;e > Math.floor((rprobs[5].length-1)*probs[5]);e--){
+							/* gのコメント参照ループを回さずに確率分布を加算し、次のループへ。
+							 */
 							for(int f = rprobs[6].length-1;f > Math.floor((rprobs[6].length-1)*probs[6]);f--){
+								/* gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
+								 */
 								for(int g = rprobs[4].length-1;g > Math.floor((rprobs[4].length-1)*probs[4]);g--){
+									/* if(sumprob += 1ループして得られる確率分布の全体 < k){
+										sumprobをgの1ループ分だけ足し算して、
+										fのループを1つ進める。//このように処理するとfor文を回す回数そのものが減り、計算回数も減り、計算時間も減る。
+									}
+									 */
 									for(int h = rprobs[2].length-1;h > Math.floor((rprobs[2].length-1)*probs[2]);h--){
+										/*if(sumprob += rprobs[1][a] * ... * rprobs[2]の確率分布全体 * rprobs[3][9] < k ){
+											sumprobをhの1ループ分だけ足し算して、
+											hのループを1つ進める．
+										}
+										*/
 										for(int i = rprobs[3].length-1;i > Math.floor((rprobs[3].length-1)*probs[3]);i--){
 											sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d]
 													* rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h]
 													* rprobs[3][i];
 											steps++;
+											/*if(sumprob += rprobs[1][a] * ... * rprobs[3]の確率分布全体 < k){
+												sumprobをiの1ループ文だけ足し算して、
+												hのループを一つ進める.
+											}*/
 											if(sumprob > k && rprobs[1][a] > k && rprobs[0][b] > k && rprobs[8][c] > k && rprobs[7][d] > k && rprobs[5][e] > k && rprobs[6][f] > k && rprobs[4][g] > k && rprobs[2][h] > k && rprobs[3][i] > k){
 												rpvt[1] = a;
 												rpvt[0] = b;
