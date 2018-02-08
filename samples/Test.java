@@ -223,11 +223,11 @@ class Test{
 			if(r == 0){
 				bf_p[r] = 1;
 			}else{
-				if(bf_p[r-1] - (nCr(n,r))*Math.pow(prob,r)*Math.pow((1-prob),(n-r)) < 0){
+				/*if(bf_p[r-1] - (nCr(n,r))*Math.pow(prob,r)*Math.pow((1-prob),(n-r)) < 0){
 					bf_p[r] = bf_p[r-1];
-				}else{
+				}else{*/
 					bf_p[r] = bf_p[r-1] - (nCr(n,r))*Math.pow(prob,r)*Math.pow((1-prob),(n-r));
-				}
+				//}
 			}
 
 		}
@@ -332,39 +332,138 @@ class Test{
 		//ArrayList<Double> al_cprbs = new ArrayList<Double>();
 		//kを超えるまでの確率分布を作成する(probでやってるような処理。※逆からなので0+=probとなる。);
 		double sumprob = 0.0;
+		/*double[] ps = new double[9];
+		for(int len = 0;len < rprobs[0].length;len++){
+			ps[0] += rprobs[0][len];
+		}
+		for(int len = 0;len < rprobs[8].length;len++){
+			ps[8] += rprobs[8][len];
+		}
+		for(int len = 0;len < rprobs[7].length;len++){
+			ps[7] += rprobs[7][len];
+		}
+		for(int len = 0;len < rprobs[5].length;len++){
+			ps[5] += rprobs[5][len];
+		}
+		for(int len = 0;len < rprobs[6].length;len++){
+			ps[6] += rprobs[6][len];
+		}
+		for(int len = 0;len < rprobs[4].length;len++){
+			ps[4] += rprobs[4][len];
+		}
+		for(int len = 0;len < rprobs[2].length;len++){
+			ps[2] += rprobs[2][len];
+		}
+		for(int len = 0;len < rprobs[3].length;len++){
+			ps[3] += rprobs[3][len];
+		}
+		for(int len = 0;len < 9;len++){
+			System.out.println("ps["+len+"] = " + ps[len]);
+		}
+		double temp = 0.0;*/
 		label:for(int a = rprobs[1].length-1;a > Math.floor((rprobs[1].length-1)*probs[1]);a--){
 			/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。 */
 			for(int b = rprobs[0].length-1;b > Math.floor((rprobs[0].length-1)*probs[0]);b--){
 				/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。 */
+				/*temp = sumprob;
+				temp += rprobs[1][a] * ps[0] * ps[8] * ps[7] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+				if(temp < k || a < Math.floor((rprobs[1].length-1)*probs[1])){
+					sumprob += rprobs[1][a] * ps[0] * ps[8] * ps[7] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+					System.out.println("b is break");
+					System.out.println("sumprob = "+sumprob);
+					a--;
+					break;
+				}*/
 				for(int c = rprobs[8].length-1;c > Math.floor((rprobs[8].length-1)*probs[8]);c--){
 					/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
 					 */
+					/*temp = sumprob;
+					temp += rprobs[1][a] * rprobs[0][b] * ps[8] * ps[7] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+					if(temp < k || b < Math.floor((rprobs[0].length-1)*probs[0])){
+						sumprob += rprobs[1][a] * rprobs[0][b] * ps[8] * ps[7] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+						System.out.println("c is break");
+						System.out.println("sumprob = "+sumprob);
+						b--;
+						break;
+					}*/
 					for(int d = rprobs[7].length-1;d > Math.floor((rprobs[7].length-1)*probs[7]);d--){
 						/* gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
 						 */
+						/*temp = sumprob;
+						temp += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * ps[7] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+						if(temp < k || c < Math.floor((rprobs[8].length-1)*probs[8])){
+							sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * ps[7] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+							System.out.println("d is break");
+							System.out.println("sumprob = " + sumprob);
+							c--;
+							break;
+						}*/
 						for(int e = rprobs[5].length-1;e > Math.floor((rprobs[5].length-1)*probs[5]);e--){
 							/* gのコメント参照ループを回さずに確率分布を加算し、次のループへ。
 							 */
+							/*temp = sumprob;
+							temp += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+							if(temp < k || d < Math.floor((rprobs[7].length-1)*probs[7])){
+								sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
+								System.out.println("e is break");
+								System.out.println("sumprob = " + sumprob);
+								d--;
+								break;
+							}*/
 							for(int f = rprobs[6].length-1;f > Math.floor((rprobs[6].length-1)*probs[6]);f--){
 								/* gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
 								 */
+								/*temp = sumprob;
+								temp += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * ps[6] * ps[4] * ps[2] * ps[3];
+								if(temp < k || e < Math.floor((rprobs[5].length-1)*probs[5])){
+									sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * ps[6] * ps[4] * ps[2] * ps[3];
+									System.out.println("f is break");
+									System.out.println("sumprob = " + sumprob);
+									e--;
+									break;
+								}*/
 								for(int g = rprobs[4].length-1;g > Math.floor((rprobs[4].length-1)*probs[4]);g--){
 									/* if(sumprob += 1ループして得られる確率分布の全体 < k){
 										sumprobをgの1ループ分だけ足し算して、
 										fのループを1つ進める。//このように処理するとfor文を回す回数そのものが減り、計算回数も減り、計算時間も減る。
 									}
 									 */
+									/*temp = sumprob;
+									temp += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * ps[4] * ps[2] * ps[3];
+									if(temp < k || f < Math.floor((rprobs[6].length-1)*probs[6])){
+										sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * ps[4] * ps[2] * ps[3];
+										System.out.println("g is break");
+										System.out.println("sumprob = " + sumprob);
+										f--;
+										break;
+									}*/
 									for(int h = rprobs[2].length-1;h > Math.floor((rprobs[2].length-1)*probs[2]);h--){
 										/*if(sumprob += rprobs[1][a] * ... * rprobs[2]の確率分布全体 * rprobs[3][9] < k ){
 											sumprobをhの1ループ分だけ足し算して、
 											hのループを1つ進める．
 										}
 										*/
+										/*temp = sumprob;
+										temp += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * ps[2] * ps[3];
+										if(temp < k || g < Math.floor((rprobs[4].length-1)*probs[4])){
+											sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * ps[2] * ps[3];
+											System.out.println("h is break");
+											System.out.println("sumprob = " + sumprob);
+											g--;
+											break;
+										}*/
 										for(int i = rprobs[3].length-1;i > Math.floor((rprobs[3].length-1)*probs[3]);i--){
+											/*temp = sumprob;
+											temp += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h] * ps[3];
+											if(temp < k){
+												sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h] * ps[3];
+												break;
+											}*/
 											sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d]
 													* rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h]
 													* rprobs[3][i];
 											steps++;
+											//System.out.println("sumprob = "+sumprob);
 											/*if(sumprob += rprobs[1][a] * ... * rprobs[3]の確率分布全体 < k){
 												sumprobをiの1ループ文だけ足し算して、
 												hのループを一つ進める.
