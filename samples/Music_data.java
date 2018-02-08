@@ -71,6 +71,10 @@ class Music_data {
 		return musictm;
 	}
 
+	public String gunttp(){
+		return unttp;
+	}
+
 	public int[][] glanes(){
 		int[][] lanes = new int[9][];
 		lanes[0] = alane;
