@@ -379,6 +379,24 @@ class Calc_data{
 		for(int len = 0; len < unit.length;len++){
 			unitprbs[len] = setprob(setMaxactcnt(sklcalc[len], calcMd, perper, sf), sklcalc[len].gprob()/100.0);
 		}
+		int[] scrupT = new int[9];
+		for(int len = 0;len < unit.length;len++){
+			if(unit[len].gsksha().equals("スコア")){
+				scrupT[len] = unit[len].gefsz();
+				//SIS処理必須　あとで参照するのは非効率
+			}else if(unit[len].gsksha().equals("回復")){
+				scrupT[len] = unit[len].gefsz();
+				//SIS処理必須　あとで参照するのは非効率
+			}else if(unit[len].gsksha().equals("判定")){
+				scrupT[len] = unit[len].gaccut();
+				//SIS処理必須　あとで参照するのは非効率
+			}else if(unit[len].gsksha().equals("パーフェクト")){
+				scrupT[len] = unit[len].gefsz();
+				//SISの処理無し
+			}else if(unit[len].gsksha().equals("発動率")){
+				//
+			}
+		}
 
 		return rtn_scr;
 	}
