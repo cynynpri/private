@@ -229,7 +229,7 @@ int main( int argc, char *argv[])
 			}
 			else
 			{
-				sumcu += (int)(ceil(pprtys[len]*frcu)+ceil(pprtys[len]*frscu/100.0));
+				sumcu += (int)(ceil(pprtys[len]*frcu/100.0)+ceil(pprtys[len]*frscu/100.0));
 				if(clctrbl != 0)
 				{
 					trsumcu += (int)(ceil(trpprtys[len]*frcu/100.0)+ceil(trpprtys[len]*frscu/100.0));
