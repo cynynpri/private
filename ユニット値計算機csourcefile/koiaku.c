@@ -22,6 +22,7 @@ int main( int argc, char *argv[])
 	int veil = 0;
 	int rings[9] = {0};
 	int crossies[9] = {0};
+	int tricks[9] = {0};
 	
 	for(len = 0;len < 9;len++)
 	{
@@ -33,6 +34,8 @@ int main( int argc, char *argv[])
 		scanf("%d", &rings[len]);
 		printf("%d番目のカードの装着しているクロスの数(無ければ0):", len+1);
 		scanf("%d", &crossies[len]);
+		printf("%d番目のカードの装着しているトリックの数(無ければ0):", len+1);
+		scanf("%d", &tricks[len]);
 		printf("\n\n\n");
 	}
 	printf("\n");
@@ -49,10 +52,31 @@ int main( int argc, char *argv[])
 	}
 	
 	int pprtys[9] = {0};
+	int trpprtys[9] = {0};
+	int tra = 0;
+	int trv = 0;
+	if(veil != 0)
+	{
+		trv = 1;
+	}
+	if(aura != 0)
+	{
+		tra = 1;
+	}
+	
 	for(len = 0;len < 9;len++)
 	{
 		pprtys[len] = properties[len];
 		pprtys[len] += (int)(ceil(properties[len]*0.10*rings[len])+ceil(properties[len]*0.16*crossies[len])+ceil(properties[len]*0.024)*veil+ceil(properties[len]*0.018)*aura);
+		if(tricks[len] != 0)
+		{
+			trpprtys[len] = properties[len];
+			trpprtys[len] += (int)(ceil(properties[len]*0.33*(1.024*trv)*(1.018*tra)));
+		}
+		else
+		{
+			trpprtys[len] = pprtys[len];
+		}
 	}
 	
 	printf("次にセンタースキル、サブセンタースキルによるアップを計算します。\n");
@@ -64,8 +88,18 @@ int main( int argc, char *argv[])
 	double dcu = 0.0;
 	int subcu = 0;
 	double dscu = 0.0;
+	int clctrbl = 0;
 	int sumcu = 0;
+	int trsumcu = 0;
 	int unitsm = 0;
+	int trunitsm = 0;
+	for(len = 0;len < 9;len++)
+	{
+		if(tricks[len] != 0)
+		{
+			clctrbl = 1;
+		}
+	}
 	if(frbl == 0)
 	{
 		printf("センタースキルの上昇値を入力してください。例えば9%アップするなら9など\n");
@@ -88,10 +122,20 @@ int main( int argc, char *argv[])
 			if(tbl == 0)
 			{
 				sumcu += (int)(ceil(pprtys[len]*dcu));
+				if(clctrbl != 0)
+				{
+					trsumcu += (int)(ceil(trpprtys[len]*dcu));
+					trunitsm += trpprtys[len];
+				}
 			}
 			else
 			{
 				sumcu += (int)(ceil(pprtys[len]*dcu)+ceil(pprtys[len]*dscu));
+				if(clctrbl != 0)
+				{
+					trsumcu += (int)(ceil(trpprtys[len]*dcu)+ceil(trpprtys[len]*dscu));
+					trunitsm += trpprtys[len];
+				}
 			}
 			unitsm += pprtys[len];
 			printf("\n");
@@ -105,12 +149,21 @@ int main( int argc, char *argv[])
 		int secscr = (int)(floor(dscr*1.1));
 		int finscr = (int)(floor(dscr*1.1*1.1));
 		printf("%d, %d(1.1倍),%d(1.21倍)\n",iniscr, secscr, finscr);
+		if(clctrbl != 0)
+		{
+			trunitsm += trsumcu;
+			int initr = (int)(floor(trunitsm/80.0));
+			int sectr = (int)(floor(initr*1.1));
+			int fintr = (int)(floor(sectr*1.1));
+			printf("判定強化発動時の1タップスコアは,\n");
+			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
+		}
 		system("@pause");
 		return 0;
 	}
 	else if(frbl == 1)
 	{
-		printf("センタースキルの上昇値を入力してください。例えば9%アップするなら9など\n");
+		printf("自ユニットのセンタースキルの上昇値を入力してください。例えば9%アップするなら9など\n");
 		scanf("%d", &cenup);
 		if(cenup == 0){
 			printf("数値が正しくありません。\n");
@@ -118,7 +171,7 @@ int main( int argc, char *argv[])
 			return 0;
 		}
 		dcu = cenup /100.0;
-		printf("次にサブセンタースキルの上昇値を入力してください。6%アップなら6など\n");
+		printf("次に自ユニットのサブセンタースキルの上昇値を入力してください。6%アップなら6など\n");
 		scanf("%d", &subcu);
 		dscu = subcu / 100.0;
 		for(len = 0;len < 9;len++)
@@ -130,10 +183,20 @@ int main( int argc, char *argv[])
 			if(tbl == 0)
 			{
 				sumcu += (int)(ceil(pprtys[len]*dcu));
+				if(clctrbl != 0)
+				{
+					trsumcu += (int)(ceil(trpprtys[len]*dcu));
+					trunitsm += trpprtys[len];
+				}
 			}
 			else
 			{
 				sumcu += (int)(ceil(pprtys[len]*dcu)+ceil(pprtys[len]*dscu));
+				if(clctrbl != 0)
+				{
+					trsumcu += (int)(ceil(trpprtys[len]*dcu)+ceil(trpprtys[len]*dscu));
+					trunitsm += trpprtys[len];
+				}
 			}
 			unitsm += pprtys[len];
 			printf("\n");
@@ -159,10 +222,18 @@ int main( int argc, char *argv[])
 			if(tbl == 0)
 			{
 				sumcu += (int)(ceil(pprtys[len]*frcu/100.0));
+				if(clctrbl != 0)
+				{
+					trsumcu += (int)(ceil(trpprtys[len]*frcu/100.0));
+				}
 			}
 			else
 			{
-				sumcu += (int)(ceil(pprtys[len]*dcu)+ceil(pprtys[len]*frscu/100.0));
+				sumcu += (int)(ceil(pprtys[len]*frcu)+ceil(pprtys[len]*frscu/100.0));
+				if(clctrbl != 0)
+				{
+					trsumcu += (int)(ceil(trpprtys[len]*frcu/100.0)+ceil(trpprtys[len]*frscu/100.0));
+				}
 			}
 			printf("\n");
 		}
@@ -175,6 +246,15 @@ int main( int argc, char *argv[])
 		int secscr = (int)(floor(dscr*1.1));
 		int finscr = (int)(floor(dscr*1.1*1.1));
 		printf("%d, %d(1.1倍),%d(1.21倍)\n",iniscr, secscr, finscr);
+		if(clctrbl != 0)
+		{
+			trunitsm += trsumcu;
+			int initr = (int)(floor(trunitsm/80.0));
+			int sectr = (int)(floor(initr*1.1));
+			int fintr = (int)(floor(sectr*1.1));
+			printf("判定強化発動時の1タップスコアは,\n");
+			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
+		}
 		system("@pause");
 		return 0;
 	}
