@@ -144,7 +144,7 @@ int main( int argc, char *argv[])
 		printf("ユニット値:%d+%d\n", unitsm, sumcu);
 		printf("1タップスコアは,\n");
 		double dscr = 0;
-		dscr = floor(unitsm/80);
+		dscr = floor(unitsm/80.0);
 		int iniscr = (int)dscr;
 		int secscr = (int)(floor(dscr*1.1));
 		int finscr = (int)(floor(dscr*1.1*1.1));
@@ -153,8 +153,8 @@ int main( int argc, char *argv[])
 		{
 			trunitsm += trsumcu;
 			int initr = (int)(floor(trunitsm/80.0));
-			int sectr = (int)(floor(initr*1.1));
-			int fintr = (int)(floor(initr*1.1*1.1));
+			int sectr = (int)(floor((trunitsm/80.0)*1.1));
+			int fintr = (int)(floor((trunitsm/80.0)*1.1*1.1));
 			printf("判定強化発動時の1タップスコアは,\n");
 			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
 		}
@@ -241,7 +241,7 @@ int main( int argc, char *argv[])
 		printf("ユニット値:%d+%d\n", unitsm, sumcu);
 		printf("1タップスコアは,\n");
 		double dscr = 0;
-		dscr = floor(unitsm/80);
+		dscr = floor(unitsm/80.0);
 		int iniscr = (int)dscr;
 		int secscr = (int)(floor(dscr*1.1));
 		int finscr = (int)(floor(dscr*1.1*1.1));
@@ -250,8 +250,8 @@ int main( int argc, char *argv[])
 		{
 			trunitsm += trsumcu;
 			int initr = (int)(floor(trunitsm/80.0));
-			int sectr = (int)(floor(initr*1.1));
-			int fintr = (int)(floor(initr*1.1*1.1));
+			int sectr = (int)(floor((trunitsm/80.0)*1.1));
+			int fintr = (int)(floor((trunitsm/80.0)*1.1*1.1));
 			printf("判定強化発動時の1タップスコアは,\n");
 			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
 		}
