@@ -158,11 +158,11 @@ int main( int argc, char *argv[])
 			scanf("%d", &tbl);
 			if(tbl == 0)
 			{
-				sumcu += (int)(ceil(pprtys[len]*dcu));
+				sumcu += (int)(ceil(pprtys[len]*frcu/100.0));
 			}
 			else
 			{
-				sumcu += (int)(ceil(pprtys[len]*dcu)+ceil(pprtys[len]*dscu));
+				sumcu += (int)(ceil(pprtys[len]*dcu)+ceil(pprtys[len]*frscu/100.0));
 			}
 			printf("\n");
 		}
