@@ -154,7 +154,7 @@ int main( int argc, char *argv[])
 			trunitsm += trsumcu;
 			int initr = (int)(floor(trunitsm/80.0));
 			int sectr = (int)(floor(initr*1.1));
-			int fintr = (int)(floor(sectr*1.1));
+			int fintr = (int)(floor(initr*1.1*1.1));
 			printf("判定強化発動時の1タップスコアは,\n");
 			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
 		}
@@ -251,7 +251,7 @@ int main( int argc, char *argv[])
 			trunitsm += trsumcu;
 			int initr = (int)(floor(trunitsm/80.0));
 			int sectr = (int)(floor(initr*1.1));
-			int fintr = (int)(floor(sectr*1.1));
+			int fintr = (int)(floor(initr*1.1*1.1));
 			printf("判定強化発動時の1タップスコアは,\n");
 			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
 		}
