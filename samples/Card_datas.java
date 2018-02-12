@@ -30,7 +30,7 @@ class Card_datas{
 	private String subuntnm; //サブユニット名 ex) Printemps,lily white, BiBi, CYaRon!, Guilty Kiss, AZALEA
 	private String grade;//学年 1年, 2年, 3年
 	private int expefsz;//スコアアップ期待値
-	private int pkiss;//ＳＩＳのキッス
+	private int pkiss;//SISのキッス
 	private int ppfm;//SISのパフューム
 	private int pring;//SISのリング
 	private int pcross;//SISのクロス
@@ -39,15 +39,16 @@ class Card_datas{
 	private int[] actcnt;//スキル発動回数のテーブル（期待値発動回数　～　1/(プレイ回数)よりも大きい確率で発生する発動回数を格納）
 	private int pcharm;//SISのチャーム
 	private int pheal;//SISのヒール
+	private int ptrick;//SISのトリック
 
-	private enum pprte{
+	/*private enum pprte{
 		Smile("スマイル"), Cool("クール"), Pure("ピュア");
 		private String pname;
 
 		private pprte(String pname){
 			this.pname = pname;
 		}
-	};
+	};*/
 
 	private boolean awake;//awaked:True, don't awake:False
 
@@ -394,6 +395,16 @@ class Card_datas{
 	public int gpheal(){
 		if (pheal <= 1 && pheal >= 0) {
 			return pheal;
+		}
+		return -1;
+	}
+//=============================================================
+	public void sptrick(int ptrick){
+		this.ptrick = ptrick;
+	}
+	public int gptrick(){
+		if(ptrick <= 1 && ptrick >= 0){
+			return ptrick;
 		}
 		return -1;
 	}

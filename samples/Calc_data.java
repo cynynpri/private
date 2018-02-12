@@ -47,6 +47,8 @@ class Calc_data{
 	}*/
 
 	public static double nCr(int n, int r){
+		//https://teratail.com/questions/9363
+		//上記のpythonプログラムを参考にした。
 		r = Math.min(r, n - r);
 		if (r == 0) return 1;
 		if (r == 1) return n;
@@ -76,8 +78,6 @@ class Calc_data{
 		}
 		return result;
 	}
-	//https://teratail.com/questions/9363
-	//上記のpythonプログラムを参考にした。
 
 	//スキル発動最大回数を計算するメソッド
 	public static int setMaxactcnt(Card_datas ondt, Music_data calcMd, double perper, String sf/*, Card_datas[] unit*/) {
@@ -111,7 +111,7 @@ class Calc_data{
 		return mactct;
 	}
 
-	//スキル発動期待値を計算するメソッド
+	//スキル発動によるスコアアップ期待値を計算するメソッド
 	public static int setsklexp(Card_datas calcCd, double perper, String sf, Card_datas[] unit, Music_data calcMd){
 		//引数のperperはパフェ率のこと。
 		//sfはユニットの値
@@ -121,7 +121,36 @@ class Calc_data{
 		double prob = calcCd.gprob()/100.0;
 		int maxactcnt = 0;
 		maxactcnt = setMaxactcnt(calcCd, calcMd, perper, sf);
-		return (int)Math.floor(maxactcnt*prob*efsz);
+		if(calcCd.gsksha().equals("スコア")){
+			if(calcCd.gpcharm() == 0){
+				return (int)Math.floor(maxactcnt*prob*efsz);
+			}else{
+				efsz = (int)(efsz*2.5);
+				return (int) Math.floor(maxactcnt * prob * efsz);
+			}
+		}else if(calcCd.gsksha().equals("回復")){
+			if(calcCd.gpheal() == 0){
+				efsz = 0;
+				return 0;
+			}else{
+				efsz *= 480;
+				return (int) Math.floor(maxactcnt * prob * efsz);
+			}
+		}else if(calcCd.gsksha().equals("判定")){
+			if(calcCd.gptrick() == 0){
+				return 0;
+			}else{
+				/*sfを再定義し、判定強化時間その再定義されたrsfで
+				rsf - sfを計算し、1タップ上昇分を計算する。
+				そして、楽曲の1秒当たりのノーツ数から、
+				accut分の時間を掛け算して、rsf-sfの数値と掛け算し、
+				トリック上昇分を出力する。
+				*/
+				double pernotes = calcMd.gmaxcb() / calcMd.gmusictm();
+
+			}
+		}
+		return -1;
 	}
 	/*public void realsklef(Card_datas[] unit, Music_data calcMd, int playcount){
 		ArrayList<float[]> bfrtnscrT = new ArrayList<float[]>();
@@ -141,7 +170,7 @@ class Calc_data{
 
 	}*/
 
-	public static String setUnitsf(Card_datas[] unit,Card_datas frend, Music_data cmdt){
+	public static String setUnitsf(Card_datas[] unit,Card_datas frend, Music_data cmdt/*, Boolean trbl*/){
 		//ユニット値Sfを求めるメソッド ユニット値,センタースキル増加分 という文字列を出力する。
 		String subcentersklnm = unit[4].getacskn();
 		String centersklnm = unit[4].getcskin();
@@ -332,7 +361,210 @@ class Calc_data{
 		return rtnstr;
 	}
 
+	public static int settrsf(Card_datas[] unit, Card_datas frend, Music_data cmdt/*, Boolean trbl*/) {
+		//トリック発動時のユニット値rSfを求めるメソッド ユニット値,センタースキル増加分 という文字列を出力する。
+		String subcentersklnm = unit[4].getacskn();
+		String centersklnm = unit[4].getcskin();
+		String rrity = unit[4].grrity();
+		int[] su = new int[9];//Su Status of Unit カードステータスでスクールアイドルスキル増加分も含む。(これを9人分加算するとセンタースキルを省いた場合のユニット数値になる)
+		int[] sa = new int[9];//Sa Status of one Card カードステータスでスクールアイドルスキル増加分を含まない。
+		int veil = 0;
+		int aura = 0;
+		double cenup = 0;
+		double subcenup = 0;
+		int tmpsu = 0;
+		Music_data cmscdt = cmdt;//もしかしたら渡す楽曲データは配列じゃなくて1つだけになるかも…
+
+		//キッスやパフュームを含めたカード値処理(掛け算における切り上げ無し)
+		for (int len = 0; len < 9; len++) {
+			if (cmscdt.gpprty().equals("スマイル")) {
+				sa[len] = unit[len].gcsm();
+			} else if (cmscdt.gpprty().equals("ピュア")) {
+				sa[len] = unit[len].gcpr();
+			} else {
+				sa[len] = unit[len].gccl();
+			}
+			veil += unit[len].gpveil();
+			aura += unit[len].gpaura();
+			sa[len] += unit[len].gpkiss() * 200.0 + unit[len].gppfm() * 450.0;
+		}
+
+		//SIS処理
+		for (int len = 0; len < 9; len++) {
+			if(unit[len].gptrick() == 0){
+				if (unit[len].gpcross() != 0 || unit[len].gpring() != 0) {
+					sa[len] += Math.ceil(sa[len] * 0.018) * aura + Math.ceil(sa[len] * 0.024) * veil
+							+ Math.ceil(sa[len] * 0.16) * unit[len].gpcross()
+							+ Math.ceil(sa[len] * 0.10) * unit[len].gpring();
+				} else {
+					sa[len] += Math.ceil(sa[len] * 0.018) * aura + Math.ceil(sa[len] * 0.024) * veil;
+				}
+			}else{
+				if (unit[len].gpcross() != 0 || unit[len].gpring() != 0) {
+					sa[len] += Math.ceil(sa[len] * 0.16 * (1+0.018*aura) * (1+0.024*veil)) * unit[len].gpcross()
+							+ Math.ceil(sa[len] * 0.10 * (1+0.018*aura) * (1+0.024*veil)) * unit[len].gpring()
+							+ Math.ceil(sa[len] * 0.33*(1+0.024*veil)*(1+0.018*aura));
+							//ringやcrossの処理考えてなかった…＼(^o^)／ｵﾜﾀ
+				} else {
+					sa[len] +=  Math.ceil(sa[len]*0.33*(1+0.024*veil)*(1+0.018*aura));
+				}
+			}
+		}
+		//自ユニットのセンターサブセンター処理 SSRセンターとSRセンター処理できてませんねぇ？！
+		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
+			if (rrity.equals("SSR")) {
+				subcenup = 0.01;
+			} else {
+				subcenup = 0.03;
+			}
+		} else {
+			if (rrity.equals("SSR")) {
+				subcenup = 0.02;
+			} else {
+				subcenup = 0.06;
+			}
+		}
+		if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
+			cenup = 0.09;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
+				|| centersklnm.indexOf("プリンセス") != -1) {
+			if (centersklnm.indexOf("エンジェル") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+					}
+				}
+			} else if (centersklnm.indexOf("エンプレス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+					}
+				}
+			} else if (centersklnm.indexOf("プリンセス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+					}
+				}
+			}
+		} else if (centersklnm.indexOf("スター") != -1) {
+			cenup = 0.07;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else {
+			cenup = 0.06;
+			for (int len = 0; len < unit.length; len++) {
+				tmpsu += sa[len];
+				su[len] = (int) Math.ceil(sa[len] * cenup);
+			}
+		}
+
+		//フレンド処理
+		subcentersklnm = frend.getacskn();
+		centersklnm = frend.getcskin();
+		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
+			subcenup = 0.03;
+		} else {
+			subcenup = 0.06;
+		}
+		if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
+			cenup = 0.09;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					su[len] += (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					su[len] += (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
+				|| centersklnm.indexOf("プリンセス") != -1) {
+			if (centersklnm.indexOf("エンジェル") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+					}
+				}
+			} else if (centersklnm.indexOf("エンプレス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+					}
+				}
+			} else if (centersklnm.indexOf("プリンセス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+					}
+				}
+			}
+		} else if (centersklnm.indexOf("スター") != -1) {
+			cenup = 0.07;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else {
+			cenup = 0.06;
+			for (int len = 0; len < unit.length; len++) {
+				su[len] = (int) Math.ceil(sa[len] * cenup);
+			}
+		}
+
+		int allsu = 0;
+		for (int len = 0; len < 9; len++) {
+			allsu += su[len];
+		}
+		tmpsu += allsu;
+
+		return tmpsu;
+	}
+
 	public static Card_datas[] setsortsklUnit(Card_datas[] unit, Music_data cmdt, String sf, double perper){
+		//スキル発動期待値が高い順にソートするメソッド
+		//unit[0]が一番期待値が高く、unit[8]が一番期待値が小さい。
 		int[] sklexpT = new int[unit.length];
 		for(int len = 0;len < sklexpT.length;len++){
 			sklexpT[len] = setsklexp(unit[len], perper, sf, unit, cmdt);
@@ -358,22 +590,24 @@ class Calc_data{
 			if (r == 0) {
 				bf_p[r] = 1;
 			} else {
-				if (bf_p[r - 1] - (nCr(n, r)) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r)) < 0) {
+				/*if (bf_p[r - 1] - (nCr(n, r)) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r)) < 0) {
 					bf_p[r] = bf_p[r - 1];
-				} else {
-					bf_p[r] = bf_p[r - 1] - (nCr(n, r)) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r));
-				}
+				} else {*/
+				bf_p[r] = bf_p[r - 1] - (nCr(n, r)) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r));
+				//}
 			}
 
 		}
 		return bf_p;
 	}
 
-	public static int showsklupscr(double perper, Card_datas[] unit, Music_data calcMd, Card_datas frend){
+	public static int calcscrmain(double perper, Card_datas[] unit, Music_data calcMd, Card_datas frend){
 		// ある特定の確率で出る最大スコアを計算するメソッド
+		//メインのスコア計算メソッドとする。
 		// 派生版として、 1/プレイ回数 の確率を1ビットとして、グラフを表示させるメソッドも作成可能。
 		int rtn_scr = 0;
 		String sf = setUnitsf(unit, frend, calcMd);
+		String actsf = new String();
 		Card_datas[] sklcalc = setsortsklUnit(unit, calcMd, sf, perper);
 		double[][] unitprbs = new double[9][];
 		for(int len = 0; len < unit.length;len++){
@@ -383,17 +617,39 @@ class Calc_data{
 		for(int len = 0;len < unit.length;len++){
 			if(unit[len].gsksha().equals("スコア")){
 				scrupT[len] = unit[len].gefsz();
+				if(unit[len].gpcharm() != 0){
+					scrupT[len] *= (int)(unit[len].gpcharm()*2.5);
+				}
 				//SIS処理必須　あとで参照するのは非効率
 			}else if(unit[len].gsksha().equals("回復")){
 				scrupT[len] = unit[len].gefsz();
+				scrupT[len] *= unit[len].gpheal()*480;//heal = 0 => 0;
 				//SIS処理必須　あとで参照するのは非効率
 			}else if(unit[len].gsksha().equals("判定")){
-				scrupT[len] = unit[len].gaccut();
-				//SIS処理必須　あとで参照するのは非効率
+				double accut = unit[len].gaccut();
+				//トリックが付いている場合
+				if(unit[len].gptrick()==1){
+					//Sfを再計算。1タップアップスコアを再計算。
+					//判定強化時間中その再計算された値を使用する。
+
+				}else{
+					//そうでない場合は通常の1タップスコアでスコアを計算。
+					//SIS処理必須　あとで参照するのは非効率
+					scrupT[len] = 0;
+				}
 			}else if(unit[len].gsksha().equals("パーフェクト")){
 				scrupT[len] = unit[len].gefsz();
 				//SISの処理無し
+				//楽曲中に一定時間発動する。
+				//その一定時間中に飛んでくるノーツ数は未知数である。
+				//正確な数値が計算できない。
 			}else if(unit[len].gsksha().equals("発動率")){
+				//
+			}else if(unit[len].gsksha().equals("パラメーター")){
+				//
+			}else if(unit[len].gsksha().equals("シンクロ")){
+				//
+			}else if(unit[len].gsksha().equals("リピート")){
 				//
 			}
 		}
@@ -402,17 +658,18 @@ class Calc_data{
 	}
 
 	public static int calcBS(Card_datas[] unit, Music_data cmdt, String sf){
+		//楽曲のタップスコアから最大ノーツ数を掛け算して全タップスコアを出力するメソッド
 		double rtnBS = 0;
 		int intbase = Integer.parseInt(sf.split(",",0)[0]);
 		double dBase = intbase/80.0;
 		int[][] all_lanes = cmdt.glanes();
 		for(int len = 0;len < unit.length;len++){
 			double tempscr = lanescr(all_lanes[len], dBase);
-			if(cmdt.gpprty().equals(unit[len].gpprty())){
-				tempscr *= 1.10;
+			/*if(cmdt.gpprty().equals(unit[len].gpprty())){
+				tempscr *= 1.10;//ここlanescrでやらないと意味が無い
 			}else if(cmdt.gunttp().equals(unit[len].getunitnm())){
-				tempscr *= 1.10;
-			}
+				tempscr *= 1.10;//ここlanescrでやらないと意味が無い
+			}*/
 			rtnBS += tempscr;
 		}
 
@@ -421,9 +678,9 @@ class Calc_data{
 
 	public static double lanescr(int[] note, double base) {//calcBSで使うメソッド **計算式的にはBaseは不必要である。
 		double ln = 1.25;
-		return note[0] * base + note[1] * ln * base + note[2] * 1.10 * base + note[3] * 1.10 * ln * base
-				+ note[4] * 1.15 * base + note[5] * 1.15 * ln * base + note[6] * 1.20 * base
-				+ note[7] * 1.20 * ln * base + note[8] * 1.25 * base + note[9] * 1.25 * ln * base;
+		return note[0]*Math.floor(base) + note[1]*Math.floor(ln*base)+note[2]*Math.floor(1.10 * base) + note[3]*Math.floor(1.10*ln*base)
+				+ note[4]*Math.floor(1.15*base) + note[5]*Math.floor( 1.15 * ln * base) + note[6]*Math.floor(1.20 * base)
+				+ note[7]*Math.floor(1.20 * ln * base) + note[8]*Math.floor(1.25 * base) + note[9]*Math.floor(1.25 * ln * base);
 	}
 
 	/*public static void main(String[] args)throws Exception{
