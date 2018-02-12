@@ -53,16 +53,6 @@ int main( int argc, char *argv[])
 	
 	int pprtys[9] = {0};
 	int trpprtys[9] = {0};
-	int tra = 0;
-	int trv = 0;
-	if(veil != 0)
-	{
-		trv = 1;
-	}
-	if(aura != 0)
-	{
-		tra = 1;
-	}
 	
 	for(len = 0;len < 9;len++)
 	{
@@ -71,7 +61,7 @@ int main( int argc, char *argv[])
 		if(tricks[len] != 0)
 		{
 			trpprtys[len] = properties[len];
-			trpprtys[len] += (int)(ceil(properties[len]*0.33*(1.024*trv)*(1.018*tra)));
+			trpprtys[len] += (int)(ceil(properties[len]*(0.33*tricks[len]+0.10*rings[len]+0.16*crossies[len])*(1+0.024*veil)*(1+0.018*aura)));
 		}
 		else
 		{
@@ -155,6 +145,7 @@ int main( int argc, char *argv[])
 			int initr = (int)(floor(trunitsm/80.0));
 			int sectr = (int)(floor((trunitsm/80.0)*1.1));
 			int fintr = (int)(floor((trunitsm/80.0)*1.1*1.1));
+			printf("判定強化発動時のユニット値:%d\n", trunitsm);
 			printf("判定強化発動時の1タップスコアは,\n");
 			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
 		}
@@ -252,6 +243,7 @@ int main( int argc, char *argv[])
 			int initr = (int)(floor(trunitsm/80.0));
 			int sectr = (int)(floor((trunitsm/80.0)*1.1));
 			int fintr = (int)(floor((trunitsm/80.0)*1.1*1.1));
+			printf("判定強化発動時のユニット値:%d\n", trunitsm);
 			printf("判定強化発動時の1タップスコアは,\n");
 			printf("%d, %d(1.1倍),%d(1.21倍)\n",initr, sectr, fintr);
 		}
