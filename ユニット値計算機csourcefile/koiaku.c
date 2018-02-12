@@ -102,7 +102,7 @@ int main( int argc, char *argv[])
 	}
 	if(frbl == 0)
 	{
-		printf("センタースキルの上昇値を入力してください。例えば9%アップするなら9など\n");
+		printf("センタースキルの上昇値を入力してください。例えば9%%アップするなら9など\n");
 		scanf("%d", &cenup);
 		if(cenup == 0){
 			printf("数値が正しくありません。\n");
@@ -110,7 +110,7 @@ int main( int argc, char *argv[])
 			return 0;
 		}
 		dcu = cenup /100.0;
-		printf("次にサブセンタースキルの上昇値を入力してください。6%アップなら6など\n");
+		printf("次にサブセンタースキルの上昇値を入力してください。6%%アップなら6など\n");
 		scanf("%d", &subcu);
 		dscu = subcu / 100.0;
 		for(len = 0;len < 9;len++)
@@ -144,7 +144,7 @@ int main( int argc, char *argv[])
 		printf("ユニット値:%d+%d\n", unitsm, sumcu);
 		printf("1タップスコアは,\n");
 		double dscr = 0;
-		dscr = floor(unitsm/80.0);
+		dscr = unitsm/80.0;
 		int iniscr = (int)dscr;
 		int secscr = (int)(floor(dscr*1.1));
 		int finscr = (int)(floor(dscr*1.1*1.1));
@@ -163,7 +163,7 @@ int main( int argc, char *argv[])
 	}
 	else if(frbl == 1)
 	{
-		printf("自ユニットのセンタースキルの上昇値を入力してください。例えば9%アップするなら9など\n");
+		printf("自ユニットのセンタースキルの上昇値を入力してください。例えば9%%アップするなら9など\n");
 		scanf("%d", &cenup);
 		if(cenup == 0){
 			printf("数値が正しくありません。\n");
@@ -171,7 +171,7 @@ int main( int argc, char *argv[])
 			return 0;
 		}
 		dcu = cenup /100.0;
-		printf("次に自ユニットのサブセンタースキルの上昇値を入力してください。6%アップなら6など\n");
+		printf("次に自ユニットのサブセンタースキルの上昇値を入力してください。6%%アップなら6など\n");
 		scanf("%d", &subcu);
 		dscu = subcu / 100.0;
 		for(len = 0;len < 9;len++)
@@ -202,7 +202,7 @@ int main( int argc, char *argv[])
 			printf("\n");
 		}
 		printf("フレンドの処理をします。\n");
-		printf("フレンドのセンタースキルの上昇値を入力してください。9% -> 9\n");
+		printf("フレンドのセンタースキルの上昇値を入力してください。9%% -> 9\n");
 		int frcu = 0;
 		scanf("%d", &frcu);
 		if(frcu == 0){
@@ -210,7 +210,7 @@ int main( int argc, char *argv[])
 			system("@pause");
 			return 0;
 		}
-		printf("フレンドのサブセンタースキルの上昇値を入力してください。6% -> 6\n");
+		printf("フレンドのサブセンタースキルの上昇値を入力してください。6%% -> 6\n");
 		int frscu = 0;
 		scanf("%d", &frscu);
 		for(len = 0;len < 9;len++)
@@ -241,7 +241,7 @@ int main( int argc, char *argv[])
 		printf("ユニット値:%d+%d\n", unitsm, sumcu);
 		printf("1タップスコアは,\n");
 		double dscr = 0;
-		dscr = floor(unitsm/80.0);
+		dscr = unitsm/80.0;
 		int iniscr = (int)dscr;
 		int secscr = (int)(floor(dscr*1.1));
 		int finscr = (int)(floor(dscr*1.1*1.1));
