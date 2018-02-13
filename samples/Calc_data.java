@@ -361,7 +361,7 @@ class Calc_data{
 		return rtnstr;
 	}
 
-	public static int settrsf(Card_datas[] unit, Card_datas frend, Music_data cmdt/*, Boolean trbl*/) {
+	public static String settrsf(Card_datas[] unit, Card_datas frend, Music_data cmdt/*, Boolean trbl*/) {
 		//トリック発動時のユニット値rSfを求めるメソッド ユニット値,センタースキル増加分 という文字列を出力する。
 		String subcentersklnm = unit[4].getacskn();
 		String centersklnm = unit[4].getcskin();
@@ -559,7 +559,9 @@ class Calc_data{
 		}
 		tmpsu += allsu;
 
-		return tmpsu;
+		String rtnstr = tmpsu + "," + allsu;
+
+		return rtnstr;
 	}
 
 	public static Card_datas[] setsortsklUnit(Card_datas[] unit, Music_data cmdt, String sf, double perper){
@@ -620,22 +622,29 @@ class Calc_data{
 				if(unit[len].gpcharm() != 0){
 					scrupT[len] *= (int)(unit[len].gpcharm()*2.5);
 				}
-				//SIS処理必須　あとで参照するのは非効率
 			}else if(unit[len].gsksha().equals("回復")){
 				scrupT[len] = unit[len].gefsz();
 				scrupT[len] *= unit[len].gpheal()*480;//heal = 0 => 0;
-				//SIS処理必須　あとで参照するのは非効率
 			}else if(unit[len].gsksha().equals("判定")){
 				double accut = unit[len].gaccut();
 				//トリックが付いている場合
 				if(unit[len].gptrick()==1){
-					//Sfを再計算。1タップアップスコアを再計算。
-					//判定強化時間中その再計算された値を使用する。
-
+					int trBs = calcBS(unit, calcMd, settrsf(unit, frend, calcMd));
+					//常に判定強化が発動し、トリックが発動してるときのスコア(実際には起こりえない)
+					int iBs = calcBS(unit, calcMd, sf);
+					//全く判定強化が発動せず、トリックが発動しないときのスコア
+					int dfBs = iBs - trBs;
+					//上記のスコア差(すなわちこれがトリックによる1曲中のすべてのスコア上昇分。)
+					//※近似。最初の数秒は確実に判定強化が発動しない部分があるがそこが加味できていない。
+					//つまり実際のトリックによる上昇分よりも高めに出力される。
+					double oefsz = dfBs * (accut/calcMd.gmusictm());
+					//accutは判定強化時間,musictmは楽曲時間なので1回判定強化が発動した時の楽曲中における割合をトリックによる1曲中のすべてのスコア上昇分に掛け算。
+					scrupT[len] = (int)Math.floor(oefsz);
+					//上記の数値をfloorすなわち小数点以下切り捨てでscrupT[]に格納。
+					//scrupTに格納された値はこの後計算する、スキル発動回数との積を出すのに使われる。
 				}else{
 					//そうでない場合は通常の1タップスコアでスコアを計算。
-					//SIS処理必須　あとで参照するのは非効率
-					scrupT[len] = 0;
+					scrupT[len] = 0;//スキルが何回発動しようがスコア上昇分は0.
 				}
 			}else if(unit[len].gsksha().equals("パーフェクト")){
 				scrupT[len] = unit[len].gefsz();
@@ -643,6 +652,8 @@ class Calc_data{
 				//楽曲中に一定時間発動する。
 				//その一定時間中に飛んでくるノーツ数は未知数である。
 				//正確な数値が計算できない。
+				//多分だけれども判定強化の上位互換。
+
 			}else if(unit[len].gsksha().equals("発動率")){
 				//
 			}else if(unit[len].gsksha().equals("パラメーター")){
@@ -664,20 +675,24 @@ class Calc_data{
 		double dBase = intbase/80.0;
 		int[][] all_lanes = cmdt.glanes();
 		for(int len = 0;len < unit.length;len++){
-			double tempscr = lanescr(all_lanes[len], dBase);
-			/*if(cmdt.gpprty().equals(unit[len].gpprty())){
-				tempscr *= 1.10;//ここlanescrでやらないと意味が無い
-			}else if(cmdt.gunttp().equals(unit[len].getunitnm())){
-				tempscr *= 1.10;//ここlanescrでやらないと意味が無い
-			}*/
+			double tempscr = lanescr(all_lanes[len], dBase, unit[len], cmdt);
 			rtnBS += tempscr;
 		}
 
 		return (int)Math.floor(rtnBS);
 	}
 
-	public static double lanescr(int[] note, double base) {//calcBSで使うメソッド **計算式的にはBaseは不必要である。
+	public static double lanescr(int[] note, double base, Card_datas card, Music_data music) {//calcBSで使うメソッド **計算式的にはBaseは不必要である。
 		double ln = 1.25;
+		double pprty = 1.0;
+		double unit = 1.0;
+		if(music.gunttp().equals(card.getunitnm())){
+			unit = 1.1;
+		}
+		if(music.gpprty().equals(card.gpprty())){
+			pprty = 1.1;
+		}
+		base = base*unit*pprty;
 		return note[0]*Math.floor(base) + note[1]*Math.floor(ln*base)+note[2]*Math.floor(1.10 * base) + note[3]*Math.floor(1.10*ln*base)
 				+ note[4]*Math.floor(1.15*base) + note[5]*Math.floor( 1.15 * ln * base) + note[6]*Math.floor(1.20 * base)
 				+ note[7]*Math.floor(1.20 * ln * base) + note[8]*Math.floor(1.25 * base) + note[9]*Math.floor(1.25 * ln * base);
