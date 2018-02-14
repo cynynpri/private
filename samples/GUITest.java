@@ -911,7 +911,7 @@ public class GUITest extends Application{
 						if(debuglevel >= 1)
 							System.err.println(e);
 						tpane.getSelectionModel().select(3);
-					}catch(FileTypeNotMatchException e){
+					}catch(FileFormatNotMatchException e){
 						System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ:変換するボタン:入力ファイル形式が異なります");
 						printlogc++;
 						if(debuglevel >= 1){
