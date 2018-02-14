@@ -1,6 +1,6 @@
 honosd.csv¨‚Ù‚Ì‚©
 elisd.csv¨‚¦‚è
-korosd.csv¨‚±‚Æ‚è
+kotosd.csv¨‚±‚Æ‚è
 umisd.csv¨‚¤‚İ
 rinsd.csv¨‚è‚ñ
 makisd.csv¨‚Ü‚«

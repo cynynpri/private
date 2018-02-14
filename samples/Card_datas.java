@@ -40,7 +40,7 @@ class Card_datas{
 	private int pcharm;//SISのチャーム
 	private int pheal;//SISのヒール
 	private int ptrick;//SISのトリック
-
+	
 	/*private enum pprte{
 		Smile("スマイル"), Cool("クール"), Pure("ピュア");
 		private String pname;
@@ -79,7 +79,7 @@ class Card_datas{
 		this.acskn = acskn;
 		//set grade
 		if(name.equals("小泉花陽")||name.equals("西木野真姫")||name.equals("星空凛")||name.equals("津島善子")||name.equals("黒澤ルビィ")||name.equals("国木田花丸")){
-			grade = "1年生";
+			grade = "1年生";	
 		}else if(name.equals("南ことり")||name.equals("高坂穂乃果")||name.equals("園田海未")||name.equals("渡辺曜")||name.equals("高海千歌")||name.equals("桜内梨子")){
 			grade = "2年生";
 		}else if(name.equals("東條希")||name.equals("矢澤にこ")||name.equals("絢瀬絵里")||name.equals("黒澤ダイヤ")||name.equals("小原鞠莉")||name.equals("松浦果南")){
@@ -595,7 +595,7 @@ class Card_datas{
 		//chk ... CHecK
 		//cskn ... Center SKill Name
 		//_s or _p or _c ... Smile , Pure , Cool
-
+		
 		//chkcskn_s
 		chkcskn_s[0] = ",\"1.スマイルパワー\"";
 		chkcskn_s[1] = ",\"2.スマイルハート\"";
@@ -864,7 +864,7 @@ class Card_datas{
 		int b = liner.indexOf(chkawk);
 		int e = liner.indexOf(chkskltype);
 		int rtnskslt = 0;
-
+		
 		b = b + 4;
 		int len = 0;
 		while(e == -1){
@@ -945,7 +945,7 @@ class Card_datas{
 				}
 			}
 		}
-
+		
 		//デバック用
 		//System.out.println(liner.substring(bs,es));
 		/*try{
@@ -954,7 +954,7 @@ class Card_datas{
 			return rtn_array;
 		}
 		buffer_a = chkliner.split(",", 7);*/
-		try{
+		try{		
 			buffer_a = liner.substring(bs,es).split(",",7);
 		}catch(StringIndexOutOfBoundsException e){
 			return rtn_array;
@@ -1059,7 +1059,7 @@ class Card_datas{
 
 	public static int[] fixedSislt(Card_datas cdata){
 		//覚醒状態か否かからＳＩＳのスロット数を入力するメソッド
-		String cskin = cdata.getcskin();
+		String cskin = cdata.getcskin(); 
 		String rrity = cdata.grrity();
 		int iniSislt = 1;
 		int maxSislt = 1;
@@ -1087,7 +1087,7 @@ class Card_datas{
 	}
 
 //=============================================================
-	public static String[] skill_list(String chara_name, String rrity)throws IOException{
+	public static String[] skill_list(String chara_name, String rrity)throws IOException{		
 		if(chara_name.equals("園田海未")){
 			String[] skill_allList = new String[Skill_data.mAx(chara_name)];
 			skill_allList = Skill_data.sKillName(chara_name);
@@ -1124,7 +1124,7 @@ class Card_datas{
 							skill_allList[i] = "Empty";
 							//System.out.println(skill_allList[i]);
 						}
-					}
+					}	
 				}
 				for(int i = 0; i < skill_allList.length; i++){
 					if(!skill_allList[i].equals("Empty")){
@@ -1270,7 +1270,7 @@ class Card_datas{
 			rtnTable[0] = iniupp;
 			Integer[] diffT = {2,1,2,3,2,2,2};
 			for(int i = 1;i<8;i++){
-				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
+				rtnTable[i] = rtnTable[i-1] + diffT[i-1]; 
 			}
 		}else if((finupp - iniupp) == 15){//#1415 card.
 			rtnTable[0] = iniupp;
@@ -1280,7 +1280,7 @@ class Card_datas{
 			}
 		}else if((finupp - iniupp) == 21){//#1416 card.
 			rtnTable[0] = iniupp;
-			Integer[] diffT = {2,3,3,3,3,3,3};
+			Integer[] diffT = {3,3,3,3,3,3,3};
 			for(int i = 1;i<8;i++){
 				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
 			}
@@ -1288,13 +1288,13 @@ class Card_datas{
 			rtnTable[0] = iniupp;
 			Integer[] diffT = {4,3,3,3,3,3,3};
 			for(int i = 1;i<8;i++){
-				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
+				rtnTable[i] = rtnTable[i-1] + diffT[i-1]; 
 			}
 		}else if((finupp - iniupp) == 28){
 			rtnTable[0] = iniupp;
 			Integer[] diffT = {3,5,4,4,4,4,4};
 			for(int i = 1;i<8;i++){
-				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
+				rtnTable[i] = rtnTable[i-1] + diffT[i-1]; 
 			}
 		}else{
 			rtnTable = null;
@@ -1343,12 +1343,12 @@ class Card_datas{
 	}
 //=============================================================================
 //特技レベルテーブル ->End 1203 to 1310
-//=============================================================================
+//=============================================================================	
 	public static void toStringCard_datas(ArrayList<Card_datas> cdata, ComboBox<String> cb)throws DataNotFoundException{
 		if(cb.getItems().size() != 0){
 			cb.getItems().clear();
 		}
-
+		
 		try{
 			for(int len = 0;len < cdata.size()-1;len++){
 				cb.getItems().add(cdata.get(len).gcnum() + ":" +cdata.get(len).getname()+ ":" + cdata.get(len).grrity()+ ":" +cdata.get(len).gpprty() + ":" + cdata.get(len).getskinm());
@@ -1424,5 +1424,5 @@ class Card_datas{
 			System.out.println(prnt);
 		}*/
 	//}
-
+	
 }

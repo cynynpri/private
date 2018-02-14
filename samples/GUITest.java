@@ -299,6 +299,86 @@ public class GUITest extends Application{
 							System.err.println(e);
 							tpane.getSelectionModel().select(3);
 						}
+					} else if (tmpchnm.equals("南ことり")) {
+						try {
+							boolean chSelbl = false;
+							if (chSelbl == chSelector.equals(tmpchnm)) {
+								Skill_data[] bfdata = Skill_data.setdata(tmpchnm);
+								if (sdata.size() >= 0) {
+									sdata.clear();
+								}
+								if (debuglevel == 1) {
+									System.out.println("sdata.size() = " + sdata.size());
+								}
+								for (int len = 0; len < bfdata.length; len++) {
+									sdata.add(len, bfdata[len]);
+								}
+								chSelector = tmpchnm;
+							}
+							Skill_data[] table = new Skill_data[sdata.size()];
+							for (int len = 0; len < sdata.size(); len++) {
+								table[len] = sdata.get(len);
+							}
+							String[] skilT = Skill_read.setSkillnameT(setPprty.getValue(),
+									Skill_read.setSkill(setRrity.getValue(), table));
+							chara_SKills.getItems().clear();
+							chara_SKills.getItems().addAll(skilT);
+							chara_SKills.setValue(String.valueOf(skilT[0].toString()));
+							if (skilT.length >= 15) {
+								chara_SKills.setVisibleRowCount(15);
+							} else {
+								chara_SKills.setVisibleRowCount(skilT.length);
+							}
+							srdata = Skill_read.onerdata(chara_SKills.getValue(), table);
+							if (skilT.length == 1) {
+								detailsk.setText(
+									Skill_read.getSklefText(setSkilv.getValue(), srdata, chara_Sel.getValue()));
+								}
+						} catch (IOException e) {
+							System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ内のキャラクター選択ボックス:スキルがセットできませんでした");
+							printlogc++;
+							System.err.println(e);
+							tpane.getSelectionModel().select(3);
+						}
+					}else if(tmpchnm.equals("星空凛")){
+						try{
+							boolean chSelbl = false;
+							if(chSelbl == chSelector.equals(tmpchnm)){
+								Skill_data[] bfdata = Skill_data.setdata(tmpchnm);
+								if(sdata.size() >= 0){
+									sdata.clear();
+								}
+								if(debuglevel == 1){
+									System.out.println("sdata.size() = "+ sdata.size());
+								}
+								for(int len = 0; len < bfdata.length; len++){
+									sdata.add(len, bfdata[len]);
+								}
+								chSelector = tmpchnm;
+							}
+							Skill_data[] table = new Skill_data[sdata.size()];
+							for(int len = 0; len < sdata.size(); len++){
+								table[len] = sdata.get(len);
+							}
+							String[] skilT = Skill_read.setSkillnameT(setPprty.getValue() ,Skill_read.setSkill(setRrity.getValue(), table));
+							chara_SKills.getItems().clear();
+							chara_SKills.getItems().addAll(skilT);
+							chara_SKills.setValue(String.valueOf(skilT[0].toString()));
+							if(skilT.length >= 15){
+								chara_SKills.setVisibleRowCount(15);
+							}else{
+								chara_SKills.setVisibleRowCount(skilT.length);
+							}
+							srdata = Skill_read.onerdata(chara_SKills.getValue(), table);
+							if(skilT.length == 1){
+								detailsk.setText(Skill_read.getSklefText(setSkilv.getValue(), srdata, chara_Sel.getValue()));
+							}
+						}catch(IOException e){
+							System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ内のキャラクター選択ボックス:スキルがセットできませんでした");
+							printlogc++;
+							System.err.println(e);
+							tpane.getSelectionModel().select(3);
+						}
 					}
 				}
 			});
@@ -396,6 +476,85 @@ public class GUITest extends Application{
 							System.err.println(e);
 							tpane.getSelectionModel().select(3);
 						}
+					} else if (tmpchnm.equals("南ことり")) {
+						try {
+							boolean chSelbl = false;
+							if (chSelbl == chSelector.equals(tmpchnm)) {
+								Skill_data[] bfdata = Skill_data.setdata(tmpchnm);
+								if (sdata.size() >= 0) {
+									sdata.clear();
+								}
+								if (debuglevel == 1) {
+									System.out.println("sdata.size() = " + sdata.size());
+								}
+								for (int len = 0; len < bfdata.length; len++) {
+									sdata.add(len, bfdata[len]);
+								}
+								chSelector = tmpchnm;
+							}
+							Skill_data[] table = new Skill_data[sdata.size()];
+							for (int len = 0; len < sdata.size(); len++) {
+								table[len] = sdata.get(len);
+							}
+							String[] skilT = Skill_read.setSkillnameT(setPprty.getValue(),Skill_read.setSkill(setRrity.getValue(), table));
+							chara_SKills.getItems().clear();
+							chara_SKills.getItems().addAll(skilT);
+							chara_SKills.setValue(String.valueOf(skilT[0].toString()));
+							if (skilT.length >= 15) {
+								chara_SKills.setVisibleRowCount(15);
+							} else {
+								chara_SKills.setVisibleRowCount(skilT.length);
+							}
+							srdata = Skill_read.onerdata(chara_SKills.getValue(), table);
+							if (skilT.length == 1) {
+							detailsk.setText(Skill_read.getSklefText(setSkilv.getValue(), srdata, chara_Sel.getValue()));
+							}
+						} catch (IOException e) {
+							System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ内のキャラクター選択ボックス:スキルがセットできませんでした");
+							printlogc++;
+							System.err.println(e);
+							tpane.getSelectionModel().select(3);
+						}
+					} else if (tmpchnm.equals("星空凛")) {
+						try {
+							boolean chSelbl = false;
+							if (chSelbl == chSelector.equals(tmpchnm)) {
+								Skill_data[] bfdata = Skill_data.setdata(tmpchnm);
+								if (sdata.size() >= 0) {
+									sdata.clear();
+								}
+								if (debuglevel == 1) {
+									System.out.println("sdata.size() = " + sdata.size());
+								}
+								for (int len = 0; len < bfdata.length; len++) {
+									sdata.add(len, bfdata[len]);
+								}
+								chSelector = tmpchnm;
+							}
+							Skill_data[] table = new Skill_data[sdata.size()];
+							for (int len = 0; len < sdata.size(); len++) {
+								table[len] = sdata.get(len);
+							}
+							String[] skilT = Skill_read.setSkillnameT(setPprty.getValue(),
+							Skill_read.setSkill(setRrity.getValue(), table));
+							chara_SKills.getItems().clear();
+							chara_SKills.getItems().addAll(skilT);
+							chara_SKills.setValue(String.valueOf(skilT[0].toString()));
+							if (skilT.length >= 15) {
+								chara_SKills.setVisibleRowCount(15);
+							} else {
+								chara_SKills.setVisibleRowCount(skilT.length);
+							}
+							srdata = Skill_read.onerdata(chara_SKills.getValue(), table);
+							if (skilT.length == 1) {
+								detailsk.setText(Skill_read.getSklefText(setSkilv.getValue(), srdata, chara_Sel.getValue()));
+							}
+						} catch (IOException e) {
+							System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ内のキャラクター選択ボックス:スキルがセットできませんでした");
+							printlogc++;
+							System.err.println(e);
+							tpane.getSelectionModel().select(3);
+						}
 					}
 				}
 			});
@@ -474,6 +633,84 @@ public class GUITest extends Application{
 							}
 							srdata = Skill_read.onerdata(chara_SKills.getValue(), table);
 						}catch(IOException e){
+							System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ内のキャラクター選択ボックス:スキルがセットできませんでした");
+							printlogc++;
+							System.err.println(e);
+							tpane.getSelectionModel().select(3);
+						}
+					} else if (tmpchnm.equals("南ことり")) {
+						try {
+							boolean chSelbl = false;
+							if (chSelbl == chSelector.equals(tmpchnm)) {
+								Skill_data[] bfdata = Skill_data.setdata(tmpchnm);
+								if (sdata.size() >= 0) {
+									sdata.clear();
+								}
+								if (debuglevel == 1) {
+									System.out.println("sdata.size() = " + sdata.size());
+								}
+								for (int len = 0; len < bfdata.length; len++) {
+									sdata.add(len, bfdata[len]);
+								}
+								chSelector = tmpchnm;
+							}
+							Skill_data[] table = new Skill_data[sdata.size()];
+							for (int len = 0; len < sdata.size(); len++) {
+								table[len] = sdata.get(len);
+							}
+							String[] skilT = Skill_read.setSkillnameT(setPprty.getValue(),Skill_read.setSkill(setRrity.getValue(), table));
+							chara_SKills.getItems().clear();
+							chara_SKills.getItems().addAll(skilT);
+							chara_SKills.setValue(String.valueOf(skilT[0].toString()));
+							if (skilT.length >= 15) {
+								chara_SKills.setVisibleRowCount(15);
+							} else {
+								chara_SKills.setVisibleRowCount(skilT.length);
+							}
+							srdata = Skill_read.onerdata(chara_SKills.getValue(), table);
+							if (skilT.length == 1) {
+								detailsk.setText(Skill_read.getSklefText(setSkilv.getValue(), srdata, chara_Sel.getValue()));
+							}
+						} catch (IOException e) {
+							System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ内のキャラクター選択ボックス:スキルがセットできませんでした");
+							printlogc++;
+							System.err.println(e);
+							tpane.getSelectionModel().select(3);
+						}
+					} else if (tmpchnm.equals("星空凛")) {
+						try {
+							boolean chSelbl = false;
+							if (chSelbl == chSelector.equals(tmpchnm)) {
+								Skill_data[] bfdata = Skill_data.setdata(tmpchnm);
+								if (sdata.size() >= 0) {
+									sdata.clear();
+								}
+								if (debuglevel == 1) {
+									System.out.println("sdata.size() = " + sdata.size());
+								}
+								for (int len = 0; len < bfdata.length; len++) {
+									sdata.add(len, bfdata[len]);
+								}
+								chSelector = tmpchnm;
+							}
+							Skill_data[] table = new Skill_data[sdata.size()];
+							for (int len = 0; len < sdata.size(); len++) {
+								table[len] = sdata.get(len);
+							}
+							String[] skilT = Skill_read.setSkillnameT(setPprty.getValue(),Skill_read.setSkill(setRrity.getValue(), table));
+							chara_SKills.getItems().clear();
+							chara_SKills.getItems().addAll(skilT);
+							chara_SKills.setValue(String.valueOf(skilT[0].toString()));
+							if (skilT.length >= 15) {
+								chara_SKills.setVisibleRowCount(15);
+							} else {
+								chara_SKills.setVisibleRowCount(skilT.length);
+							}
+							srdata = Skill_read.onerdata(chara_SKills.getValue(), table);
+							if (skilT.length == 1) {
+								detailsk.setText(Skill_read.getSklefText(setSkilv.getValue(), srdata, chara_Sel.getValue()));
+							}
+						} catch (IOException e) {
 							System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ内のキャラクター選択ボックス:スキルがセットできませんでした");
 							printlogc++;
 							System.err.println(e);
@@ -674,7 +911,7 @@ public class GUITest extends Application{
 						if(debuglevel >= 1)
 							System.err.println(e);
 						tpane.getSelectionModel().select(3);
-					}catch(FileFormatNotMatchException e){
+					}catch(FileTypeNotMatchException e){
 						System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ:変換するボタン:入力ファイル形式が異なります");
 						printlogc++;
 						if(debuglevel >= 1){
@@ -887,8 +1124,6 @@ public class GUITest extends Application{
 		}
 	}
 
-	//https://qiita.com/snipsnipsnip/items/281bd6ad20417b10fa04
-	//上記のサイトを参考にjavafx仕様に書き直した。
 	private static void redirectConsole(TextArea textarea, Button resetButton){
 		final ByteArrayOutputStream bytes = new ByteArrayOutputStream(){
 			@Override

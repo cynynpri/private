@@ -101,7 +101,7 @@ class Skill_read{
 			String rtnStr = String.valueOf(rtnprupP) + ",";
 
 			double accut = rdata.gaccut();
-			int finint = (int)rdata.gpfupt()*10;
+			int finint = (int)rdata.gpfupt()*10;//#1416対応済み。
 			double[] accT = Card_datas.accracyTable(accut, finint);
 			double rtnefsz = accT[skilv-1];
 
@@ -177,6 +177,8 @@ class Skill_read{
 			rtntext = gtpsk + "PERFECT" + fsz +"回ごとに";
 		}else if(gtpsk.equals("チェイン")){
 			rtntext = "自身を除く" + tprchain + "の特技がすべて発動すると";
+			//factv = 0;扱い
+			//fsz = 0扱い
 		}
 
 
@@ -196,7 +198,7 @@ class Skill_read{
 		}else if(chkstr.equals("パラメーター")){
 			rtntext = rtntext + bfefsz[1] + "秒間" + tprchain + "の属性Pが" + bfefsz[0] +"%UPする";
 		}else if(chkstr.equals("シンクロ")){
-			rtntext = rtntext + bfefsz[1] + "秒間" + tprchain + "のいずれかと同じ属性Pになる";
+			rtntext = rtntext + gefsz + "秒間" + tprchain + "のいずれかと同じ属性Pになる";
 		}else if(chkstr.equals("リピート")){
 			rtntext = rtntext + "直前に発動した特技リピート以外の特技効果を発動";
 		}
