@@ -1125,6 +1125,8 @@ public class GUITest extends Application{
 	}
 
 	private static void redirectConsole(TextArea textarea, Button resetButton){
+		//https://qiita.com/snipsnipsnip/items/281bd6ad20417b10fa04
+		//上記のサイトを参考にjavafx仕様に書き直した。
 		final ByteArrayOutputStream bytes = new ByteArrayOutputStream(){
 			@Override
 			public synchronized void flush() throws IOException{

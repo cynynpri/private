@@ -80,7 +80,7 @@ class Calc_data{
 	}
 
 	//スキル発動最大回数を計算するメソッド
-	public static int setMaxactcnt(Card_datas ondt, Music_data calcMd, double perper, String sf/*, Card_datas[] unit*/) {
+	public static int setMaxactcnt(Card_datas ondt, Music_data calcMd, double perper, String sf, Card_datas[] unit)throws DataNotFoundException{
 		int maxcombo = calcMd.gmaxcb();
 		int star_icon = calcMd.gstar_icon();
 		int musictm = calcMd.gmusictm();
@@ -100,19 +100,47 @@ class Calc_data{
 		} else if (ondt.gskitp().equals("スターアイコン")) {
 			mactct = (int)Math.floor(star_icon / ondt.gfactv());
 		} else if (ondt.gskitp().equals("チェイン")) {
-			//処理が思いつかない
-			/*for(int len = 0;len < unit.length;len++){
-				if(ondt.getgrade().equals(unit[len].getgrade())){
-
+			//対象カードの最大スキル発動回数の最低値がチェインの最大発動回数．(e.g. {19,28,17,22} -> maxactcnt of Chain is 17)
+			List<Card_datas> targetCd = new ArrayList<Card_datas>();
+			for(int len = 0;len < 9;len++){
+				//無限ループ回避に失敗した場合
+				//下記if文内のunit[len].gskitp().equals(ondt.gskitp()) == falseを確認のこと。plz check ctrl + f.
+				if(unit[len].getgrade().equals(ondt.getgrade()) && unit[len].getunitnm().equals(ondt.getunitnm()) && unit[len].gskitp().equals(ondt.gskitp()) == false){
+					targetCd.add(unit[len]);
 				}
-			}*/
-			//仕方ないので未実装
+			}
+			//再帰させるので無限ループ回避の確認
+			for(int len = 0;len < targetCd.size();len++){
+				if(targetCd.get(len).gskitp().equals("チェイン")){
+					System.out.println("メソッドエラーにより無限ループの回避に失敗しました。");
+					String err = new String();
+					throw new DataNotFoundException(err);
+				}
+			}
+			int[] tmpac = new int[targetCd.size()];
+			for(int len = 0;len < targetCd.size();len++){
+				tmpac[len] = setMaxactcnt(targetCd.get(len), calcMd, perper, sf, unit);
+				if (tmpac[len] > mactct) {//0から最大値を入れるようにする。
+					mactct = tmpac[len];
+				}
+			}
+			if(mactct == 0){
+				System.out.println("チェイン対象となるカードが存在しないようです。");
+				System.out.println("チェインの最大発動回数を0として計算します。");
+				return 0;
+			}
+			for (int len = 0; len < tmpac.length; len++) {
+				if (tmpac[len] < mactct) {//mactctには最大値が入っているので0との比較にはならない。
+					mactct = tmpac[len];
+				}
+			}
+
 		}
 		return mactct;
 	}
 
 	//スキル発動によるスコアアップ期待値を計算するメソッド
-	public static int setsklexp(Card_datas calcCd, double perper, String sf, Card_datas[] unit, Music_data calcMd){
+	public static int setsklexp(Card_datas calcCd, Music_data calcMd, double perper, String sf, Card_datas[] unit){
 		//引数のperperはパフェ率のこと。
 		//sfはユニットの値
 		//unitは一枚のカード
@@ -120,7 +148,14 @@ class Calc_data{
 		int efsz = calcCd.gefsz();
 		double prob = calcCd.gprob()/100.0;
 		int maxactcnt = 0;
-		maxactcnt = setMaxactcnt(calcCd, calcMd, perper, sf);
+		try{
+			maxactcnt = setMaxactcnt(calcCd, calcMd, perper, sf, unit);
+		}catch(DataNotFoundException e){
+			System.out.println(e);
+			System.out.println("メソッドエラーによりスキルによるスコアアップ期待値の計算に無限ループが発生しました。");
+			System.out.println("このエラーを作者にスクリーンショットを撮ってどのような操作を行ったのか明記の上伝えてください。");
+			return 0;
+		}
 		if(calcCd.gsksha().equals("スコア")){
 			if(calcCd.gpcharm() == 0){
 				return (int)Math.floor(maxactcnt*prob*efsz);
@@ -403,10 +438,10 @@ class Calc_data{
 				if (unit[len].gpcross() != 0 || unit[len].gpring() != 0) {
 					sa[len] += Math.ceil(sa[len] * 0.16 * (1+0.018*aura) * (1+0.024*veil)) * unit[len].gpcross()
 							+ Math.ceil(sa[len] * 0.10 * (1+0.018*aura) * (1+0.024*veil)) * unit[len].gpring()
-							+ Math.ceil(sa[len] * 0.33*(1+0.024*veil)*(1+0.018*aura));
+							+ Math.ceil(sa[len] * 0.33 * (1+0.018*aura) * (1+0.024*veil));
 							//ringやcrossの処理考えてなかった…＼(^o^)／ｵﾜﾀ
 				} else {
-					sa[len] +=  Math.ceil(sa[len]*0.33*(1+0.024*veil)*(1+0.018*aura));
+					sa[len] +=  Math.ceil(sa[len]*0.33 * (1+0.018*aura) * (1+0.024*veil));
 				}
 			}
 		}
@@ -564,12 +599,12 @@ class Calc_data{
 		return rtnstr;
 	}
 
-	public static Card_datas[] setsortsklUnit(Card_datas[] unit, Music_data cmdt, String sf, double perper){
+	public static Card_datas[] setsortsklUnit(Card_datas[] unit, Music_data cmdt, double perper, String sf){
 		//スキル発動期待値が高い順にソートするメソッド
 		//unit[0]が一番期待値が高く、unit[8]が一番期待値が小さい。
 		int[] sklexpT = new int[unit.length];
 		for(int len = 0;len < sklexpT.length;len++){
-			sklexpT[len] = setsklexp(unit[len], perper, sf, unit, cmdt);
+			sklexpT[len] = setsklexp(unit[len], cmdt, perper, sf, unit);
 		}
 		for(int len = 0;len < unit.length;len++){
 			for(int i = unit.length;i > len;i--){
@@ -603,20 +638,27 @@ class Calc_data{
 		return bf_p;
 	}
 
-	public static int calcscrmain(double perper, Card_datas[] unit, Music_data calcMd, Card_datas frend){
+	public static int calcscrmain(Card_datas[] unit, Music_data calcMd, Card_datas frend, double perper)throws NullPointerException{
 		// ある特定の確率で出る最大スコアを計算するメソッド
 		//メインのスコア計算メソッドとする。
 		// 派生版として、 1/プレイ回数 の確率を1ビットとして、グラフを表示させるメソッドも作成可能。
 		int rtn_scr = 0;
 		String sf = setUnitsf(unit, frend, calcMd);
 		String actsf = new String();
-		Card_datas[] sklcalc = setsortsklUnit(unit, calcMd, sf, perper);
-		double[][] unitprbs = new double[9][];
+		Card_datas[] sklcalc = setsortsklUnit(unit, calcMd, perper, sf);
+		double[][] unitprbs = new double[9][];//実際の確率分布を格納する配列
+		double[][] untupprbs = new double[9][];//発動確率アップの確率分布を格納する配列
 		for(int len = 0; len < unit.length;len++){
-			unitprbs[len] = setprob(setMaxactcnt(sklcalc[len], calcMd, perper, sf), sklcalc[len].gprob()/100.0);
+			try{
+				unitprbs[len] = setprob(setMaxactcnt(sklcalc[len], calcMd, perper, sf, unit), sklcalc[len].gprob()/100.0);
+			}catch(DataNotFoundException e){
+				System.out.println(e);
+				System.out.println("メソッドcalcscrmainにてsetMaxactcntメソッドが原因のエラー");
+				return 0;
+			}
 		}
-		int[] scrupT = new int[9];
 		for(int len = 0;len < unit.length;len++){
+			int[] scrupT = new int[9];
 			if(unit[len].gsksha().equals("スコア")){
 				scrupT[len] = unit[len].gefsz();
 				if(unit[len].gpcharm() != 0){
@@ -647,15 +689,26 @@ class Calc_data{
 					scrupT[len] = 0;//スキルが何回発動しようがスコア上昇分は0.
 				}
 			}else if(unit[len].gsksha().equals("パーフェクト")){
-				scrupT[len] = unit[len].gefsz();
 				//SISの処理無し
 				//楽曲中に一定時間発動する。
 				//その一定時間中に飛んでくるノーツ数は未知数である。
 				//正確な数値が計算できない。
 				//多分だけれども判定強化の上位互換。
-
+				double pfupt = unit[len].gaccut();
+				int musictm = calcMd.gmusictm();
+				int maxcombo = calcMd.gmaxcb();
+				double nps = musictm / maxcombo;
+				scrupT[len] = (int)Math.floor(nps*pfupt*unit[len].gefsz());
 			}else if(unit[len].gsksha().equals("発動率")){
-				//
+				for(int k = 0;k < unit.length;k++){
+					try{
+						untupprbs[k] = setprob(setMaxactcnt(unit[k],calcMd,perper,unit), unit[k].gprob/100.0);
+					}catch(DataNotFoundException e){
+						String err = new String();
+						System.out.println(e);
+						throw new NullPointerException(err);
+					}
+				}
 			}else if(unit[len].gsksha().equals("パラメーター")){
 				//
 			}else if(unit[len].gsksha().equals("シンクロ")){

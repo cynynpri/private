@@ -163,7 +163,9 @@ namespace SIFUnitCalc
                         unitsm += propertys[len];
                     }
                     unitsm += sumcu;
+                    trunitsm += trsumcu;
                     result_lbl.Text = "ユニット値:" + unitsm + "+" + sumcu;
+                    trrslt_lbl.Text = "判定強化時のユニット値:" + trunitsm;
                     return;
                 }
                 else
