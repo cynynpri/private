@@ -595,7 +595,7 @@ class Card_datas{
 		//chk ... CHecK
 		//cskn ... Center SKill Name
 		//_s or _p or _c ... Smile , Pure , Cool
-		
+
 		//chkcskn_s
 		chkcskn_s[0] = ",\"1.スマイルパワー\"";
 		chkcskn_s[1] = ",\"2.スマイルハート\"";
@@ -945,7 +945,7 @@ class Card_datas{
 				}
 			}
 		}
-		
+
 		//デバック用
 		//System.out.println(liner.substring(bs,es));
 		/*try{
@@ -954,7 +954,7 @@ class Card_datas{
 			return rtn_array;
 		}
 		buffer_a = chkliner.split(",", 7);*/
-		try{		
+		try{
 			buffer_a = liner.substring(bs,es).split(",",7);
 		}catch(StringIndexOutOfBoundsException e){
 			return rtn_array;
@@ -1059,7 +1059,7 @@ class Card_datas{
 
 	public static int[] fixedSislt(Card_datas cdata){
 		//覚醒状態か否かからＳＩＳのスロット数を入力するメソッド
-		String cskin = cdata.getcskin(); 
+		String cskin = cdata.getcskin();
 		String rrity = cdata.grrity();
 		int iniSislt = 1;
 		int maxSislt = 1;
@@ -1124,7 +1124,7 @@ class Card_datas{
 							skill_allList[i] = "Empty";
 							//System.out.println(skill_allList[i]);
 						}
-					}	
+					}
 				}
 				for(int i = 0; i < skill_allList.length; i++){
 					if(!skill_allList[i].equals("Empty")){
@@ -1270,7 +1270,7 @@ class Card_datas{
 			rtnTable[0] = iniupp;
 			Integer[] diffT = {2,1,2,3,2,2,2};
 			for(int i = 1;i<8;i++){
-				rtnTable[i] = rtnTable[i-1] + diffT[i-1]; 
+				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
 			}
 		}else if((finupp - iniupp) == 15){//#1415 card.
 			rtnTable[0] = iniupp;
@@ -1288,13 +1288,13 @@ class Card_datas{
 			rtnTable[0] = iniupp;
 			Integer[] diffT = {4,3,3,3,3,3,3};
 			for(int i = 1;i<8;i++){
-				rtnTable[i] = rtnTable[i-1] + diffT[i-1]; 
+				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
 			}
 		}else if((finupp - iniupp) == 28){
 			rtnTable[0] = iniupp;
 			Integer[] diffT = {3,5,4,4,4,4,4};
 			for(int i = 1;i<8;i++){
-				rtnTable[i] = rtnTable[i-1] + diffT[i-1]; 
+				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
 			}
 		}else{
 			rtnTable = null;
@@ -1348,7 +1348,7 @@ class Card_datas{
 		if(cb.getItems().size() != 0){
 			cb.getItems().clear();
 		}
-		
+
 		try{
 			for(int len = 0;len < cdata.size()-1;len++){
 				cb.getItems().add(cdata.get(len).gcnum() + ":" +cdata.get(len).getname()+ ":" + cdata.get(len).grrity()+ ":" +cdata.get(len).gpprty() + ":" + cdata.get(len).getskinm());
@@ -1424,5 +1424,4 @@ class Card_datas{
 			System.out.println(prnt);
 		}*/
 	//}
-	
 }
