@@ -117,13 +117,13 @@ class Card_read{
 		}
 		return one_data;
 	}
-	public static Card_datas[] ndc_cdatas(File dPath) throws IOException,FileNotFoundException, FileTypeNotMatchException, DataNotFoundException{
+	public static Card_datas[] ndc_cdatas(File dPath) throws IOException,FileNotFoundException, FileFormatNotMatchException, DataNotFoundException{
 		//dc_cdatasの再定義版
 
 		//ファイルフォーマット確認
 		if (dPath.getPath().indexOf(".csv") == -1 && dPath.getPath().indexOf(".txt") == -1) {
 			String e = new String();
-			throw new FileTypeNotMatchException(e);
+			throw new FileFormatNotMatchException(e);
 		}
 
 		//ファイル読み込み(改行、非改行問わずとりあえずチェッカーとして読み込み、あとでファイル内容を改行させた後、ファイル内容そのものをString配列化)
@@ -201,14 +201,14 @@ class Card_read{
 		}
 	}
 
-	public static Card_datas[] dc_cdatas(File dPath) throws FileTypeNotMatchException, DataNotFoundException{
+	public static Card_datas[] dc_cdatas(File dPath) throws FileFormatNotMatchException, DataNotFoundException{
 		//見習い師様のスコア計算機からエクスポートしたデータをコンバートするメソッド
 		//本来、このメソッドはmainメソッドではなくdataconvertメソッドである。
 		/*String filepath = System.getProperty("user.dir")+"\\Sample_new.csv";
 		File f = new File(filepath);*/
 		if(dPath.getPath().indexOf(".csv") == -1 && dPath.getPath().indexOf(".txt") == -1){
 			String e = new String();
-			throw new FileTypeNotMatchException(e);
+			throw new FileFormatNotMatchException(e);
 		}
 		try{
 			BufferedReader chkbr = new BufferedReader(new FileReader(dPath.getPath()));
@@ -443,7 +443,7 @@ class Card_read{
 			System.out.println(e);
 		}catch(NullPointerException e){
 			System.out.println(e);
-		}catch(FileTypeNotMatchException e){
+		}catch(FileFormatNotMatchException e){
 			System.out.println(e);
 		}
 	}*/
