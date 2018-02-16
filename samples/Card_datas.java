@@ -40,7 +40,7 @@ class Card_datas{
 	private int pcharm;//SIS‚Ìƒ`ƒƒ[ƒ€
 	private int pheal;//SIS‚Ìƒq[ƒ‹
 	private int ptrick;//SIS‚ÌƒgƒŠƒbƒN
-	
+
 	/*private enum pprte{
 		Smile("ƒXƒ}ƒCƒ‹"), Cool("ƒN[ƒ‹"), Pure("ƒsƒ…ƒA");
 		private String pname;
@@ -79,7 +79,7 @@ class Card_datas{
 		this.acskn = acskn;
 		//set grade
 		if(name.equals("¬ò‰Ô—z")||name.equals("¼–Ø–ì^•P")||name.equals("¯‹ó™z")||name.equals("’Ã“‡‘PŽq")||name.equals("•àVƒ‹ƒrƒB")||name.equals("‘–Ø“c‰ÔŠÛ")){
-			grade = "1”N¶";	
+			grade = "1”N¶";
 		}else if(name.equals("“ì‚±‚Æ‚è")||name.equals("‚â•ä”T‰Ê")||name.equals("‰€“cŠC–¢")||name.equals("“n•Ó—j")||name.equals("‚ŠCç‰Ì")||name.equals("÷“à—œŽq")){
 			grade = "2”N¶";
 		}else if(name.equals("“ŒžŠŠó")||name.equals("–îàV‚É‚±")||name.equals("ˆº£ŠG—¢")||name.equals("•àVƒ_ƒCƒ„")||name.equals("¬Œ´‹fä»")||name.equals("¼‰Y‰Ê“ì")){
@@ -864,7 +864,7 @@ class Card_datas{
 		int b = liner.indexOf(chkawk);
 		int e = liner.indexOf(chkskltype);
 		int rtnskslt = 0;
-		
+
 		b = b + 4;
 		int len = 0;
 		while(e == -1){
@@ -872,6 +872,7 @@ class Card_datas{
 			e = liner.indexOf(chkskltype);
 			len++;
 			if(len > 7){
+				//System.err.println("liner is "+liner);
 				System.err.println("ƒf[ƒ^‚ªŽæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B");
 				return 0;
 			}
@@ -896,6 +897,7 @@ class Card_datas{
 			e = liner.indexOf(chkskltype);
 			len++;
 			if (len > 7) {
+				//System.err.println("liner is " + liner);
 				System.err.println("ƒf[ƒ^‚ªŽæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B");
 				return 0;
 			}
@@ -966,7 +968,12 @@ class Card_datas{
 				bs = 0;
 			}else{
 				//bs = Integer.parseInt(chkliner);
-				bs = Integer.parseInt(buffer_a[len]);
+				try{
+					bs = Integer.parseInt(buffer_a[len]);
+				}catch(NumberFormatException e){
+					double tmpdbl = Double.parseDouble(buffer_a[len]);
+					bs = (int)(tmpdbl*100.0 - 100);
+				}
 			}
 			rtn_array[len] = bs;
 		}
@@ -1087,7 +1094,7 @@ class Card_datas{
 	}
 
 //=============================================================
-	public static String[] skill_list(String chara_name, String rrity)throws IOException{		
+	public static String[] skill_list(String chara_name, String rrity)throws IOException{
 		if(chara_name.equals("‰€“cŠC–¢")){
 			String[] skill_allList = new String[Skill_data.mAx(chara_name)];
 			skill_allList = Skill_data.sKillName(chara_name);
@@ -1343,7 +1350,7 @@ class Card_datas{
 	}
 //=============================================================================
 //“Á‹ZƒŒƒxƒ‹ƒe[ƒuƒ‹ ->End 1203 to 1310
-//=============================================================================	
+//=============================================================================
 	public static void toStringCard_datas(ArrayList<Card_datas> cdata, ComboBox<String> cb)throws DataNotFoundException{
 		if(cb.getItems().size() != 0){
 			cb.getItems().clear();
@@ -1424,4 +1431,5 @@ class Card_datas{
 			System.out.println(prnt);
 		}*/
 	//}
+
 }

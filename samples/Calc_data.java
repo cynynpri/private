@@ -638,7 +638,7 @@ class Calc_data{
 		return bf_p;
 	}
 
-	public static int calcscrmain(Card_datas[] unit, Music_data calcMd, Card_datas frend, double perper)throws NullPointerException{
+	public static int calcscrmain(Card_datas[] unit, Music_data calcMd, Card_datas frend, double perper)throws DataNotFoundException{
 		// ある特定の確率で出る最大スコアを計算するメソッド
 		//メインのスコア計算メソッドとする。
 		// 派生版として、 1/プレイ回数 の確率を1ビットとして、グラフを表示させるメソッドも作成可能。
@@ -702,11 +702,11 @@ class Calc_data{
 			}else if(unit[len].gsksha().equals("発動率")){
 				for(int k = 0;k < unit.length;k++){
 					try{
-						untupprbs[k] = setprob(setMaxactcnt(unit[k],calcMd,perper,unit), unit[k].gprob/100.0);
+						untupprbs[k] = setprob(setMaxactcnt(unit[k],calcMd,perper,unit), (unit[len].gefsz()/100.0) * (unit[k].gprob/100.0));
 					}catch(DataNotFoundException e){
 						String err = new String();
 						System.out.println(e);
-						throw new NullPointerException(err);
+						throw new DataNotFoundException(err);
 					}
 				}
 			}else if(unit[len].gsksha().equals("パラメーター")){

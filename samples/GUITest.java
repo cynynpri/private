@@ -834,7 +834,7 @@ public class GUITest extends Application{
 								FileWriter fwSIFSCsettings = new FileWriter(iniDataPath);
 								BufferedWriter bwSIFSCsettings = new BufferedWriter(fwSIFSCsettings);
 								PrintWriter pwSIFSCsettings = new PrintWriter(bwSIFSCsettings);
-								pwSIFSCsettings.println("Character_cdata.ini");
+								pwSIFSCsettings.println("Character_cdata.tsv");
 								pwSIFSCsettings.close();
 								chknulls = "";
 							}
@@ -871,26 +871,26 @@ public class GUITest extends Application{
 							System.out.println("filepath = " + fcopen.getPath());
 						}
 						if(fcopen != null){
-							maxNum = Card_read.getMaxnum(fcopen);
-							Card_datas[] bfcdata = new Card_datas[maxNum];
-							bfcdata = Card_read.dc_cdatas(fcopen);
+							//maxNum = Card_read.getMaxnum(fcopen);
+							Card_datas[] bfcdata = Card_read.dc_cdatas(fcopen);
+							maxNum = bfcdata.length;
 							if(cdatas.size() != 0){
 								cdatas.clear();//addするので、これまでにデータが入ってるとまずい
 							}
-							for(int len = 1; len < maxNum; len++){
+							for(int len = 0; len < bfcdata.length; len++){
 								cdatas.add(Card_read.one_carddata(bfcdata, len));
 							}
 							FileWriter fwSIFSCsettings = new FileWriter(iniDataPath);
 							BufferedWriter bwSIFSCsettings = new BufferedWriter(fwSIFSCsettings);
 							PrintWriter pwSIFSCsettings = new PrintWriter(bwSIFSCsettings);
-							pwSIFSCsettings.println("Character_cdata.ini");
+							pwSIFSCsettings.println("Character_cdata.tsv");
 							pwSIFSCsettings.close();
 							System.out.println(printlogc + ":システム通常ログ:");
 							printlogc++;
 							System.out.println("カードデータを読み込みました:");
-							System.out.println("カード数: "+ (maxNum-1));
+							System.out.println("カード数: "+ maxNum);
 							Card_read.print_cdata(bfcdata,maxNum);
-							card_num = maxNum;
+							card_num = maxNum+1;
 							tpane.getSelectionModel().select(3);
 						}
 					}catch(NullPointerException e){
@@ -911,10 +911,17 @@ public class GUITest extends Application{
 						if(debuglevel >= 1)
 							System.err.println(e);
 						tpane.getSelectionModel().select(3);
-					}catch(FileFormatNotMatchException e){
+					}catch(FileTypeNotMatchException e){
 						System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ:変換するボタン:入力ファイル形式が異なります");
 						printlogc++;
 						if(debuglevel >= 1){
+							System.err.println(e);
+						}
+						tpane.getSelectionModel().select(3);
+					}catch(DataNotFoundException e){
+						System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ:変換するボタン:入力されたファイルからデータが見つかりませんでした。");
+						printlogc++;
+						if (debuglevel >= 1) {
 							System.err.println(e);
 						}
 						tpane.getSelectionModel().select(3);
