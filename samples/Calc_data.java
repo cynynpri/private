@@ -112,6 +112,7 @@ class Calc_data{
 			//再帰させるので無限ループ回避の確認
 			for(int len = 0;len < targetCd.size();len++){
 				if(targetCd.get(len).gskitp().equals("チェイン")){
+					System.err.println(ondt.grrity()+":"+ondt.getname()+":"+ondt.getskinm()+"のカードに置いて予期せぬ処理が発生しました。");
 					System.out.println("メソッドエラーにより無限ループの回避に失敗しました。");
 					String err = new String();
 					throw new DataNotFoundException(err);
@@ -126,7 +127,7 @@ class Calc_data{
 			}
 			if(mactct == 0){
 				System.out.println("チェイン対象となるカードが存在しないようです。");
-				System.out.println("チェインの最大発動回数を0として計算します。");
+				System.out.println(ondt.grrity()+":"+ondt.getname()+":"+ondt.getskinm()+"の最大発動回数を0として計算します。");
 				return 0;
 			}
 			for (int len = 0; len < tmpac.length; len++) {
@@ -140,7 +141,7 @@ class Calc_data{
 	}
 
 	//スキル発動によるスコアアップ期待値を計算するメソッド
-	public static int setsklexp(Card_datas calcCd, Music_data calcMd, double perper, String sf, Card_datas[] unit){
+	public static int setsklexp(Card_datas calcCd, Music_data calcMd, double perper, String sf, Card_datas[] unit, Card_datas frend)throws NullPointerException{
 		//引数のperperはパフェ率のこと。
 		//sfはユニットの値
 		//unitは一枚のカード
@@ -172,18 +173,138 @@ class Calc_data{
 				return (int) Math.floor(maxactcnt * prob * efsz);
 			}
 		}else if(calcCd.gsksha().equals("判定")){
-			if(calcCd.gptrick() == 0){
-				return 0;
-			}else{
+			if(calcCd.gptrick() == 1){
+				//トリックが付いている場合
 				/*sfを再定義し、判定強化時間その再定義されたrsfで
 				rsf - sfを計算し、1タップ上昇分を計算する。
 				そして、楽曲の1秒当たりのノーツ数から、
 				accut分の時間を掛け算して、rsf-sfの数値と掛け算し、
 				トリック上昇分を出力する。
 				*/
-				double pernotes = calcMd.gmaxcb() / calcMd.gmusictm();
-
+				int trBs = calcBS(unit, calcMd, settrsf(unit, frend, calcMd));
+				int iBs = calcBS(unit, calcMd, sf);
+				int dfBs = iBs - trBs;
+				double oefsz = dfBs * (calcCd.gaccut()/calcMd.gmusictm());
+				return (int)Math.floor(maxactcnt * prob * oefsz);
+			}else{
+				return 0;
 			}
+		}else if(calcCd.gsksha().equals("パーフェクト")){
+			double spnotes = calcMd.gmaxcb()/calcMd.gmusictm();
+			double oefsz = spnotes*calcCd.gaccut()*efsz;
+			return (int)Math.floor(maxactcnt * prob *oefsz);
+		}else if(calcCd.gsksha().equals("発動率")){
+			//確率分布を再計算して上昇したスキル期待値分を元のスキル期待値分から引いて、最大発動回数で割る。
+			double[] uprobs = new double[8];
+			double[] probs = new double[8];
+			double[] tmpefsz = new double[8];
+			double[] maxactcnts = new double[8];
+			double tefsz = 0.0;
+			double oefsz = 0.0;
+			List<Card_datas> lunt = new ArrayList<Card_datas>();
+			for(int len = 0;len < unit.length;len++){
+				if(!(calcCd.equals(unit[len]))){
+					lunt.add(unit[len]);
+				}
+			}
+			if(lunt.size() == unit.length){
+				String errs = new String();
+				System.err.println(calcCd.grrity() + ":" +calcCd.getname()+":"+calcCd.getskinm()+"のカードの期待値計算において異常処理が発生しました。");
+				throw new NullPointerException(errs);
+			}
+			for(int len = 0;len < lunt.size();len++){
+				probs[len] = lunt.get(len).gprob();
+				uprobs[len] = efsz/100.0 + 1;//発動アップ確率を格納。
+				uprobs[len] *= lunt.get(len).gprob();//発動確率をアップして格納。
+				lunt.get(len).sprob((int)Math.floor(uprobs[len]));//発動確率をアップしたものへ再定義。
+				tmpefsz[len] = lunt.get(len).gefsz();//仮期待値を作成するためのefszとmaxactcntを格納。
+				try {
+					maxactcnts[len] = setMaxactcnt(lunt.get(len), calcMd, perper, sf, unit);//同上。
+				} catch (DataNotFoundException e) {
+					System.out.println(e);
+					System.out.println("メソッドエラーによりスキルによるスコアアップ期待値の計算に無限ループが発生しました。");
+					System.out.println("このエラーを作者にスクリーンショットを撮ってどのような操作を行ったのか明記の上伝えてください。");
+					return 0;
+				}
+				oefsz += uprobs[len] * tmpefsz[len] * maxactcnts[len];//発動アップによるスキルのスコアアップ仮期待値を格納。
+				lunt.get(len).sprob((int)probs[len]);//元の発動確率へ戻し、再定義。
+				try {
+					maxactcnts[len] = setMaxactcnt(lunt.get(len), calcMd, perper, sf, unit);//元の最大発動回数を格納。
+				} catch (DataNotFoundException e) {
+					System.out.println(e);
+					System.out.println("メソッドエラーによりスキルによるスコアアップ期待値の計算に無限ループが発生しました。");
+					System.out.println("このエラーを作者にスクリーンショットを撮ってどのような操作を行ったのか明記の上伝えてください。");
+					return 0;
+				}
+				tefsz += probs[len] * tmpefsz[len] * maxactcnts[len];//元の発動率でのスキルによるスコアアップ期待値を格納。
+			}
+			oefsz -= tefsz;//発動アップ発動済みのスコアアップ期待値から元の発動率でのスコアアップ期待値を引く。
+			double accut = calcCd.gaccut()/calcMd.gmusictm();//発動時間割合を格納。
+			return (int)Math.floor(maxactcnt * prob * oefsz * accut);//最大発動回数×確率で発動回数期待値を算出し、oefszは全時間発動時の時間による関数値なのでaccutという時間を代入する。
+
+		}else if(calcCd.gsksha().equals("パラメーター")){
+			double accut = calcCd.gaccut();
+			//対象となるカードの属性値をefsz%分アップさせる
+			//そしてsfを計算する-> prsf
+			//後は判定強化と同じ処理。
+
+		}else if(calcCd.gsksha().equals("シンクロ")){
+			double accut = calcCd.gaccut();
+			//対象のカードの中から1枚取得し、ユニットを作成しsfを再計算する。-> sysf
+			//sysfから元のsfを引きあとは判定強化の処理と同一。
+			List<Card_datas> calcs = new ArrayList<Card_datas>();
+			Card_datas[] syunt = new Card_datas[9];
+			List<Card_datas> calcunit = new ArrayList<Card_datas>();
+			for (int len = 0; len < unit.length; len++) {
+				if (unit[len].getgrade().equals(calcCd.getgrade()) && !(unit[len].equals(calcCd))) {
+					calcs.add(unit[len]);
+				}
+				if (!(unit[len].equals(calcCd))) {
+					calcunit.add(unit[len]);
+				}
+			}
+			if (calcunit.size() == unit.length) {
+				System.err.println(calcCd.grrity() + ":" + calcCd.getname() + ":" + calcCd.getskinm()
+						+ "のカードの期待値計算において異常処理が発生しました。");
+				String err = new String();
+				throw new NullPointerException(err);
+			}
+			String[] tempsysf = new String[calcs.size()];
+			for (int len = 0; len < calcs.size(); len++) {
+				for (int i = 0; i < calcunit.size(); i++) {
+					syunt[i] = calcunit.get(i);
+				}
+				//SIS引き継ぎ
+				calcs.get(len).spkiss(calcCd.gpkiss());
+				calcs.get(len).sppfm(calcCd.gppfm());
+				calcs.get(len).spring(calcCd.gpring());
+				calcs.get(len).spcross(calcCd.gpcross());
+				calcs.get(len).spaura(calcCd.gpaura());
+				calcs.get(len).spveil(calcCd.gpveil());
+				calcs.get(len).sptrick(calcCd.gptrick());
+				//引き継ぎここまで。
+				if(calcunit.size() != 8){
+					for(int j = calcunit.size();j < 9;j++){
+						syunt[j] = calcs.get(len);
+					}
+				}else{
+					syunt[calcunit.size()] = calcs.get(len);
+				}
+				if(calcCd.gptrick() == 1){
+					tempsysf[len] = settrsf(syunt, frend, calcMd);
+				}else{
+					tempsysf[len] = setUnitsf(syunt, frend, calcMd);//シンクロ時のsfを格納させる。
+				}
+			}
+			double tmp = 0.0;
+			for (int len = 0; len < calcs.size(); len++) {
+				tmp += calcBS(unit, calcMd, tempsysf[len]);//シンクロ発動時のBSを計算させtmpに合算する。
+			}
+			tmp /= calcs.size();//合算した分で割り、平均を出す。
+			tmp -= calcBS(unit, calcMd, sf);//元の数値を引く。
+			return (int)Math.floor(maxactcnt * prob * tmp*(accut/calcMd.gmusictm())*calcMd.gmaxcb());
+		}else if(calcCd.gsksha().equals("リピート")){
+
 		}
 		return -1;
 	}
@@ -599,12 +720,12 @@ class Calc_data{
 		return rtnstr;
 	}
 
-	public static Card_datas[] setsortsklUnit(Card_datas[] unit, Music_data cmdt, double perper, String sf){
+	public static Card_datas[] setsortsklUnit(Card_datas[] unit, Music_data cmdt, double perper, String sf, Card_datas frend){
 		//スキル発動期待値が高い順にソートするメソッド
 		//unit[0]が一番期待値が高く、unit[8]が一番期待値が小さい。
 		int[] sklexpT = new int[unit.length];
 		for(int len = 0;len < sklexpT.length;len++){
-			sklexpT[len] = setsklexp(unit[len], cmdt, perper, sf, unit);
+			sklexpT[len] = setsklexp(unit[len], cmdt, perper, sf, unit, frend);
 		}
 		for(int len = 0;len < unit.length;len++){
 			for(int i = unit.length;i > len;i--){
@@ -645,7 +766,7 @@ class Calc_data{
 		int rtn_scr = 0;
 		String sf = setUnitsf(unit, frend, calcMd);
 		String actsf = new String();
-		Card_datas[] sklcalc = setsortsklUnit(unit, calcMd, perper, sf);
+		Card_datas[] sklcalc = setsortsklUnit(unit, calcMd, perper, sf, frend);
 		double[][] unitprbs = new double[9][];//実際の確率分布を格納する配列
 		double[][] untupprbs = new double[9][];//発動確率アップの確率分布を格納する配列
 		for(int len = 0; len < unit.length;len++){
@@ -702,7 +823,7 @@ class Calc_data{
 			}else if(unit[len].gsksha().equals("発動率")){
 				for(int k = 0;k < unit.length;k++){
 					try{
-						untupprbs[k] = setprob(setMaxactcnt(unit[k],calcMd,perper,unit), (unit[len].gefsz()/100.0) * (unit[k].gprob/100.0));
+						untupprbs[k] = setprob(setMaxactcnt(unit[k],calcMd,perper,sf,unit), (unit[len].gefsz()/100.0) * (unit[k].gprob()/100.0));
 					}catch(DataNotFoundException e){
 						String err = new String();
 						System.out.println(e);

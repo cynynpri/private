@@ -26,9 +26,9 @@ public class GUITest extends Application{
 	static int printlogc = 1;
 	static int maxNum = 0;
 	static Card_datas[] unitdt = new Card_datas[9];
-	static ArrayList<Skill_data> sdata = new ArrayList<Skill_data>();
+	static List<Skill_data> sdata = new ArrayList<Skill_data>();
 	static Skill_data srdata;
-	static ArrayList<Card_datas> cdatas = new ArrayList<Card_datas>();
+	static List<Card_datas> cdatas = new ArrayList<Card_datas>();
 	static int card_num = 0;
 	static String iniDataPath;//SIF_SCsettings.ini
 	static String chknulls;

@@ -131,10 +131,13 @@ class Card_read{
 			BufferedReader chkbr = new BufferedReader(new FileReader(dPath.getPath()));
 			String chkstr = chkbr.readLine();
 			List<String> bfstr = new ArrayList<String>();
+			boolean replaced = false;
 			while(chkstr != null){
+				if(chkstr.indexOf("],[") != -1){replaced = true;}
 				bfstr.add(chkstr.replaceAll("\\],\\[", "\\],\n\\["));
 				chkstr = chkbr.readLine();
 			}
+			chkbr.close();
 			String allstr = new String();
 			label:for(int len = 0;len < bfstr.size();len++){
 				if(bfstr.get(len).indexOf(",\n") != -1){
@@ -147,10 +150,12 @@ class Card_read{
 				}
 			}
 			bfstr.clear();
-			PrintWriter allstrpw = new PrintWriter(new BufferedWriter(new FileWriter(dPath.getPath())));
-			allstr.replaceAll("\n\n","");
-			allstrpw.println(allstr);
-			allstrpw.close();
+			allstr.replaceAll("\n\n", "");
+			if(replaced == true){
+				PrintWriter allstrpw = new PrintWriter(new BufferedWriter(new FileWriter(dPath.getPath())));
+				allstrpw.println(allstr);
+				allstrpw.close();
+			}
 			//System.out.println(allstr);
 			String[] liners = allstr.split("\\],\n",0);
 
@@ -293,7 +298,6 @@ class Card_read{
 			lcdata.clear();
 			if(card_num == 1){
 				if(cdata.length == 0){
-					chkbr.close();
 					pw.close();
 
 					System.out.println("データが見つかりませんでした");
@@ -326,7 +330,6 @@ class Card_read{
 					+ cdata[len].getacskn()
 				);
 			}
-			chkbr.close();
 			//*ファイルを閉じる
 			pw.close();
 			//cdata = reading_rdata();

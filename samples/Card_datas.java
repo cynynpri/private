@@ -1351,7 +1351,7 @@ class Card_datas{
 //=============================================================================
 //特技レベルテーブル ->End 1203 to 1310
 //=============================================================================
-	public static void toStringCard_datas(ArrayList<Card_datas> cdata, ComboBox<String> cb)throws DataNotFoundException{
+	public static void toStringCard_datas(List<Card_datas> cdata, ComboBox<String> cb)throws DataNotFoundException{
 		if(cb.getItems().size() != 0){
 			cb.getItems().clear();
 		}
@@ -1367,7 +1367,7 @@ class Card_datas{
 		}
 	}
 
-	public static Card_datas setGuitoUnit(Card_datas unit, ArrayList<Card_datas> cdata ,ComboBox<String> cb){
+	public static Card_datas setGuitoUnit(Card_datas unit, List<Card_datas> cdata ,ComboBox<String> cb){
 		String[] bfcb = cb.getValue().split(":",0);
 		int cnum = Integer.parseInt(bfcb[0]);
 		unit = cdata.get(cnum-1);
