@@ -130,7 +130,7 @@ class Calc_data{
 				System.out.println(ondt.grrity()+":"+ondt.getname()+":"+ondt.getskinm()+"の最大発動回数を0として計算します。");
 				return 0;
 			}
-			for (int len = 0; len < tmpac.length; len++) {
+			for (int len = 0; len < tmpac.length; len++){
 				if (tmpac[len] < mactct) {//mactctには最大値が入っているので0との比較にはならない。
 					mactct = tmpac[len];
 				}
@@ -181,11 +181,40 @@ class Calc_data{
 				accut分の時間を掛け算して、rsf-sfの数値と掛け算し、
 				トリック上昇分を出力する。
 				*/
-				int trBs = calcBS(unit, calcMd, settrsf(unit, frend, calcMd));
-				int iBs = calcBS(unit, calcMd, sf);
-				int dfBs = iBs - trBs;
-				double oefsz = dfBs * (calcCd.gaccut()/calcMd.gmusictm());
-				return (int)Math.floor(maxactcnt * prob * oefsz);
+				int counter = 0;
+				boolean prupbl = false;
+				for(int len = 0;len < unit.length;len++){
+					if(unit[len].gsksha().equals("パラメーター")){
+						prupbl = true;
+						counter++;
+					}else if(unit[len].gsksha().equals("判定")){
+						counter++;
+					}else if(unit[len].gsksha().equals("シンクロ")){
+						prupbl = true;
+						counter++;
+					}
+				}
+				if(prupbl){
+					int pruptrBS = calcBS(unit, calcMd, setpruptrsf(unit, frend, calcMd));
+					int prupBS = calcBS(unit, calcMd, setprupsf(unit, frend, calcMd));
+					int trBS = calcBS(unit, calcMd, settrsf(unit, frend, calcMd));
+					int iBs = calcBS(unit, calcMd, sf);
+					int tmpBS = trBS - iBs;
+					int tmpdfBs = prupBS - iBs;
+					double dfBs = pruptrBS - iBs;
+					dfBs = dfBs - tmpdfBs;
+					dfBs = dfBs - tmpBS;//相乗効果分だけを出す。
+					dfBs /= counter;//相乗効果分を割る。
+					dfBs += tmpBS;
+					double oefsz = dfBs * (calcCd.gaccut()/calcMd.gmusictm());
+					return (int)Math.floor(maxactcnt * prob * oefsz);
+				}else{
+					int trBs = calcBS(unit, calcMd, settrsf(unit, frend, calcMd));
+					int iBs = calcBS(unit, calcMd, sf);
+					int dfBs = iBs - trBs;
+					double oefsz = dfBs * (calcCd.gaccut()/calcMd.gmusictm());
+					return (int)Math.floor(maxactcnt * prob * oefsz);
+				}
 			}else{
 				return 0;
 			}
@@ -244,14 +273,55 @@ class Calc_data{
 
 		}else if(calcCd.gsksha().equals("パラメーター")){
 			double accut = calcCd.gaccut();
+			String prsf = setprupsf(unit, frend, calcMd);
 			//対象となるカードの属性値をefsz%分アップさせる
 			//そしてsfを計算する-> prsf
 			//後は判定強化と同じ処理。
-
+			//sfの計算メソッドの再定義が必要。
+			//テストメソッドにて計算式確認済み
+			int counter = 0;
+			boolean trunt = false;
+			for(int len = 0;len < unit.length;len++){
+				if(unit[len].gsksha().equals("判定")){
+					trunt = true;
+					counter++;
+				}else if(unit[len].gsksha().equals("パラメーター")){
+					counter++;
+				}else if(unit[len].gsksha().equals("シンクロ")){
+					trunt = true;
+					counter++;
+				}
+			}
+			if(trunt){
+				prsf = settrsf(unit, frend, calcMd);
+				String prupsf = setprupsf(unit, frend, calcMd);
+				String pruptrsf = setpruptrsf(unit, frend, calcMd);
+				int pruptrBS = calcBS(unit, calcMd, pruptrsf);
+				int prBS = calcBS(unit, calcMd, prupsf);
+				int trBS = calcBS(unit, calcMd, prsf);
+				int iBS = calcBS(unit, calcMd, sf);
+				int tmpBS = prBS - iBS;
+				int tmpdfBS = trBS - iBS;
+				double dfBS = pruptrBS - iBS;
+				dfBS = dfBS - tmpdfBS;
+				dfBS = dfBS - tmpBS;//トリックと判定の相乗効果分が残る。
+				dfBS /= counter;//相乗効果分を判定とパラメーターのカードの数だけ割る(判定の方も同様にすれば相乗効果分を余計に足すことがなくなる。)
+				dfBS += tmpBS;//カードがパラメーターアップなのでパラメーターアップ分だけ戻す。
+				double oefsz = dfBS *(calcCd.gaccut()/calcMd.gmusictm());
+				return (int)Math.floor(maxactcnt * prob * oefsz);
+			}else{
+				int prupBS = calcBS(unit, calcMd, prsf);
+				int iBS = calcBS(unit, calcMd, sf);
+				int dfBS = prupBS - iBS;
+				double oefsz = dfBS *(calcCd.gaccut()/calcMd.gmusictm());
+				return (int)Math.floor(maxactcnt * prob * oefsz);
+			}
 		}else if(calcCd.gsksha().equals("シンクロ")){
 			double accut = calcCd.gaccut();
+			double oefsz = 0.0;
 			//対象のカードの中から1枚取得し、ユニットを作成しsfを再計算する。-> sysf
 			//sysfから元のsfを引きあとは判定強化の処理と同一。
+			boolean clctrprupbl = false;
 			List<Card_datas> calcs = new ArrayList<Card_datas>();
 			Card_datas[] syunt = new Card_datas[9];
 			List<Card_datas> calcunit = new ArrayList<Card_datas>();
@@ -290,21 +360,78 @@ class Calc_data{
 				}else{
 					syunt[calcunit.size()] = calcs.get(len);
 				}
+				//判定、パラメーターがあると相乗効果分があるのでその処理のための下準備。
+				int counter = 0;
+				for(int j = 0;j < syunt.length;j++){
+					if(syunt[j].gsksha().equals("判定")){
+						clctrprupbl = true;
+						counter++;
+					}else if(syunt[j].gsksha().equals("パラメーター")){
+						clctrprupbl = true;
+						counter++;
+					}else if(syunt[j].gsksha().equals("シンクロ")){
+						counter++;
+					}
+				}
+				if(clctrprupbl){
+					//判定、パラメーターとの相乗効果分も含んだ計算処理。
+					String tmpsf = setpruptrsf(syunt, frend, calcMd);
+					String trsf = settrsf(syunt, frend, calcMd);
+					String prsf = setprupsf(syunt, frend, calcMd);
+					sf = setUnitsf(syunt, frend, calcMd);
+					int iBS = calcBS(unit, calcMd, sf);
+					int trBS = calcBS(unit, calcMd, trsf);
+					int prBS = calcBS(unit, calcMd, prsf);
+					int allBS = calcBS(unit, calcMd, tmpsf);
+					int exprtmp = allBS - prBS;
+					int extrtmp = allBS - trBS;
+					int exitmp = allBS -iBS;
+					double dfBS = exitmp - extrtmp - exprtmp;//これが相乗効果分。
+					dfBS /= counter;
+					oefsz += dfBS *(calcCd.gaccut()/calcMd.gmusictm());//シンクロなので特に数値を戻す必要なし。
+				}else{
+
+				/*
 				if(calcCd.gptrick() == 1){
 					tempsysf[len] = settrsf(syunt, frend, calcMd);
 				}else{
 					tempsysf[len] = setUnitsf(syunt, frend, calcMd);//シンクロ時のsfを格納させる。
+				}*/
+				tempsysf[len] = setUnitsf(syunt, frend, calcMd);
 				}
+			}
+			if(clctrprupbl){
+				oefsz /= calcs.size();
+				return (int)Math.floor(maxactcnt * prob * oefsz*(accut/calcMd.gmusictm())* calcMd.gmaxcb());
 			}
 			double tmp = 0.0;
 			for (int len = 0; len < calcs.size(); len++) {
 				tmp += calcBS(unit, calcMd, tempsysf[len]);//シンクロ発動時のBSを計算させtmpに合算する。
 			}
-			tmp /= calcs.size();//合算した分で割り、平均を出す。
-			tmp -= calcBS(unit, calcMd, sf);//元の数値を引く。
+			//合算した分で割り、平均を出す。
+			tmp -= calcBS(unit, calcMd, sf)*calcs.size();//元の数値を引く。
 			return (int)Math.floor(maxactcnt * prob * tmp*(accut/calcMd.gmusictm())*calcMd.gmaxcb());
 		}else if(calcCd.gsksha().equals("リピート")){
-
+			List<Card_datas> hits = new ArrayList<Card_datas>();
+			for(int len = 0;len < unit.length;len++){
+				if(unit[len].getgrade().equals(calcCd.getgrade()) && unit[len].getunitnm().equals(calcCd.getunitnm()) && !(unit[len].equals(calcCd))){
+					hits.add(unit[len]);
+				}
+			}
+			for(Card_datas tmp:hits){
+				if(tmp.equals(calcCd)){
+					System.out.println("特技リピートのスコアアップ期待値計算において、予期せぬエラーが発生しました。");
+					String err = new String();
+					throw new NullPointerException(err);
+				}
+			}
+			double tmpexps = 0.0;
+			for(int len = 0;len < hits.size();len++){
+				tmpexps += setsklexp(hits.get(len), calcMd, perper, sf, unit, frend);
+			}
+			tmpexps /= hits.size();
+			double oefsz = tmpexps;
+			return (int)Math.floor(maxactcnt * prob * oefsz);
 		}
 		return -1;
 	}
@@ -566,6 +693,435 @@ class Calc_data{
 				}
 			}
 		}
+		//自ユニットのセンターサブセンター処理 SSRセンターとSRセンター処理できてませんねぇ？！
+		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
+			if (rrity.equals("SSR")) {
+				subcenup = 0.01;
+			} else {
+				subcenup = 0.03;
+			}
+		} else {
+			if (rrity.equals("SSR")) {
+				subcenup = 0.02;
+			} else {
+				subcenup = 0.06;
+			}
+		}
+		if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
+			cenup = 0.09;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
+				|| centersklnm.indexOf("プリンセス") != -1) {
+			if (centersklnm.indexOf("エンジェル") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+					}
+				}
+			} else if (centersklnm.indexOf("エンプレス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+					}
+				}
+			} else if (centersklnm.indexOf("プリンセス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+					}
+				}
+			}
+		} else if (centersklnm.indexOf("スター") != -1) {
+			cenup = 0.07;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else {
+			cenup = 0.06;
+			for (int len = 0; len < unit.length; len++) {
+				tmpsu += sa[len];
+				su[len] = (int) Math.ceil(sa[len] * cenup);
+			}
+		}
+
+		//フレンド処理
+		subcentersklnm = frend.getacskn();
+		centersklnm = frend.getcskin();
+		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
+			subcenup = 0.03;
+		} else {
+			subcenup = 0.06;
+		}
+		if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
+			cenup = 0.09;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					su[len] += (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					su[len] += (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
+				|| centersklnm.indexOf("プリンセス") != -1) {
+			if (centersklnm.indexOf("エンジェル") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+					}
+				}
+			} else if (centersklnm.indexOf("エンプレス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+					}
+				}
+			} else if (centersklnm.indexOf("プリンセス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+					}
+				}
+			}
+		} else if (centersklnm.indexOf("スター") != -1) {
+			cenup = 0.07;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else {
+			cenup = 0.06;
+			for (int len = 0; len < unit.length; len++) {
+				su[len] = (int) Math.ceil(sa[len] * cenup);
+			}
+		}
+
+		int allsu = 0;
+		for (int len = 0; len < 9; len++) {
+			allsu += su[len];
+		}
+		tmpsu += allsu;
+
+		String rtnstr = tmpsu + "," + allsu;
+
+		return rtnstr;
+	}
+
+	public static String setprupsf(Card_datas[] unit,Card_datas frend, Music_data cmdt/*, Boolean trbl*/){
+		//ユニット値Sfを求めるメソッド ユニット値,センタースキル増加分 という文字列を出力する。
+		String subcentersklnm = unit[4].getacskn();
+		String centersklnm = unit[4].getcskin();
+		String rrity = unit[4].grrity();
+		int[] su = new int[9];//Su Status of Unit カードステータスでスクールアイドルスキル増加分も含む。(これを9人分加算するとセンタースキルを省いた場合のユニット数値になる)
+		int[] sa = new int[9];//Sa Status of one Card カードステータスでスクールアイドルスキル増加分を含まない。
+		int veil = 0;
+		int aura = 0;
+		double cenup = 0;
+		double subcenup = 0;
+		int tmpsu = 0;
+		Music_data cmscdt = cmdt;//もしかしたら渡す楽曲データは配列じゃなくて1つだけになるかも…
+
+		//キッスやパフュームを含めたカード値処理(掛け算における切り上げ無し)
+		for (int len = 0; len < 9; len++) {
+			if(cmscdt.gpprty().equals("スマイル")){
+				sa[len] = unit[len].gcsm();
+			}else if(cmscdt.gpprty().equals("ピュア")){
+				sa[len] = unit[len].gcpr();
+			}else{
+				sa[len] = unit[len].gccl();
+			}
+			veil += unit[len].gpveil();
+			aura += unit[len].gpaura();
+			sa[len] += unit[len].gpkiss() * 200.0 + unit[len].gppfm() * 450.0;
+		}
+
+		//SIS処理
+		for (int len = 0; len < 9; len++) {
+			if (unit[len].gpcross() != 0 || unit[len].gpring() != 0) {
+				sa[len] += Math.ceil(sa[len] * 0.018) * aura + Math.ceil(sa[len] * 0.024) * veil
+						+ Math.ceil(sa[len] * 0.16) * unit[len].gpcross()
+						+ Math.ceil(sa[len] * 0.10) * unit[len].gpring();
+			} else {
+				sa[len] += Math.ceil(sa[len] * 0.018) * aura + Math.ceil(sa[len] * 0.024) * veil;
+			}
+		}
+
+		double upp = 0.0;
+		Card_datas tmp = new Card_datas();
+		for(int len = 0;len < unit.length;len++){
+			if(unit[len].gsksha().equals("パラメーター")){
+				upp = (unit[len].gefsz()/100.0)+1.0;
+				tmp = unit[len];
+			}
+		}
+		if(tmp != null){
+			for(int len = 0;len < unit.length;len++){
+				if(unit[len].getgrade().equals(tmp.getgrade()) && unit[len].getunitnm().equals(tmp.getunitnm())){
+				//学年とメインユニット名が等しければ。
+					sa[len] *= upp;
+				}
+			}
+		}
+
+		//自ユニットのセンターサブセンター処理 SSRセンターとSRセンター処理できてませんねぇ？！
+		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
+			if(rrity.equals("SSR")){
+				subcenup = 0.01;
+			}else{
+				subcenup = 0.03;
+			}
+		} else {
+			if (rrity.equals("SSR")) {
+				subcenup = 0.02;
+			} else {
+				subcenup = 0.06;
+			}
+		}
+		if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
+			cenup = 0.09;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					tmpsu += sa[len];
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
+				|| centersklnm.indexOf("プリンセス") != -1) {
+			if (centersklnm.indexOf("エンジェル") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+					}
+				}
+			} else if (centersklnm.indexOf("エンプレス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+					}
+				}
+			} else if (centersklnm.indexOf("プリンセス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+					}
+				}
+			}
+		}else if (centersklnm.indexOf("スター") != -1){
+				cenup = 0.07;
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						tmpsu += sa[len];
+						su[len] = (int) Math.ceil(sa[len] * cenup);
+					}
+				}
+		} else {
+			cenup = 0.06;
+			for(int len = 0; len < unit.length; len++){
+				tmpsu += sa[len];
+				su[len] = (int) Math.ceil(sa[len] * cenup);
+			}
+		}
+
+		//フレンド処理
+		subcentersklnm = frend.getacskn();
+		centersklnm = frend.getcskin();
+		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
+			subcenup = 0.03;
+		} else {
+			subcenup = 0.06;
+		}
+		if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
+			cenup = 0.09;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					su[len] += (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					su[len] += (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
+				|| centersklnm.indexOf("プリンセス") != -1) {
+			if (centersklnm.indexOf("エンジェル") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+					}
+				}
+			} else if (centersklnm.indexOf("エンプレス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+					}
+				}
+			} else if (centersklnm.indexOf("プリンセス") != -1) {
+				for (int len = 0; len < unit.length; len++) {
+					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+								+ (int) Math.ceil(sa[len] * subcenup);
+					} else {
+						su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+					}
+				}
+			}
+		} else if (centersklnm.indexOf("スター") != -1) {
+			cenup = 0.07;
+			for (int len = 0; len < unit.length; len++) {
+				if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
+					su[len] = (int) Math.ceil(sa[len] * cenup) + (int) Math.ceil(sa[len] * subcenup);
+				} else {
+					su[len] = (int) Math.ceil(sa[len] * cenup);
+				}
+			}
+		} else {
+			cenup = 0.06;
+			for (int len = 0; len < unit.length; len++) {
+				su[len] = (int) Math.ceil(sa[len] * cenup);
+			}
+		}
+
+		int allsu = 0;
+		for (int len = 0; len < 9; len++) {
+			allsu += su[len];
+		}
+		tmpsu += allsu;
+		String rtnstr = tmpsu + "," + allsu;
+
+		return rtnstr;
+	}
+
+	public static String setpruptrsf(Card_datas[] unit, Card_datas frend, Music_data cmdt/*, Boolean trbl*/) {
+		//トリック発動時のユニット値rSfを求めるメソッド ユニット値,センタースキル増加分 という文字列を出力する。
+		String subcentersklnm = unit[4].getacskn();
+		String centersklnm = unit[4].getcskin();
+		String rrity = unit[4].grrity();
+		int[] su = new int[9];//Su Status of Unit カードステータスでスクールアイドルスキル増加分も含む。(これを9人分加算するとセンタースキルを省いた場合のユニット数値になる)
+		int[] sa = new int[9];//Sa Status of one Card カードステータスでスクールアイドルスキル増加分を含まない。
+		int veil = 0;
+		int aura = 0;
+		double cenup = 0;
+		double subcenup = 0;
+		int tmpsu = 0;
+		Music_data cmscdt = cmdt;//もしかしたら渡す楽曲データは配列じゃなくて1つだけになるかも…
+
+		//キッスやパフュームを含めたカード値処理(掛け算における切り上げ無し)
+		for (int len = 0; len < 9; len++) {
+			if (cmscdt.gpprty().equals("スマイル")) {
+				sa[len] = unit[len].gcsm();
+			} else if (cmscdt.gpprty().equals("ピュア")) {
+				sa[len] = unit[len].gcpr();
+			} else {
+				sa[len] = unit[len].gccl();
+			}
+			veil += unit[len].gpveil();
+			aura += unit[len].gpaura();
+			sa[len] += unit[len].gpkiss() * 200.0 + unit[len].gppfm() * 450.0;
+		}
+
+		//SIS処理
+		for (int len = 0; len < 9; len++) {
+			if(unit[len].gptrick() == 0){
+				if (unit[len].gpcross() != 0 || unit[len].gpring() != 0) {
+					sa[len] += Math.ceil(sa[len] * 0.018) * aura + Math.ceil(sa[len] * 0.024) * veil
+							+ Math.ceil(sa[len] * 0.16) * unit[len].gpcross()
+							+ Math.ceil(sa[len] * 0.10) * unit[len].gpring();
+				} else {
+					sa[len] += Math.ceil(sa[len] * 0.018) * aura + Math.ceil(sa[len] * 0.024) * veil;
+				}
+			}else{
+				if (unit[len].gpcross() != 0 || unit[len].gpring() != 0) {
+					sa[len] += Math.ceil(sa[len] * 0.16 * (1+0.018*aura) * (1+0.024*veil)) * unit[len].gpcross()
+							+ Math.ceil(sa[len] * 0.10 * (1+0.018*aura) * (1+0.024*veil)) * unit[len].gpring()
+							+ Math.ceil(sa[len] * 0.33 * (1+0.018*aura) * (1+0.024*veil));
+							//ringやcrossの処理考えてなかった…＼(^o^)／ｵﾜﾀ
+				} else {
+					sa[len] +=  Math.ceil(sa[len]*0.33 * (1+0.018*aura) * (1+0.024*veil));
+				}
+			}
+		}
+		double upp = 0.0;
+		Card_datas tmp = new Card_datas();
+		for(int len = 0;len < unit.length;len++){
+			if(unit[len].gsksha().equals("パラメーター")){
+				upp = (unit[len].gefsz()/100.0)+1.0;
+				tmp = unit[len];
+			}
+		}
+		if(tmp != null){
+			for(int len = 0;len < unit.length;len++){
+				if(unit[len].getgrade().equals(tmp.getgrade()) && unit[len].getunitnm().equals(tmp.getunitnm())){
+				//学年とメインユニット名が等しければ。
+					sa[len] *= upp;
+				}
+			}
+		}
+
 		//自ユニットのセンターサブセンター処理 SSRセンターとSRセンター処理できてませんねぇ？！
 		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
 			if (rrity.equals("SSR")) {
