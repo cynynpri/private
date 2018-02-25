@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -103,10 +103,62 @@ namespace SIFUnitCalc
                 if (checkBox61.Checked == true) frsubcu[6] = 1;
                 if (checkBox62.Checked == true) frsubcu[7] = 1;
                 if (checkBox63.Checked == true) frsubcu[8] = 1;
-                for (int len = 0; len < propertys.Length; len++)
+                int[] wink = new int[9];
+                if (wink1.Checked == true) wink[0] = 1;
+                if (wink2.Checked == true) wink[1] = 1;
+                if (wink3.Checked == true) wink[2] = 1;
+                if (wink4.Checked == true) wink[3] = 1;
+                if (wink5.Checked == true) wink[4] = 1;
+                if (wink6.Checked == true) wink[5] = 1;
+                if (wink7.Checked == true) wink[6] = 1;
+                if (wink8.Checked == true) wink[7] = 1;
+                if (wink9.Checked == true) wink[8] = 1;
+                int[] trill = new int[9];
+                if (trill1.Checked == true) trill[0] = 1;
+                if (trill2.Checked == true) trill[1] = 1;
+                if (trill3.Checked == true) trill[2] = 1;
+                if (trill4.Checked == true) trill[3] = 1;
+                if (trill5.Checked == true) trill[4] = 1;
+                if (trill6.Checked == true) trill[5] = 1;
+                if (trill7.Checked == true) trill[6] = 1;
+                if (trill8.Checked == true) trill[7] = 1;
+                if (trill9.Checked == true) trill[8] = 1;
+                int[] blooms = new int[9];
+                if (bloom1.Checked == true) blooms[0] = 1;
+                if (bloom2.Checked == true) blooms[1] = 1;
+                if (bloom3.Checked == true) blooms[2] = 1;
+                if (bloom4.Checked == true) blooms[3] = 1;
+                if (bloom5.Checked == true) blooms[4] = 1;
+                if (bloom6.Checked == true) blooms[5] = 1;
+                if (bloom7.Checked == true) blooms[6] = 1;
+                if (bloom8.Checked == true) blooms[7] = 1;
+                if (bloom9.Checked == true) blooms[8] = 1;
+                int[] image = new int[9];
+                if (image1.Checked == true) image[0] = 1;
+                if (image2.Checked == true) image[1] = 1;
+                if (image3.Checked == true) image[2] = 1;
+                if (image4.Checked == true) image[3] = 1;
+                if (image5.Checked == true) image[4] = 1;
+                if (image6.Checked == true) image[5] = 1;
+                if (image7.Checked == true) image[6] = 1;
+                if (image8.Checked == true) image[7] = 1;
+                if (image9.Checked == true) image[8] = 1;
+                int[] nonettes = new int[9];
+                if (nonette1.Checked == true) nonettes[0] = 1;
+                if (nonette2.Checked == true) nonettes[1] = 1;
+                if (nonette3.Checked == true) nonettes[2] = 1;
+                if (nonette4.Checked == true) nonettes[3] = 1;
+                if (nonette5.Checked == true) nonettes[4] = 1;
+                if (nonette6.Checked == true) nonettes[5] = 1;
+                if (nonette7.Checked == true) nonettes[6] = 1;
+                if (nonette8.Checked == true) nonettes[7] = 1;
+                if (nonette9.Checked == true) nonettes[8] = 1;
+                int nonette = 0;
+                int bloom = 0;
+                for (int len = 0; len < 9; len++)
                 {
-                    propertys[len] += 200 * kiss[len];
-                    propertys[len] += 450 * perfume[len];
+                    bloom += blooms[len];
+                    nonette += nonettes[len];
                 }
                 int[] trpprty = new int[9];
                 int aura = Decimal.ToInt32(numericUpDown5.Value);
@@ -117,14 +169,21 @@ namespace SIFUnitCalc
                     if (trick[len] != 0)
                     {
                         trpprty[len] = propertys[len];
-                        trpprty[len] += (int)Math.Ceiling(propertys[len] * (0.33 * trick[len] + 0.10 * ring[len] + 0.16 * cross[len]) * (1 + 0.024 * veil) * (1 + 0.018 * aura));
+                        trpprty[len] += (int)Math.Ceiling(propertys[len] * (0.33 * trick[len] + 0.10 * ring[len] + 0.16 * cross[len] + 0.28 * trill[len] + 0.29 * image[len]) * (1 + 0.024 * veil) * (1 + 0.018 * aura) * (1+0.04 * bloom) * (1+0.042 * nonette));
+                        trpprty[len] += 200 * kiss[len];
+                        trpprty[len] += 450 * perfume[len];
+                        trpprty[len] += 1400 * wink[len];
                         clctrbl = true;
                     }
                     else
                     {
-                        trpprty[len] += (int)Math.Ceiling(propertys[len] * 0.10 * ring[len]) + (int)Math.Ceiling(propertys[len] * 0.16 * cross[len]) + (int)Math.Ceiling(propertys[len] * 0.024) * veil + (int)Math.Ceiling(propertys[len] * 0.018) * aura;
+                        trpprty[len] += (int)Math.Ceiling(propertys[len] * 0.10 * ring[len]) + (int)Math.Ceiling(propertys[len] * 0.16 * cross[len]) + (int)Math.Ceiling(propertys[len] * 0.28 * trill[len]) +(int)Math.Ceiling(propertys[len] * 0.29 * image[len]) + (int)Math.Ceiling(propertys[len] * 0.024) * veil + (int)Math.Ceiling(propertys[len] * 0.018) * aura + (int)Math.Ceiling(propertys[len] * 0.04) * bloom  + (int)Math.Ceiling(propertys[len] * 0.042) * nonette;
                     }
-                    propertys[len] += (int)Math.Ceiling(propertys[len] * 0.10 * ring[len]) + (int)Math.Ceiling(propertys[len] * 0.16 * cross[len]) + (int)Math.Ceiling(propertys[len] * 0.024) * veil + (int)Math.Ceiling(propertys[len] * 0.018) * aura;
+                    propertys[len] += (int)Math.Ceiling(propertys[len] * 0.10 * ring[len]) + (int)Math.Ceiling(propertys[len] * 0.16 * cross[len]) + (int)Math.Ceiling(propertys[len] * 0.28 * trill[len]) + (int)Math.Ceiling(propertys[len] * 0.29 * image[len]) + (int)Math.Ceiling(propertys[len] * 0.024) * veil + (int)Math.Ceiling(propertys[len] * 0.018) * aura + (int)Math.Ceiling(propertys[len] * 0.04) * bloom + (int)Math.Ceiling(propertys[len] * 0.042) * nonette;
+                    propertys[len] += 200 * kiss[len];
+                    propertys[len] += 450 * perfume[len];
+                    propertys[len] += 1400 * wink[len];
+
                 }
                 double dcu = 0.0;
                 double dscu = 0.0;
@@ -164,8 +223,8 @@ namespace SIFUnitCalc
                     }
                     unitsm += sumcu;
                     trunitsm += trsumcu;
-                    result_lbl.Text = "ƒ†ƒjƒbƒg’l:" + unitsm + "+" + sumcu;
-                    trrslt_lbl.Text = "”»’è‹­‰»Žž‚Ìƒ†ƒjƒbƒg’l:" + trunitsm;
+                    result_lbl.Text = "ãƒ¦ãƒ‹ãƒƒãƒˆå€¤:" + unitsm + "+" + sumcu;
+                    trrslt_lbl.Text = "åˆ¤å®šå¼·åŒ–æ™‚ã®ãƒ¦ãƒ‹ãƒƒãƒˆå€¤:" + trunitsm;
                     return;
                 }
                 else
@@ -215,18 +274,18 @@ namespace SIFUnitCalc
                     }
                     unitsm += sumcu;
                     trunitsm += trsumcu;
-                    result_lbl.Text = "ƒ†ƒjƒbƒg’l:" + unitsm + "+" + sumcu;
-                    trrslt_lbl.Text = "”»’è‹­‰»Žž‚Ìƒ†ƒjƒbƒg’l:" + trunitsm;
+                    result_lbl.Text = "ãƒ¦ãƒ‹ãƒƒãƒˆå€¤:" + unitsm + "+" + sumcu;
+                    trrslt_lbl.Text = "åˆ¤å®šå¼·åŒ–æ™‚ã®ãƒ¦ãƒ‹ãƒƒãƒˆå€¤:" + trunitsm;
                     return;
                 }
             }
             catch (FormatException)
             {
-                result_lbl.Text = "”’l‚ð“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B";
+                result_lbl.Text = "æ•°å€¤ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚";
             }
             catch (OverflowException)
             {
-                result_lbl.Text = "³‚µ‚¢”’l‚ð“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B";
+                result_lbl.Text = "æ­£ã—ã„æ•°å€¤ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„ã€‚";
             }
         }
 
