@@ -178,6 +178,7 @@ namespace SIFUnitCalc
                     else
                     {
                         trpprty[len] += (int)Math.Ceiling(propertys[len] * 0.10 * ring[len]) + (int)Math.Ceiling(propertys[len] * 0.16 * cross[len]) + (int)Math.Ceiling(propertys[len] * 0.28 * trill[len]) +(int)Math.Ceiling(propertys[len] * 0.29 * image[len]) + (int)Math.Ceiling(propertys[len] * 0.024) * veil + (int)Math.Ceiling(propertys[len] * 0.018) * aura + (int)Math.Ceiling(propertys[len] * 0.04) * bloom  + (int)Math.Ceiling(propertys[len] * 0.042) * nonette;
+                        trpprty[len] += 200 * kiss[len] + 450 * perfume[len] + 1400 * wink[len];
                     }
                     propertys[len] += (int)Math.Ceiling(propertys[len] * 0.10 * ring[len]) + (int)Math.Ceiling(propertys[len] * 0.16 * cross[len]) + (int)Math.Ceiling(propertys[len] * 0.28 * trill[len]) + (int)Math.Ceiling(propertys[len] * 0.29 * image[len]) + (int)Math.Ceiling(propertys[len] * 0.024) * veil + (int)Math.Ceiling(propertys[len] * 0.018) * aura + (int)Math.Ceiling(propertys[len] * 0.04) * bloom + (int)Math.Ceiling(propertys[len] * 0.042) * nonette;
                     propertys[len] += 200 * kiss[len];
