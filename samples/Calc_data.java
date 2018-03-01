@@ -1739,7 +1739,7 @@ class Calc_data{
 																			tempprob *= unitprbs[8][ilane];
 																			sumprob += tempprob;
 																			steps++;
-																			tempprob = 0.0;
+																			tempprob /= unitprbs[8][ilane];
 																			if(sumprob > discriminant && unitprbs[8][ilane] > discriminant){
 																				tmppivot[0] = alane;
 																				tmppivot[1] = blane;
@@ -1866,7 +1866,7 @@ class Calc_data{
 																				tempprob *= untupprbs[8][ilane];
 																				sumprob += tempprob;
 																				steps++;
-																				tempprob = 0.0;
+																				tempprob /= untupprbs[8][ilane];
 																				if (sumprob > discriminant
 																						&& untupprbs[8][ilane] > discriminant) {
 																					tmppivot[0] = alane;

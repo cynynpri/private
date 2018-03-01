@@ -509,7 +509,7 @@ class Test{
 										  tempprob *= rprobs[3][i];
 										  sumprob += tempprob;
 										  steps++;
-										  tempprob = 0.0;
+										  tempprob /= rprobs[3][i];
 										  //System.out.println("step i");
 										  //System.out.println("sumprob = "+sumprob);
 										  if(sumprob > k && rprobs[3][i] > k){
