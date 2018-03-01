@@ -15,7 +15,7 @@ GUITest.javaはGUI本体になります。実行するとキャラクターデ�
 SIF_SCsettings.iniは中身無しのtxtファイルなので実行する前に作成してから起動してもかまいません。  
 GUITest.javaについては現在起動してもスコア計算ができません。(2018/03/01現在)  
 
-コンパイルしても実行可能ではないもの  
+コンパイルしても実行できないもの  
 ・Card\_datas.java  カードデータを取り扱うクラスになります。  
 ・Skill\_data.java  Datalist/\*\*sd.csvを読み込むクラスになります。  
 ・Music\_data.java  Datalist/FullMusicData.csvを読み込むクラスになります。  
