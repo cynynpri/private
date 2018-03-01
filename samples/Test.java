@@ -3,9 +3,11 @@ package samples;
 import java.math.*;
 import java.util.*;
 
+import com.sun.javafx.runtime.SystemProperties;
+
 class Test{
 	public static double lanescr(int[] note,double base){
-		return note[0]*base+note[1]*1.25*base+note[2]*1.10*base+note[3]*1.10*1.25*base+note[4]*1.15*base+note[5]*1.15*1.25*base+note[6]*1.20*base+note[7]*1.20*1.25*base+note[8]*1.25*base+note[9]*1.25*1.25*base;
+		return note[0]*Math.floor(base)+note[1]*Math.floor(1.25*base)+note[2]*Math.floor(1.10*base)+note[3]*Math.floor(1.10*1.25*base)+note[4]*Math.floor(1.15*base)+note[5]*Math.floor(1.15*1.25*base)+note[6]*Math.floor(1.20*base)+note[7]*Math.floor(1.20*1.25*base)+note[8]*Math.floor(1.25*base)+note[9]*Math.floor(1.25*1.25*base);
 	}
 	public static String setUnitsf(Card_datas[] unit, Card_datas frend){
 		//スコア計算におけるBaseを計算するメソッドとする。
@@ -264,6 +266,7 @@ class Test{
 	}
 
 	public static void main(String[] args){
+		long start = System.currentTimeMillis();
 		int musictm = 98;//楽曲時間
 		Card_datas[] unit = new Card_datas[9];
 		unit[0] = new Card_datas(1, "桜内梨子", "スマイル", "UR", "私の声聞こえますか", true, 4, 4, "スコア", "リズムアイコン", 23, 47, 0.0, 1580,
@@ -306,6 +309,7 @@ class Test{
 		double[] probs = {0.47,0.43,0.37,0.23,0.44,0.44,0.49,0.43,0.17};//ここの即値をCard_datasだけで表現できたらこのjavaファイルの役目は終わり
 		int[] runskl = {21,22,26,33,23,17,21,23,57};
 		int[] effects = {1580,1670,780,0,5,1415,5,1160,1290};
+		//int[] unitpivots = {1,0,8,7,5,6,4,2,3};
 		effects[0] *= 2.5;
 		effects[1] *= 2.5;
 		effects[5] *= 2.5;
@@ -325,45 +329,21 @@ class Test{
 			rprobs[len] = ar_rprobs.get(len);
 		}
 		int[] rpvt = new int[9];
-		//int[] pivot = new int[9];
+		int[] pivot = new int[9];
+		for(int len = 0;len < 9;len++){
+			rpvt[len] = 0;
+			pivot[len] = 0;
+		}
 		//int sumeff = 0;
 		int tempscr = 0;
 		long steps = 0;
 		//ArrayList<Double> al_cprbs = new ArrayList<Double>();
 		//kを超えるまでの確率分布を作成する(probでやってるような処理。※逆からなので0+=probとなる。);
 		double sumprob = 0.0;
-		/*double[] ps = new double[9];
-		for(int len = 0;len < rprobs[0].length;len++){
-			ps[0] += rprobs[0][len];
-		}
-		for(int len = 0;len < rprobs[8].length;len++){
-			ps[8] += rprobs[8][len];
-		}
-		for(int len = 0;len < rprobs[7].length;len++){
-			ps[7] += rprobs[7][len];
-		}
-		for(int len = 0;len < rprobs[5].length;len++){
-			ps[5] += rprobs[5][len];
-		}
-		for(int len = 0;len < rprobs[6].length;len++){
-			ps[6] += rprobs[6][len];
-		}
-		for(int len = 0;len < rprobs[4].length;len++){
-			ps[4] += rprobs[4][len];
-		}
-		for(int len = 0;len < rprobs[2].length;len++){
-			ps[2] += rprobs[2][len];
-		}
-		for(int len = 0;len < rprobs[3].length;len++){
-			ps[3] += rprobs[3][len];
-		}
-		for(int len = 0;len < 9;len++){
-			System.out.println("ps["+len+"] = " + ps[len]);
-		}
-		double temp = 0.0;*/
-		label:for(int a = rprobs[1].length-1;a > Math.floor((rprobs[1].length-1)*probs[1]);a--){
+		double ansprob = 0.0;
+		//label:for(int a = rprobs[1].length-1;a > Math.floor((rprobs[1].length-1)*probs[1]);a--){
 			/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。 */
-			for(int b = rprobs[0].length-1;b > Math.floor((rprobs[0].length-1)*probs[0]);b--){
+			//for(int b = rprobs[0].length-1;b > Math.floor((rprobs[0].length-1)*probs[0]);b--){
 				/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。 */
 				/*temp = sumprob;
 				temp += rprobs[1][a] * ps[0] * ps[8] * ps[7] * ps[5] * ps[6] * ps[4] * ps[2] * ps[3];
@@ -374,7 +354,7 @@ class Test{
 					a--;
 					break;
 				}*/
-				for(int c = rprobs[8].length-1;c > Math.floor((rprobs[8].length-1)*probs[8]);c--){
+				//for(int c = rprobs[8].length-1;c > Math.floor((rprobs[8].length-1)*probs[8]);c--){
 					/*  gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
 					 */
 					/*temp = sumprob;
@@ -386,7 +366,7 @@ class Test{
 						b--;
 						break;
 					}*/
-					for(int d = rprobs[7].length-1;d > Math.floor((rprobs[7].length-1)*probs[7]);d--){
+					//for(int d = rprobs[7].length-1;d > Math.floor((rprobs[7].length-1)*probs[7]);d--){
 						/* gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
 						 */
 						/*temp = sumprob;
@@ -398,7 +378,7 @@ class Test{
 							c--;
 							break;
 						}*/
-						for(int e = rprobs[5].length-1;e > Math.floor((rprobs[5].length-1)*probs[5]);e--){
+						//for(int e = rprobs[5].length-1;e > Math.floor((rprobs[5].length-1)*probs[5]);e--){
 							/* gのコメント参照ループを回さずに確率分布を加算し、次のループへ。
 							 */
 							/*temp = sumprob;
@@ -410,7 +390,7 @@ class Test{
 								d--;
 								break;
 							}*/
-							for(int f = rprobs[6].length-1;f > Math.floor((rprobs[6].length-1)*probs[6]);f--){
+							//for(int f = rprobs[6].length-1;f > Math.floor((rprobs[6].length-1)*probs[6]);f--){
 								/* gのコメント参照 ループを回さずに確率分布を加算し、次のループへ。
 								 */
 								/*temp = sumprob;
@@ -422,7 +402,7 @@ class Test{
 									e--;
 									break;
 								}*/
-								for(int g = rprobs[4].length-1;g > Math.floor((rprobs[4].length-1)*probs[4]);g--){
+								//for(int g = rprobs[4].length-1;g > Math.floor((rprobs[4].length-1)*probs[4]);g--){
 									/* if(sumprob += 1ループして得られる確率分布の全体 < k){
 										sumprobをgの1ループ分だけ足し算して、
 										fのループを1つ進める。//このように処理するとfor文を回す回数そのものが減り、計算回数も減り、計算時間も減る。
@@ -437,7 +417,7 @@ class Test{
 										f--;
 										break;
 									}*/
-									for(int h = rprobs[2].length-1;h > Math.floor((rprobs[2].length-1)*probs[2]);h--){
+									//for(int h = rprobs[2].length-1;h > Math.floor((rprobs[2].length-1)*probs[2]);h--){
 										/*if(sumprob += rprobs[1][a] * ... * rprobs[2]の確率分布全体 * rprobs[3][9] < k ){
 											sumprobをhの1ループ分だけ足し算して、
 											hのループを1つ進める．
@@ -452,23 +432,23 @@ class Test{
 											g--;
 											break;
 										}*/
-										for(int i = rprobs[3].length-1;i > Math.floor((rprobs[3].length-1)*probs[3]);i--){
+										//for(int i = rprobs[3].length-1;i > Math.floor((rprobs[3].length-1)*probs[3]);i--){
 											/*temp = sumprob;
 											temp += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h] * ps[3];
 											if(temp < k){
 												sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h] * ps[3];
 												break;
 											}*/
-											sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d]
-													* rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h]
-													* rprobs[3][i];
-											steps++;
+											//sumprob += rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d]
+											//		* rprobs[5][e] * rprobs[6][f] * rprobs[4][g] * rprobs[2][h]
+											//		* rprobs[3][i];
+											//steps++;
 											//System.out.println("sumprob = "+sumprob);
 											/*if(sumprob += rprobs[1][a] * ... * rprobs[3]の確率分布全体 < k){
 												sumprobをiの1ループ文だけ足し算して、
 												hのループを一つ進める.
 											}*/
-											if(sumprob > k && rprobs[1][a] > k && rprobs[0][b] > k && rprobs[8][c] > k && rprobs[7][d] > k && rprobs[5][e] > k && rprobs[6][f] > k && rprobs[4][g] > k && rprobs[2][h] > k && rprobs[3][i] > k){
+											/*if(sumprob > k && rprobs[1][a] > k && rprobs[0][b] > k && rprobs[8][c] > k && rprobs[7][d] > k && rprobs[5][e] > k && rprobs[6][f] > k && rprobs[4][g] > k && rprobs[2][h] > k && rprobs[3][i] > k){
 												rpvt[1] = a;
 												rpvt[0] = b;
 												rpvt[8] = c;
@@ -492,18 +472,135 @@ class Test{
 					}
 				}
 			}
+		}*/
+		double dk = k/10.0;
+		double tempprob = 0.0;
+		int tempef = 0;
+		/*for(double d:rprobs[8]){
+			System.out.println("d is "+d);
+		}*/
+		for(int a = rprobs[1].length -1;a >= 0;a--){
+		  if(rprobs[1][a] > dk && a >= (int)Math.floor(probs[1] * runskl[1])-4 && rprobs[1][a] > dk){
+			tempprob = rprobs[1][a];
+			for(int b = rprobs[0].length -1 ; b >= 0;b--){
+			  if(tempprob * rprobs[0][b] > dk && b >= (int)Math.floor(probs[0]*runskl[0])-4 && rprobs[0][b] > dk){
+				tempprob *= rprobs[0][b];
+				for(int c = rprobs[8].length-1;c >= 0;c--){
+				  //System.out.println("sumprob = "+sumprob);
+				  if(tempprob * rprobs[8][c] > dk && c >= (int)Math.floor(probs[8]*runskl[8])-4 && rprobs[8][c] > dk){
+					tempprob *= rprobs[8][c];
+					for(int d = rprobs[7].length-1;d >= 0;d--){
+					  if(tempprob * rprobs[7][d] > dk && d >= (int)Math.floor(probs[7]*runskl[7])-4 && rprobs[7][d] > dk){
+						tempprob *= rprobs[7][d];
+						for(int e = rprobs[5].length-1;e >= 0;e--){
+						  //System.out.println("sumprob ="+sumprob);
+						  if(tempprob * rprobs[5][e] > dk && e >= (int)Math.floor(probs[5]*runskl[5])-4 && rprobs[5][e] > dk){
+							tempprob *= rprobs[5][e];
+							for(int f = rprobs[6].length-1;f >= 0;f--){
+							  if(tempprob * rprobs[6][f] > dk && f >= (int)Math.floor(probs[6]*runskl[6])-4 && rprobs[6][f] > dk){
+								tempprob *= rprobs[6][f];
+								for(int g = rprobs[4].length-1;g >= 0;g--){
+								  if(tempprob * rprobs[4][g] > dk && g >= (int)Math.floor(probs[4]*runskl[4])-4 && rprobs[4][g] > dk){
+									tempprob *= rprobs[4][g];
+									for(int h = rprobs[2].length-1;h >= 0;h--){
+									  if(tempprob * rprobs[2][h] > dk && h >= (int)Math.floor(probs[2]*runskl[2])-4 && rprobs[2][h] > dk){
+										tempprob *= rprobs[2][h];
+										for(int i = rprobs[3].length-1;i >= 0;i--){
+										  tempprob *= rprobs[3][i];
+										  sumprob += tempprob;
+										  steps++;
+										  tempprob = 0.0;
+										  //System.out.println("step i");
+										  //System.out.println("sumprob = "+sumprob);
+										  if(sumprob > k && rprobs[3][i] > k){
+											//System.out.println("sumprob is "+ sumprob);
+											pivot[1] = a;
+											pivot[0] = b;
+											pivot[8] = c;
+											pivot[7] = d;
+											pivot[5] = e;
+											pivot[6] = f;
+											pivot[4] = g;
+											pivot[2] = h;
+											pivot[3] = i;
+											//tempscr = 0;
+											for(int j = 0;j < 9;j++){
+											  tempef += effects[j] * pivot[j];
+											}
+											//System.out.println("tempscr = "+ tempscr);
+											//System.out.println("tempef = "+tempef);
+											if(tempef > tempscr){
+											  //System.out.println("get answer.");
+											  ansprob = sumprob;
+											  tempscr = tempef;
+											  rpvt[1] = a;  rpvt[0] = b;  rpvt[8] = c;
+											  rpvt[7] = d;  rpvt[5] = e;  rpvt[6] = f;
+											  rpvt[4] = g;  rpvt[2] = h;  rpvt[3] = i;
+											}
+											tempef = 0;
+										  }
+										}
+									  }else{
+									  steps += rprobs[3].length;
+									  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e]*rprobs[6][f]*rprobs[4][g]*rprobs[2][h];
+									  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g];
+									  }
+									}
+								  }else{
+								  steps += rprobs[2].length * rprobs[3].length;
+								  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e]*rprobs[6][f]*rprobs[4][g];
+								  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f];
+								  }
+								}
+							  }else{
+							  steps += rprobs[4].length * rprobs[2].length * rprobs[3].length;
+							  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e]*rprobs[6][f];
+							  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e];
+							  }
+							}
+						  }else{
+						  steps += rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
+						  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e];
+						  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d];
+						  }
+						}
+					  }else{
+					  steps += rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
+					  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d];
+					  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c];
+					  }
+					}
+				  }else{
+				  steps += rprobs[7].length * rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
+				  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c];
+				  tempprob = rprobs[1][a] * rprobs[0][b];
+				  }
+				}
+			  }else{
+			  steps += rprobs[8].length * rprobs[7].length * rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
+			  sumprob = rprobs[1][a]*rprobs[0][b];
+			  tempprob = rprobs[1][a];
+			  }
+			}
+		  }else{
+		  steps += rprobs[0].length * rprobs[8].length * rprobs[7].length * rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
+		  sumprob = rprobs[1][a];
+		  tempprob = 0.0;
+		  }
 		}
 		for(int len = 0;len < 9;len++){
-			System.out.println(rpvt[len]);
+			System.out.println(unit[len].grrity()+":"+unit[len].getname()+":"+unit[len].getskinm()+":スキル発動回数:"+rpvt[len] +":発生確率("+(rprobs[len][rpvt[len]]*100)+"%)");
 		}
-		System.out.println("特技スコアアップ期待値:"+tempscr+"("+sumprob*100+"%)");
+		System.out.println("楽曲名:海岸通りで待ってるよ");
+		System.out.println("特技スコアアップ期待値:"+tempscr+"("+ansprob*100+"%)");
 		System.out.println("計算した数値が条件を満たすまでに計算がループした回数:"+steps);
 		System.out.println("ベーススコア計算");
 		unit[2].spcross(1); unit[2].spaura(1);
 		unit[3].spcross(1); unit[3].spaura(1);
 		String sfstr = setUnitsf(unit,frend);
-		System.out.println("ユニット値:"+sfstr);
 		int unitsf = Integer.parseInt(sfstr.split(",",0)[0]);
+		sfstr = sfstr.replaceAll(",","+");
+		System.out.println("ユニット値:" + sfstr);
 		double base = unitsf / 80.0;
 		int sumscr = 0;
 		double a = 0.0;
@@ -540,7 +637,9 @@ class Test{
 		sumscr = (int)Math.floor(a+b+c+d+e+f+g+h+i);
 		System.out.println("ベーススコア:"+sumscr);
 		sumscr += tempscr;
-		System.out.println("スコア期待値："+sumscr+"：このスコアを超えるスコアが出る確率は"+sumprob*100+"%");
-		System.out.println("計算終了。");
+		System.out.println("スコア期待値："+sumscr+"：このスコアを超えるスコアが出る確率は"+ansprob*100+"%");
+		System.out.println("sumprob is "+sumprob*100+"%");
+		long end = System.currentTimeMillis();
+		System.out.println("計算終了。計算に掛かった時間は"+(end-start)+"msです。");
 	}
 }
