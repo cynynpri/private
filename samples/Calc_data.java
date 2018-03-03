@@ -15,8 +15,11 @@ class Calc_data{
 	private int upr;//ユニットピュア値
 	private int ucl;//ユニットクール値*/
 	private double regular_probably;
+	private double up_regular_probably;
 	private int skill_up_score;
+	private int probably_up_skillupscore;
 	private int base_score;
+	private long calculation_time;
 
 	/*public static ArrayList<Card_datas[]> setUnitlist(ArrayList<Card_datas> cdata,String pprty,int maxnotes){
 		int max = cdata.size();
@@ -48,6 +51,52 @@ class Calc_data{
 
 		return null;
 	}*/
+	public Calc_data(){
+		super();
+	}
+	//---------------------------------------------------------
+	final public void setregular_probably(double regular_probably){
+		this.regular_probably = regular_probably;
+	}
+	final public double getregular_probably(){
+		return regular_probably;
+	}
+	//---------------------------------------------------------
+	final public void set_up_regular_probably(double up_regular_probably){
+		this.up_regular_probably = up_regular_probably;
+	}
+	final public double get_up_regular_probably(){
+		return up_regular_probably;
+	}
+	//---------------------------------------------------------
+	final public void setskill_up_score(int skill_up_score){
+		this.skill_up_score = skill_up_score;
+	}
+	final public int getskill_up_score(){
+		return skill_up_score;
+	}
+	//---------------------------------------------------------
+	final public void set_probably_up_skillupscore(int probably_up_skillupscore){
+		this.probably_up_skillupscore = probably_up_skillupscore;
+	}
+	final public int get_probably_up_skillupscore(){
+		return probably_up_skillupscore;
+	}
+	//---------------------------------------------------------
+	final public void setbase_score(int base_score){
+		this.base_score = base_score;
+	}
+	final public int getbase_score(){
+		return base_score;
+	}
+	//---------------------------------------------------------
+	final public void setcalculation_time(long calculation_time){
+		this.calculation_time = calculation_time;
+	}
+	final public long getcalculation_time(){
+		return calculation_time;
+	}
+	//---------------------------------------------------------
 
 	public static double nCr(int n, int r){
 		//https://teratail.com/questions/9363
@@ -1410,6 +1459,7 @@ class Calc_data{
 	}
 
 	public static double[] setprob(int n, double prob) {
+		//積分済みの二項分布データを入力するメソッド。
 		double[] bf_p = new double[n];
 		for (int r = 0; r < n; r++) {
 			if (r == 0) {
@@ -1425,17 +1475,28 @@ class Calc_data{
 		return bf_p;
 	}
 
-	public static int calcscrmain(Card_datas[] unit, Music_data calcMd, Card_datas frend, double perper, int playcount, double tapscoreup)throws DataNotFoundException{
+	public static double[] setrealprob(int n, double prob){
+		//実際の一回一回のスキル発動回数に対応する確率を入力するメソッド。
+		double[] bf_p = new double[n];
+		for(int r = 0; r < n;r++){
+			bf_p[r] = nCr(n,r) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r));
+		}
+		return bf_p;
+	}
+
+	public static Calc_data calcscrmain(Card_datas[] unit, Music_data calcMd, Card_datas frend, double perper, int playcount, double tapscoreup, int depth)throws DataNotFoundException{
 		// ある特定の確率で出る最大スコアを計算するメソッド
 		// メインのスコア計算メソッドとする。
 		// 派生版として、 1/プレイ回数 の確率を1ビットとして、グラフを表示させるメソッドも作成可能。
 		double discriminant = 1/playcount;
-		int rtn_scr = 0;
 		String sf = setUnitsf(unit, frend, calcMd);
+		int base_scr = calcBS(unit, calcMd, sf, tapscoreup);
 		String actsf = new String();
 		//Card_datas[] sklcalc = setsortsklUnit(unit, calcMd, perper, sf, frend, tapscoreup);
-		double[][] unitprbs = new double[9][];//実際の確率分布を格納する配列
-		double[][] untupprbs = new double[9][];//発動確率アップの確率分布を格納する配列
+		double[][] unitprbs = new double[9][];//実際の積分済みの確率分布を格納する配列
+		double[][] unitsprbs = new double[9][];//積分する前の実際の確率を格納する配列。
+		double[][] untupprbs = new double[9][];//発動確率アップの積分済みの確率分布を格納する配列
+		double[][] untupsprbs = new double[9][];//積分する前の発動確率アップの確率を格納する配列。
 		boolean upprbsbl = false;//発動率アップによる再計算をするか否かのbool値。通常は再計算しないのfalse.
 		int[] maxactcnts = new int[9];
 		int[] expactcnts = new int[9];
@@ -1446,14 +1507,15 @@ class Calc_data{
 			}catch(DataNotFoundException e){
 				System.out.println(e);
 				System.out.println("メソッドcalcscrmainにてsetMaxactcntメソッドが原因のエラー");
-				return 0;
+				return null;
 			}
 		}
 		for(int len = 0; len < unit.length;len++){
 			expactcnts[len] = (int)Math.floor(maxactcnts[len]*unit[len].gprob()/100.0);
 		}
 		for(int len = 0; len < unit.length;len++){
-			unitprbs[len] = setprob(maxactcnts[len], unit[len].gprob()/100.0);
+			unitprbs[len] = setrealprob(maxactcnts[len], unit[len].gprob()/100.0);
+			unitsprbs[len] = setprob(maxactcnts[len], unit[len].gprob()/100.0);
 		}
 		for(int len = 0;len < unit.length;len++){
 			if(unit[len].gsksha().equals("スコア")){
@@ -1526,7 +1588,8 @@ class Calc_data{
 			}else if(unit[len].gsksha().equals("発動率")){
 				for(int k = 0;k < unit.length;k++){
 					try{
-						untupprbs[k] = setprob(setMaxactcnt(unit[k],calcMd,perper,sf,unit), (unit[len].gefsz()/100.0) * (unit[k].gprob()/100.0));
+						untupprbs[k] = setrealprob(setMaxactcnt(unit[k],calcMd,perper,sf,unit), (unit[len].gefsz()/100.0 + 1) * (unit[k].gprob()/100.0));
+						untupsprbs[k] = setprob(setMaxactcnt(unit[k],calcMd,perper,sf,unit), (unit[len].gefsz()/100.0 + 1) * (unit[k].gprob()/100.0));
 					}catch(DataNotFoundException e){
 						String err = new String();
 						System.out.println(e);
@@ -1702,7 +1765,8 @@ class Calc_data{
 			}
 		}
 		double tempprob = 0.0;
-		double sumprob = 0.0;
+		double tempsprob = 0.0;
+		double sumprob = 0.0;//積分済みの二項分布から検索する。
 		long steps = 0;
 		int[] tmppivot = new int[9];
 		int[] regularpivot = new int[9];
@@ -1711,36 +1775,44 @@ class Calc_data{
 		double regularprob = 0.0;
 
 		for(int alane = unitprbs[0].length-1;alane >= 0;alane--){
-			if(unitprbs[0][alane] > discriminant && alane >= expactcnts[0]){
+			if(unitsprbs[0][alane] > discriminant && alane >= expactcnts[0] - depth){
 				tempprob = unitprbs[0][alane];
+				tempsprob = unitsprbs[0][alane];
 				for(int blane = unitprbs[1].length-1;blane >= 0;blane--){
-					if(tempprob * unitprbs[1][blane] > discriminant && blane >= expactcnts[1] && unitprbs[1][blane] > discriminant){
+					if(tempsprob * unitsprbs[1][blane] > discriminant && blane >= expactcnts[1] - depth && unitsprbs[1][blane] > discriminant){
 						tempprob *= unitprbs[1][blane];
+						tempsprob *= unitsprbs[1][blane];
 						for(int clane = unitprbs[2].length-1;clane >= 0;clane--){
-							if(tempprob * unitprbs[2][clane] > discriminant && clane >= expactcnts[2] && unitprbs[2][clane] > discriminant){
+							if(tempsprob * unitsprbs[2][clane] > discriminant && clane >= expactcnts[2] - depth && unitsprbs[2][clane] > discriminant){
 								tempprob *= unitprbs[2][clane];
+								tempsprob *= unitsprbs[2][clane];
 								for(int dlane = unitprbs[3].length-1;dlane >= 0;dlane--){
-									if(tempprob * unitprbs[3][dlane] > discriminant && dlane >= expactcnts[3] && unitprbs[3][dlane] > discriminant){
+									if(tempsprob * unitsprbs[3][dlane] > discriminant && dlane >= expactcnts[3] - depth && unitsprbs[3][dlane] > discriminant){
 										tempprob *= unitprbs[3][dlane];
-										for(int elane = unitprbs[4].length-1;elane >= 0;elane--){
-											if(tempprob * unitprbs[4][elane] > discriminant && elane >= expactcnts[4] && unitprbs[4][elane] > discriminant){
+										tempsprob *= unitsprbs[3][dlane];
+										for(int elane = unitsprbs[4].length-1;elane >= 0;elane--){
+											if(tempsprob * unitsprbs[4][elane] > discriminant && elane >= expactcnts[4] - depth && unitsprbs[4][elane] > discriminant){
 												tempprob *= unitprbs[4][elane];
+												tempsprob *= unitsprbs[4][elane];
 												for(int flane = unitprbs[5].length-1;flane >= 0;flane--){
-													if(tempprob * unitprbs[5][flane] > discriminant && flane >= expactcnts[5] && unitprbs[5][flane] > discriminant){
+													if(tempsprob * unitprbs[5][flane] > discriminant && flane >= expactcnts[5] - depth && unitsprbs[5][flane] > discriminant){
 														tempprob *= unitprbs[5][flane];
+														tempsprob *= unitsprbs[5][flane];
 														for(int glane = unitprbs[6].length-1;glane >= 0;glane--){
-															if(tempprob * unitprbs[6][glane] > discriminant && glane >= expactcnts[6] && unitprbs[6][glane] > discriminant){
+															if(tempsprob * unitsprbs[6][glane] > discriminant && glane >= expactcnts[6] - depth && unitsprbs[6][glane] > discriminant){
 																tempprob *= unitprbs[6][glane];
+																tempsprob *= unitsprbs[6][glane];
 																for(int hlane = unitprbs[7].length-1;hlane >= 0;hlane--){
-																	if(tempprob * unitprbs[7][hlane] > discriminant && hlane >= expactcnts[7] && unitprbs[7][hlane] > discriminant){
+																	if(tempsprob * unitsprbs[7][hlane] > discriminant && hlane >= expactcnts[7] - depth && unitsprbs[7][hlane] > discriminant){
 																		tempprob *= unitprbs[7][hlane];
+																		tempsprob *= unitsprbs[7][hlane];
 																		for(int ilane = unitprbs[8].length-1;ilane >= 0;ilane--){
 																			//pivotの処理して、スコア比較。
 																			tempprob *= unitprbs[8][ilane];
 																			sumprob += tempprob;
 																			steps++;
 																			tempprob /= unitprbs[8][ilane];
-																			if(sumprob > discriminant && unitprbs[8][ilane] > discriminant){
+																			if(sumprob > discriminant && unitsprbs[8][ilane] > discriminant){
 																				tmppivot[0] = alane;
 																				tmppivot[1] = blane;
 																				tmppivot[2] = clane;
@@ -1770,50 +1842,50 @@ class Calc_data{
 																		}
 																	}else{
 																		steps += unitprbs[8].length;
-																		sumprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane] * unitprbs[5][flane] * unitprbs[6][glane] * unitprbs[7][hlane];
+																		sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane] * unitsprbs[6][glane] * unitsprbs[7][hlane];
 																		tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane] * unitprbs[5][flane] * unitprbs[6][glane];
 																	}
 																}
 															}else{
 																steps += unitprbs[7].length * unitprbs[8].length;
-																sumprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane] * unitprbs[5][flane] * unitprbs[6][glane];
+																sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane] * unitsprbs[6][glane];
 																tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane] * unitprbs[5][flane];
 															}
 														}
 
 													}else{
 														steps += unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
-														sumprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane] * unitprbs[5][flane];
+														sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane];
 														tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane];
 													}
 												}
 											}else{
 												steps += unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
-												sumprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane];
+												sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane];
 												tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane];
 											}
 										}
 									}else{
 										steps += unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
-										sumprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane];
+										sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane];
 										tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane];
 									}
 								}
 							}else{
 								steps += unitprbs[3].length * unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
-								sumprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane];
+								sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane];
 								tempprob = unitprbs[0][alane] * unitprbs[1][blane];
 							}
 						}
 					}else{
 						steps += unitprbs[2].length * unitprbs[3].length * unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
-						sumprob = unitprbs[0][alane] * unitprbs[1][blane];
+						sumprob = unitsprbs[0][alane] * unitsprbs[1][blane];
 						tempprob = unitprbs[0][alane];
 					}
 				}
 			}else{
 				steps += unitprbs[1].length * unitprbs[2].length * unitprbs[3].length * unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
-				sumprob = unitprbs[0][alane];
+				sumprob = unitsprbs[0][alane];
 				tempprob = 0.0;
 			}
 		}
@@ -1822,44 +1894,54 @@ class Calc_data{
 			unit[len].sactcnt(regularpivot[len]);
 		}
 
+		int upregularscr = 0;
+		double upedsumprob = 0.0;
 		if(upprbsbl){
 			for (int alane = untupprbs[0].length - 1; alane >= 0; alane--) {
-				if (untupprbs[0][alane] > discriminant && alane >= expactcnts[0]) {
+				if (untupprbs[0][alane] > discriminant && alane >= expactcnts[0] - depth) {
 					tempprob = untupprbs[0][alane];
+					tempsprob = untupsprbs[0][alane];
 					for (int blane = untupprbs[1].length - 1; blane >= 0; blane--) {
-						if (tempprob * untupprbs[1][blane] > discriminant && blane >= expactcnts[1]
-								&& untupprbs[1][blane] > discriminant) {
+						if (tempsprob * untupsprbs[1][blane] > discriminant && blane >= expactcnts[1] - depth
+								&& untupsprbs[1][blane] > discriminant) {
 							tempprob *= untupprbs[1][blane];
+							tempsprob *= untupsprbs[1][blane];
 							for (int clane = untupprbs[2].length - 1; clane >= 0; clane--) {
-								if (tempprob * untupprbs[2][clane] > discriminant && clane >= expactcnts[2]
-										&& untupprbs[2][clane] > discriminant) {
+								if (tempsprob * untupsprbs[2][clane] > discriminant && clane >= expactcnts[2] - depth
+										&& untupsprbs[2][clane] > discriminant) {
 									tempprob *= untupprbs[2][clane];
+									tempsprob *= untupsprbs[2][clane];
 									for (int dlane = untupprbs[3].length - 1; dlane >= 0; dlane--) {
-										if (tempprob * untupprbs[3][dlane] > discriminant && dlane >= expactcnts[3]
-												&& untupprbs[3][dlane] > discriminant) {
+										if (tempsprob * untupsprbs[3][dlane] > discriminant && dlane >= expactcnts[3] - depth
+												&& untupsprbs[3][dlane] > discriminant) {
 											tempprob *= untupprbs[3][dlane];
+											tempsprob *= untupsprbs[3][dlane];
 											for (int elane = untupprbs[4].length - 1; elane >= 0; elane--) {
-												if (tempprob * untupprbs[4][elane] > discriminant
-														&& elane >= expactcnts[4]
-														&& untupprbs[4][elane] > discriminant) {
+												if (tempsprob * untupsprbs[4][elane] > discriminant
+														&& elane >= expactcnts[4] - depth
+														&& untupsprbs[4][elane] > discriminant) {
 													tempprob *= untupprbs[4][elane];
+													tempsprob *= untupsprbs[4][elane];
 													for (int flane = untupprbs[5].length - 1; flane >= 0; flane--) {
-														if (tempprob * untupprbs[5][flane] > discriminant
-																&& flane >= expactcnts[5]
-																&& untupprbs[5][flane] > discriminant) {
+														if (tempsprob * untupsprbs[5][flane] > discriminant
+																&& flane >= expactcnts[5] - depth
+																&& untupsprbs[5][flane] > discriminant) {
 															tempprob *= untupprbs[5][flane];
+															tempsprob *= untupsprbs[5][flane];
 															for (int glane = untupprbs[6].length
 																	- 1; glane >= 0; glane--) {
-																if (tempprob * untupprbs[6][glane] > discriminant
-																		&& glane >= expactcnts[6]
-																		&& untupprbs[6][glane] > discriminant) {
+																if (tempsprob * untupsprbs[6][glane] > discriminant
+																		&& glane >= expactcnts[6] - depth
+																		&& untupsprbs[6][glane] > discriminant) {
 																	tempprob *= untupprbs[6][glane];
+																	tempsprob *= untupsprbs[6][glane];
 																	for (int hlane = untupprbs[7].length
 																			- 1; hlane >= 0; hlane--) {
-																		if (tempprob * untupprbs[7][hlane] > discriminant
-																				&& hlane >= expactcnts[7]
-																				&& untupprbs[7][hlane] > discriminant) {
+																		if (tempsprob * untupsprbs[7][hlane] > discriminant
+																				&& hlane >= expactcnts[7] - depth
+																				&& untupsprbs[7][hlane] > discriminant) {
 																			tempprob *= untupprbs[7][hlane];
+																			tempsprob *= untupsprbs[7][hlane];
 																			for (int ilane = untupprbs[8].length
 																					- 1; ilane >= 0; ilane--) {
 																				//pivotの処理して、スコア比較。
@@ -1868,7 +1950,7 @@ class Calc_data{
 																				steps++;
 																				tempprob /= untupprbs[8][ilane];
 																				if (sumprob > discriminant
-																						&& untupprbs[8][ilane] > discriminant) {
+																						&& untupsprbs[8][ilane] > discriminant) {
 																					tmppivot[0] = alane;
 																					tmppivot[1] = blane;
 																					tmppivot[2] = clane;
@@ -1882,8 +1964,8 @@ class Calc_data{
 																						tempscr += scrupT[len]
 																								* tmppivot[len];
 																					}
-																					if (tempscr > regularscr) {
-																						regularscr = tempscr;
+																					if (tempscr > upregularscr) {
+																						upregularscr = tempscr;
 																						regularpivot[0] = alane;
 																						regularpivot[1] = blane;
 																						regularpivot[2] = clane;
@@ -1893,20 +1975,20 @@ class Calc_data{
 																						regularpivot[6] = glane;
 																						regularpivot[7] = hlane;
 																						regularpivot[8] = ilane;
-																						regularprob = sumprob;
+																						upedsumprob = sumprob;
 																					}
 																				}
 																			}
 																		} else {
 																			steps += untupprbs[8].length;
-																			sumprob = untupprbs[0][alane]
-																					* untupprbs[1][blane]
-																					* untupprbs[2][clane]
-																					* untupprbs[3][dlane]
-																					* untupprbs[4][elane]
-																					* untupprbs[5][flane]
-																					* untupprbs[6][glane]
-																					* untupprbs[7][hlane];
+																			sumprob = untupsprbs[0][alane]
+																					* untupsprbs[1][blane]
+																					* untupsprbs[2][clane]
+																					* untupsprbs[3][dlane]
+																					* untupsprbs[4][elane]
+																					* untupsprbs[5][flane]
+																					* untupsprbs[6][glane]
+																					* untupsprbs[7][hlane];
 																			tempprob = untupprbs[0][alane]
 																					* untupprbs[1][blane]
 																					* untupprbs[2][clane]
@@ -1918,10 +2000,10 @@ class Calc_data{
 																	}
 																} else {
 																	steps += untupprbs[7].length * untupprbs[8].length;
-																	sumprob = untupprbs[0][alane] * untupprbs[1][blane]
-																			* untupprbs[2][clane] * untupprbs[3][dlane]
-																			* untupprbs[4][elane] * untupprbs[5][flane]
-																			* untupprbs[6][glane];
+																	sumprob = untupsprbs[0][alane] * untupsprbs[1][blane]
+																			* untupsprbs[2][clane] * untupsprbs[3][dlane]
+																			* untupsprbs[4][elane] * untupsprbs[5][flane]
+																			* untupsprbs[6][glane];
 																	tempprob = untupprbs[0][alane] * untupprbs[1][blane]
 																			* untupprbs[2][clane] * untupprbs[3][dlane]
 																			* untupprbs[4][elane] * untupprbs[5][flane];
@@ -1931,9 +2013,9 @@ class Calc_data{
 														} else {
 															steps += untupprbs[6].length * untupprbs[7].length
 																	* untupprbs[8].length;
-															sumprob = untupprbs[0][alane] * untupprbs[1][blane]
-																	* untupprbs[2][clane] * untupprbs[3][dlane]
-																	* untupprbs[4][elane] * untupprbs[5][flane];
+															sumprob = untupsprbs[0][alane] * untupsprbs[1][blane]
+																	* untupsprbs[2][clane] * untupsprbs[3][dlane]
+																	* untupsprbs[4][elane] * untupsprbs[5][flane];
 															tempprob = untupprbs[0][alane] * untupprbs[1][blane]
 																	* untupprbs[2][clane] * untupprbs[3][dlane]
 																	* untupprbs[4][elane];
@@ -1942,9 +2024,9 @@ class Calc_data{
 												} else {
 													steps += untupprbs[5].length * untupprbs[6].length
 															* untupprbs[7].length * untupprbs[8].length;
-													sumprob = untupprbs[0][alane] * untupprbs[1][blane]
-															* untupprbs[2][clane] * untupprbs[3][dlane]
-															* untupprbs[4][elane];
+													sumprob = untupsprbs[0][alane] * untupsprbs[1][blane]
+															* untupsprbs[2][clane] * untupsprbs[3][dlane]
+															* untupsprbs[4][elane];
 													tempprob = untupprbs[0][alane] * untupprbs[1][blane]
 															* untupprbs[2][clane] * untupprbs[3][dlane];
 												}
@@ -1952,39 +2034,46 @@ class Calc_data{
 										} else {
 											steps += untupprbs[4].length * untupprbs[5].length * untupprbs[6].length
 													* untupprbs[7].length * untupprbs[8].length;
-											sumprob = untupprbs[0][alane] * untupprbs[1][blane] * untupprbs[2][clane]
-													* untupprbs[3][dlane];
+											sumprob = untupsprbs[0][alane] * untupsprbs[1][blane] * untupsprbs[2][clane]
+													* untupsprbs[3][dlane];
 											tempprob = untupprbs[0][alane] * untupprbs[1][blane] * untupprbs[2][clane];
 										}
 									}
 								} else {
 									steps += untupprbs[3].length * untupprbs[4].length * untupprbs[5].length
 											* untupprbs[6].length * untupprbs[7].length * untupprbs[8].length;
-									sumprob = untupprbs[0][alane] * untupprbs[1][blane] * untupprbs[2][clane];
+									sumprob = untupsprbs[0][alane] * untupsprbs[1][blane] * untupsprbs[2][clane];
 									tempprob = untupprbs[0][alane] * untupprbs[1][blane];
 								}
 							}
 						} else {
 							steps += untupprbs[2].length * untupprbs[3].length * untupprbs[4].length * untupprbs[5].length
 									* untupprbs[6].length * untupprbs[7].length * untupprbs[8].length;
-							sumprob = untupprbs[0][alane] * untupprbs[1][blane];
+							sumprob = untupsprbs[0][alane] * untupsprbs[1][blane];
 							tempprob = untupprbs[0][alane];
 						}
 					}
 				} else {
 					steps += untupprbs[1].length * untupprbs[2].length * untupprbs[3].length * untupprbs[4].length
 							* untupprbs[5].length * untupprbs[6].length * untupprbs[7].length * untupprbs[8].length;
-					sumprob = unitprbs[0][alane];
+					sumprob = untupsprbs[0][alane];
 					tempprob = 0.0;
 				}
 			}
-		}
 
-		for (int len = 0; len < unit.length; len++) {
-			unit[len].supactcnt(regularpivot[len]);
-		}
 
-		return rtn_scr;
+			for (int len = 0; len < unit.length; len++) {
+				unit[len].supactcnt(regularpivot[len]);
+			}
+		}
+		Calc_data rtn_data = new Calc_data();
+		rtn_data.setregular_probably(regularprob);
+		rtn_data.setskill_up_score(regularscr);
+		rtn_data.setbase_score(base_scr);
+		rtn_data.set_up_regular_probably(upedsumprob);
+		rtn_data.set_probably_up_skillupscore(upregularscr);
+
+		return rtn_data;
 	}
 
 	public static int calcBS(Card_datas[] unit, Music_data cmdt, String sf, double tapscoreup){

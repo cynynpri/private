@@ -4,10 +4,10 @@ package sif_scorecalc
 
 import java.util.*
 
-class Card( rarity:String, skill_name:String, skill_conditions_type:String,
-			skill_conditions_size:Int, skill_effect:String, accuracy_time:Double,
-			card_smile:Int, card_pure:Int, card_cool:Int,
-			center_skill_name:String, subcenter_skill_name:String){
+class Card( rarity: String, skill_name: String, skill_conditions_type: String,
+			skill_conditions_size: Int, skill_effect: String, accuracy_time: Double,
+			card_smile: Int, card_pure: Int, card_cool: Int,
+			center_skill_name: String, subcenter_skill_name: String){
 	val rarity = rarity//カードのレアリティ
 	val skill_name = skill_name//特技名。
 	val skill_conditions_type = skill_conditions_type//スキル発動条件
@@ -19,7 +19,7 @@ class Card( rarity:String, skill_name:String, skill_conditions_type:String,
 	val card_cool = card_cool//カードクール値
 	val center_skill_name = center_skill_name//センターになった時のスキル。
 	val subcenter_skill_name = subcenter_skill_name//センターになった時に発動するサブセンタースキル。
-	val attribute = //カードの属性 スマイル、ピュア、クール
+	val attribute: String = //カードの属性 スマイル、ピュア、クール
 	if(center_skill_name.indexOf("スマイル") != -1){
 		"スマイル"
 	}else if(center_skill_name.indexOf("ピュア") != -1){

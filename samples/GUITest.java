@@ -18,6 +18,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.input.*;
 import javafx.scene.chart.*;
+import javafx.util.Callback;
 //import java.lang.Object;
 //import javafx.scene.Node;
 
@@ -25,6 +26,7 @@ import javafx.scene.chart.*;
 public class GUITest extends Application{
 	static int printlogc = 1;
 	static int maxNum = 0;
+	static List<Card_datas> unit = new ArrayList<Card_datas>();
 	static Card_datas[] unitdt = new Card_datas[9];
 	static List<Skill_data> sdata = new ArrayList<Skill_data>();
 	static Skill_data srdata;
@@ -39,6 +41,7 @@ public class GUITest extends Application{
 	static int orcsm = 0;
 	static int orcpr = 0;
 	static int orccl = 0;
+	static List<Music_data>music_list = new ArrayList<Music_data>();
 
 	public void start(Stage stage){
 		//*表示されるパネルの大きさ
@@ -941,12 +944,60 @@ public class GUITest extends Application{
 			StackPane spane_c_s = new StackPane();
 			calc_SCore.setContent(spane_c_s);
 
+			GridPane c_SCgroot = new GridPane();//メインのグリッドペイン
+			GridPane c_SCguis = new GridPane();//guiのボタンなどを格納するペイン
+
+			c_SCgroot.setConstraints(c_SCguis, 0, 1);
 
 
 			//*チョイスボックス
-			ChoiceBox<String> music_SEl = new ChoiceBox<>(FXCollections.observableArrayList("僕らのLIVE 君とのLIFE"));
+			/*ChoiceBox<String> music_SEl = new ChoiceBox<>(FXCollections.observableArrayList("僕らのLIVE 君とのLIFE"));*/
+			//*楽曲選択コンボボックス
+			String[] music_titles = new String[music_list.size()];
+			//ここでfor文回す意味を教えてほしい。
+			for(int len = 0;len < music_list.size();len++){
+				music_titles[len] = music_list.get(len).getmscnm();
+			}
+			ComboBox<String> music_SEl = new ComboBox<String>();
+			for(String adder : music_titles){
+				music_SEl.getItems().add(adder);
+			}
 
-			Button calc_start = new Button("計算する");
+			Button calc_start = new Button("スコアを計算する");
+			//パフェ率の入力ボックスと、探索幅を入力するボックスが必要。
+
+			//パフェ率入力ボックス。intを%に直す形式。
+			Label perperlbl = new Label("パーフェクト率:");
+			Spinner setperper = new Spinner(0,100,80);
+			setperper.setEditable(true);
+
+			//探索幅入力ボックス。
+			Label depthlbl = new Label("発動回数探索の最小値幅:");
+			Spinner setdepth = new Spinner(0,8,4);
+			setdepth.setEditable(true);
+
+			//タップアップ値入力ボックス。
+			Label tapuplbl = new Label("タップアップ値:");
+			Spinner<Double> settapup = new Spinner<Double>(1.00,1.40,1.00);
+			settapup.setEditable(true);
+
+			//プレイ回数を入力するボックス。
+			Label playcountlbl = new Label("プレイ回数(最大100000まで):");
+			Spinner setplaycount = new Spinner(1,100000,20);
+			setplaycount.setEditable(true);
+
+			String result_score_str = new String();
+			Label result_score_label = new Label(result_score_str);
+
+			ObservableList<Card_datas> listtounit = FXCollections.observableArrayList(cdatas);
+			ListView<Card_datas> card_list = new ListView<Card_datas>(listtounit);
+			card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>(){
+				@Override
+				public ListCell<Card_datas> call(ListView<Card_datas> temp){
+					return new carddatatoCell();
+				}
+			});
+
 			//*計算用のボタンが押された時のイベント
 			/*calc_start.setOnAction(new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent event){
@@ -1076,7 +1127,7 @@ public class GUITest extends Application{
 		root_c_d.setBottom(saver);
 
 		BorderPane root_c_s = new BorderPane();
-		root_c_s.setCenter(music_SEl);
+		root_c_s.setCenter(card_list);
 		root_c_s.setBottom(calc_start);
 
 		BorderPane root_s_l = new BorderPane();
@@ -1168,6 +1219,16 @@ public class GUITest extends Application{
 		printlogc++;
 	}
 
+	private static class carddatatoCell extends ListCell<Card_datas> {
+		@Override
+		protected void updateItem(Card_datas card, boolean empty) {
+			super.updateItem(card, empty);
+			if (!empty) {
+				setText(card.gcnum() + ":" + card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm() + ":" + Card_datas.setskilltext(card));
+			}
+		}
+	}
+
 	//* メインメソッド
 	public static void main(String[] args){
 		int argc = args.length;
@@ -1190,6 +1251,11 @@ public class GUITest extends Application{
 				}
 			}
 			brinifile.close();
+			Music_data[] ar_mlist = Music_data.r_Rdata();
+			for(Music_data tmp:ar_mlist){
+				music_list.add(tmp);
+			}
+
 		}catch(NullPointerException e){
 				System.err.println(e);
 				printlogc = -1;

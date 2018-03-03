@@ -3,8 +3,6 @@ package samples;
 import java.math.*;
 import java.util.*;
 
-import com.sun.javafx.runtime.SystemProperties;
-
 class Test{
 	public static double lanescr(int[] note,double base){
 		return note[0]*Math.floor(base)+note[1]*Math.floor(1.25*base)+note[2]*Math.floor(1.10*base)+note[3]*Math.floor(1.10*1.25*base)+note[4]*Math.floor(1.15*base)+note[5]*Math.floor(1.15*1.25*base)+note[6]*Math.floor(1.20*base)+note[7]*Math.floor(1.20*1.25*base)+note[8]*Math.floor(1.25*base)+note[9]*Math.floor(1.25*1.25*base);
@@ -220,15 +218,35 @@ class Test{
 	}
 
 	public static double[] prob(int n, double prob){
+		//二項分布を積分せず、各1回1回の発生確率を出力するメソッド.
 		double[] bf_p = new double[n];
 		for(int r = 0; r < n; r++){
 			if(r == 0){
-				bf_p[r] = 1;
+				/*bf_p[r] = 1;*/
+				bf_p[r] = nCr(n,r)*Math.pow(prob,r)*Math.pow((1-prob),(n-r));
 			}else{
 				/*if(bf_p[r-1] - (nCr(n,r))*Math.pow(prob,r)*Math.pow((1-prob),(n-r)) < 0){
 					bf_p[r] = bf_p[r-1];
 				}else{*/
-					bf_p[r] = bf_p[r-1] - (nCr(n,r))*Math.pow(prob,r)*Math.pow((1-prob),(n-r));
+					bf_p[r] = (nCr(n,r))*Math.pow(prob,r)*Math.pow((1-prob),(n-r));
+				//}
+			}
+
+		}
+		return bf_p;
+	}
+
+	public static double[] summed_prob(int n, double prob){
+		//二項分布を積分して、各回数以上の回数が出る確率を出力するメソッド.
+		double[] bf_p = new double[n];
+		for (int r = 0; r < n; r++) {
+			if (r == 0) {
+				bf_p[r] = 1;
+			} else {
+				/*if(bf_p[r-1] - (nCr(n,r))*Math.pow(prob,r)*Math.pow((1-prob),(n-r)) < 0){
+					bf_p[r] = bf_p[r-1];
+				}else{*/
+				bf_p[r] = bf_p[r-1] - (nCr(n, r)) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r));
 				//}
 			}
 
@@ -239,7 +257,7 @@ class Test{
 	public static int setMaxactcnt(Card_datas ondt, int maxcombo, double perper, int musictm, String sf, int star_icon/*, Card_datas[] unit*/){
 		int mactct = 0;
 		int base = Integer.parseInt(sf.split(",",0)[0]);
-		String skitp = ondt.gskitp();
+		//String skitp = ondt.gskitp();
 		//check Card_datas line 521
 		if(ondt.gskitp().equals("タイマー")){
 			mactct = (int)Math.floor(musictm/ondt.gfactv());
@@ -267,7 +285,7 @@ class Test{
 
 	public static void main(String[] args){
 		long start = System.currentTimeMillis();
-		int musictm = 98;//楽曲時間
+		//int musictm = 98;//楽曲時間
 		Card_datas[] unit = new Card_datas[9];
 		unit[0] = new Card_datas(1, "桜内梨子", "スマイル", "UR", "私の声聞こえますか", true, 4, 4, "スコア", "リズムアイコン", 23, 47, 0.0, 1580,
 				6320, 4100, 4490, "スマイルプリンセス", "Guilty Kiss");
@@ -307,7 +325,7 @@ class Test{
 		}
 		*/
 		double[] probs = {0.47,0.43,0.37,0.23,0.44,0.44,0.49,0.43,0.17};//ここの即値をCard_datasだけで表現できたらこのjavaファイルの役目は終わり
-		int[] runskl = {21,22,26,33,23,17,21,23,57};
+		int[] runskl = {21,22,26,33,23,17,21,23,57};//9,9,9,7,10,7,10,9,9 それぞれの期待値
 		int[] effects = {1580,1670,780,0,5,1415,5,1160,1290};
 		//int[] unitpivots = {1,0,8,7,5,6,4,2,3};
 		effects[0] *= 2.5;
@@ -319,14 +337,19 @@ class Test{
 		effects[4] *= 480;
 		effects[6] *= 480;
 		ArrayList<double[]> ar_rprobs = new ArrayList<double[]>();
+		List<double[]> ar_sprobs = new ArrayList<double[]>();
 		double k = 1/120.0;//分母の最小値は78.12
 		for(int len = 0;len < 9;len++){
 			double[] temp = prob(runskl[len]+1,probs[len]);
+			double[] stemp = summed_prob(runskl[len]+1, probs[len]);
 			ar_rprobs.add(temp);
+			ar_sprobs.add(stemp);
 		}
 		double[][] rprobs = new double[ar_rprobs.size()][];
+		double[][] sprobs = new double[ar_sprobs.size()][];
 		for(int len = 0;len < ar_rprobs.size();len++){
 			rprobs[len] = ar_rprobs.get(len);
+			sprobs[len] = ar_sprobs.get(len);
 		}
 		int[] rpvt = new int[9];
 		int[] pivot = new int[9];
@@ -476,43 +499,67 @@ class Test{
 		double dk = k/10.0;
 		double tempprob = 0.0;
 		int tempef = 0;
+		int depth = 0;//探索幅。あえて深さを意味するdepthとする。
 		/*for(double d:rprobs[8]){
 			System.out.println("d is "+d);
 		}*/
-		for(int a = rprobs[1].length -1;a >= 0;a--){
-		  if(rprobs[1][a] > dk && a >= (int)Math.floor(probs[1] * runskl[1])-4 && rprobs[1][a] > dk){
+
+		depth = 4;
+		double tempsprob = 0.0;
+		label:for(int a = rprobs[1].length -1;a >= 0;a--){
+		  if(sprobs[1][a] > dk && a >= (int)Math.floor(probs[1] * runskl[1]) - depth && sprobs[1][a] > dk){
 			tempprob = rprobs[1][a];
+			tempsprob = sprobs[1][a];
+			//System.out.println("sumprob is"+sumprob);
 			for(int b = rprobs[0].length -1 ; b >= 0;b--){
-			  if(tempprob * rprobs[0][b] > dk && b >= (int)Math.floor(probs[0]*runskl[0])-4 && rprobs[0][b] > dk){
+			  if(tempsprob * sprobs[0][b] > dk && b >= (int)Math.floor(probs[0]*runskl[0]) - depth && sprobs[0][b] > dk){
 				tempprob *= rprobs[0][b];
+				tempsprob *= sprobs[0][b];
 				for(int c = rprobs[8].length-1;c >= 0;c--){
 				  //System.out.println("sumprob = "+sumprob);
-				  if(tempprob * rprobs[8][c] > dk && c >= (int)Math.floor(probs[8]*runskl[8])-4 && rprobs[8][c] > dk){
+				  if(tempsprob * sprobs[8][c] > dk && c >= (int)Math.floor(probs[8]*runskl[8]) - depth && sprobs[8][c] > dk){
 					tempprob *= rprobs[8][c];
+					tempsprob *= sprobs[8][c];
 					for(int d = rprobs[7].length-1;d >= 0;d--){
-					  if(tempprob * rprobs[7][d] > dk && d >= (int)Math.floor(probs[7]*runskl[7])-4 && rprobs[7][d] > dk){
+					  if(tempsprob * sprobs[7][d] > dk && d >= (int)Math.floor(probs[7]*runskl[7]) - depth && sprobs[7][d] > dk){
 						tempprob *= rprobs[7][d];
+						tempsprob *= sprobs[7][d];
 						for(int e = rprobs[5].length-1;e >= 0;e--){
 						  //System.out.println("sumprob ="+sumprob);
-						  if(tempprob * rprobs[5][e] > dk && e >= (int)Math.floor(probs[5]*runskl[5])-4 && rprobs[5][e] > dk){
+						  if(tempsprob * sprobs[5][e] > dk && e >= (int)Math.floor(probs[5]*runskl[5]) - depth && sprobs[5][e] > dk){
 							tempprob *= rprobs[5][e];
+							tempsprob *= sprobs[5][e];
+							//System.out.println("sumprob is "+ sumprob);
 							for(int f = rprobs[6].length-1;f >= 0;f--){
-							  if(tempprob * rprobs[6][f] > dk && f >= (int)Math.floor(probs[6]*runskl[6])-4 && rprobs[6][f] > dk){
+							  if(tempsprob * sprobs[6][f] > dk && f >= (int)Math.floor(probs[6]*runskl[6]) - depth && sprobs[6][f] > dk){
 								tempprob *= rprobs[6][f];
+								tempsprob *= sprobs[6][f];
+								//System.out.println("sumprob is "+ sumprob);
 								for(int g = rprobs[4].length-1;g >= 0;g--){
-								  if(tempprob * rprobs[4][g] > dk && g >= (int)Math.floor(probs[4]*runskl[4])-4 && rprobs[4][g] > dk){
+								  if(tempsprob * sprobs[4][g] > dk && g >= (int)Math.floor(probs[4]*runskl[4]) - depth && sprobs[4][g] > dk){
 									tempprob *= rprobs[4][g];
+									tempsprob *= sprobs[4][g];
+									//System.out.println("sumprob is "+ sumprob);
 									for(int h = rprobs[2].length-1;h >= 0;h--){
-									  if(tempprob * rprobs[2][h] > dk && h >= (int)Math.floor(probs[2]*runskl[2])-4 && rprobs[2][h] > dk){
+									  if(tempsprob * sprobs[2][h] > dk && h >= (int)Math.floor(probs[2]*runskl[2]) - depth && sprobs[2][h] > dk){
 										tempprob *= rprobs[2][h];
+										tempsprob *= sprobs[2][h];
+										sumprob = tempsprob;
+										tempsprob /= sprobs[2][h];
 										for(int i = rprobs[3].length-1;i >= 0;i--){
 										  tempprob *= rprobs[3][i];
+										  //tempsprob *= sprobs[3][i];
 										  sumprob += tempprob;
 										  steps++;
 										  tempprob /= rprobs[3][i];
+										  if(sumprob > 1){
+											System.out.println("エラーが発生しました。");
+											System.out.println("確率分布の積分計算の結果が1より大になりました。");
+											break label;
+										  }
 										  //System.out.println("step i");
 										  //System.out.println("sumprob = "+sumprob);
-										  if(sumprob > k && rprobs[3][i] > k){
+										  if(sumprob > k && sprobs[3][i] > k){
 											//System.out.println("sumprob is "+ sumprob);
 											pivot[1] = a;
 											pivot[0] = b;
@@ -542,54 +589,70 @@ class Test{
 										}
 									  }else{
 									  steps += rprobs[3].length;
-									  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e]*rprobs[6][f]*rprobs[4][g]*rprobs[2][h];
+									  sumprob = sprobs[1][a]* sprobs[0][b]* sprobs[8][c]* sprobs[7][d]* sprobs[5][e]* sprobs[6][f]* sprobs[4][g]* sprobs[2][h];
 									  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f] * rprobs[4][g];
+									  tempsprob = sprobs[1][a] * sprobs[0][b] * sprobs[8][c] * sprobs[7][d] * sprobs[5][e] * sprobs[6][f] * sprobs[4][g];
+									  //sumprob += tempprob;
 									  }
 									}
 								  }else{
 								  steps += rprobs[2].length * rprobs[3].length;
-								  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e]*rprobs[6][f]*rprobs[4][g];
+								  sumprob = sprobs[1][a] * sprobs[0][b]*sprobs[8][c]*sprobs[7][d]*sprobs[5][e]*sprobs[6][f]*sprobs[4][g];
 								  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e] * rprobs[6][f];
+								  //sumprob += tempprob;
+								  tempsprob = sprobs[1][a] * sprobs[0][b] * sprobs[8][c] * sprobs[7][d] * sprobs[5][e] * sprobs[6][f];
 								  }
 								}
 							  }else{
 							  steps += rprobs[4].length * rprobs[2].length * rprobs[3].length;
-							  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e]*rprobs[6][f];
+							  sumprob = sprobs[1][a]*sprobs[0][b]*sprobs[8][c]*sprobs[7][d]*sprobs[5][e]*sprobs[6][f];
 							  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d] * rprobs[5][e];
+							  //sumprob += tempprob;
+							  tempsprob = sprobs[1][a] * sprobs[0][b] * sprobs[8][c] * sprobs[7][d] * sprobs[5][e];
 							  }
 							}
 						  }else{
 						  steps += rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
-						  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d]*rprobs[5][e];
+						  sumprob = sprobs[1][a]*sprobs[0][b]*sprobs[8][c]*sprobs[7][d]*sprobs[5][e];
 						  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c] * rprobs[7][d];
+						  tempsprob = sprobs[1][a] * sprobs[0][b] * sprobs[8][c] * sprobs[7][d];
+						  //sumprob += tempprob;
 						  }
 						}
 					  }else{
 					  steps += rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
-					  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c]*rprobs[7][d];
+					  sumprob = sprobs[1][a]*sprobs[0][b]*sprobs[8][c]*sprobs[7][d];
 					  tempprob = rprobs[1][a] * rprobs[0][b] * rprobs[8][c];
+					  tempsprob = sprobs[1][a] * sprobs[0][b] * sprobs[8][c];
+					  //sumprob += tempprob;
 					  }
 					}
 				  }else{
 				  steps += rprobs[7].length * rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
-				  sumprob = rprobs[1][a]*rprobs[0][b]*rprobs[8][c];
+				  sumprob = sprobs[1][a]*sprobs[0][b]*sprobs[8][c];
 				  tempprob = rprobs[1][a] * rprobs[0][b];
+				  tempsprob = sprobs[1][a] * sprobs[0][b];
+				  //sumprob += tempprob;
 				  }
 				}
 			  }else{
 			  steps += rprobs[8].length * rprobs[7].length * rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
-			  sumprob = rprobs[1][a]*rprobs[0][b];
+			  sumprob = sprobs[1][a]*sprobs[0][b];
 			  tempprob = rprobs[1][a];
+			  tempsprob = sprobs[1][a];
+			  //sumprob += tempprob;
 			  }
 			}
 		  }else{
 		  steps += rprobs[0].length * rprobs[8].length * rprobs[7].length * rprobs[5].length * rprobs[6].length * rprobs[4].length * rprobs[2].length * rprobs[3].length;
-		  sumprob = rprobs[1][a];
+		  sumprob = sprobs[1][a];
 		  tempprob = 0.0;
+		  tempsprob = 0.0;
+		  //sumprob += tempprob;
 		  }
 		}
 		for(int len = 0;len < 9;len++){
-			System.out.println(unit[len].grrity()+":"+unit[len].getname()+":"+unit[len].getskinm()+":スキル発動回数:"+rpvt[len] +":発生確率("+(rprobs[len][rpvt[len]]*100)+"%)");
+			System.out.println(unit[len].grrity()+":"+unit[len].getname()+":"+unit[len].getskinm()+":スキル発動回数:"+rpvt[len] +":発生確率("+(sprobs[len][rpvt[len]]*100)+"%)");
 		}
 		System.out.println("楽曲名:海岸通りで待ってるよ");
 		System.out.println("特技スコアアップ期待値:"+tempscr+"("+ansprob*100+"%)");
@@ -639,6 +702,8 @@ class Test{
 		sumscr += tempscr;
 		System.out.println("スコア期待値："+sumscr+"：このスコアを超えるスコアが出る確率は"+ansprob*100+"%");
 		System.out.println("sumprob is "+sumprob*100+"%");
+		//System.out.println("rprobs[*][0] is "+rprobs[0][0]*rprobs[1][0] * rprobs[2][0] * rprobs[3][0] * rprobs[4][0] * rprobs[5][0] * rprobs[6][0] * rprobs[7][0] * rprobs[8][0]*100+"%");
+		//System.out.println("期待値は"+rprobs[0][9]*rprobs[1][9]*rprobs[2][9]*rprobs[3][7]*rprobs[4][10]*rprobs[5][7]*rprobs[6][10]*rprobs[7][9]*rprobs[8][9]*100.0+"%で発生します。(小数点以下切り捨て)");//9,9,9,7,10,7,10,9,9
 		long end = System.currentTimeMillis();
 		System.out.println("計算終了。計算に掛かった時間は"+(end-start)+"msです。");
 	}

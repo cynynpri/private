@@ -1434,17 +1434,17 @@ class Card_datas{
 		Integer[] rtnTable = new Integer[8];
 		if((finupp - iniupp) == 14){
 			rtnTable[0] = iniupp;
-			Integer[] diffT = {2,1,2,3,2,2,2};
+			Integer[] diffT = {2,2,2,2,2,2,2};
 			for(int i = 1;i<8;i++){
 				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
 			}
-		}else if((finupp - iniupp) == 15){//#1415 card.
+		}/*else if((finupp - iniupp) == 14){//#1415 card.
 			rtnTable[0] = iniupp;
-			Integer[] diffT = {2,3,2,2,2,2,2};
+			Integer[] diffT = {2,2,2,2,2,2,2};
 			for(int i = 1;i<8;i++){
 				rtnTable[i] = rtnTable[i-1] + diffT[i-1];
 			}
-		}else if((finupp - iniupp) == 21){//#1416 card.
+		}*/else if((finupp - iniupp) == 21){//#1416 card.
 			rtnTable[0] = iniupp;
 			Integer[] diffT = {3,3,3,3,3,3,3};
 			for(int i = 1;i<8;i++){
@@ -1465,7 +1465,6 @@ class Card_datas{
 		}else{
 			rtnTable = null;
 		}
-
 		return rtnTable;
 	}
 
@@ -1531,6 +1530,61 @@ class Card_datas{
 		int cnum = Integer.parseInt(bfcb[0]);
 		unit = cdata.get(cnum-1);
 		return unit;
+	}
+
+	public static String setskilltext(Card_datas card){
+		String rtn_skilltext = new String();
+		String tprchain = new String();
+		String name = card.getname();
+
+		if(name.equals("小泉花陽")||name.equals("西木野真姫")||name.equals("星空凛")||name.equals("南ことり")||name.equals("高坂穂乃果")||name.equals("園田海未")||name.equals("矢澤にこ")||name.equals("絢瀬絵里")||name.equals("東條希")){
+			tprchain = "μ's";
+		}else if(name.equals("黒澤ルビィ")||name.equals("国木田花丸")||name.equals("津島善子")||name.equals("渡辺曜")||name.equals("高海千歌")||name.equals("桜内梨子")||name.equals("松浦果南")||name.equals("黒澤ダイヤ")||name.equals("小原鞠莉")){
+			tprchain = "Aqours";
+		}
+		if(name.equals("小泉花陽")||name.equals("西木野真姫")||name.equals("星空凛")||name.equals("黒澤ルビィ")||name.equals("国木田花丸")||name.equals("津島善子")){
+			tprchain = tprchain + "1年生";
+		}else if(name.equals("南ことり")||name.equals("高坂穂乃果")||name.equals("園田海未")||name.equals("渡辺曜")||name.equals("高海千歌")||name.equals("桜内梨子")){
+			tprchain = tprchain + "2年生";
+		}else{
+			tprchain = tprchain + "3年生";
+		}
+		//リストビューに表示する特技のテキストを出力する。
+		if(card.gskitp().equals("リズムアイコン")){
+			rtn_skilltext = card.gskitp() + card.gfactv() + "個ごとに";
+		}else if(card.gskitp().equals("タイマー")){
+			rtn_skilltext = card.gskitp() + card.gfactv() + "秒ごとに";
+		}else if(card.gskitp().equals("パーフェクト")){
+			rtn_skilltext = "PERFECTを" + card.gfactv() + "回達成するごとに";
+		}else if(card.gskitp().equals("コンボ")){
+			rtn_skilltext = card.gskitp() + card.gfactv() +"を達成するごとに";
+		}else if(card.gskitp().equals("スコア")){
+			rtn_skilltext = card.gskitp() + card.gfactv() + "達成ごとに";
+		}else if(card.gskitp().equals("スターアイコン")){
+			rtn_skilltext = card.gskitp() + "PERFECT" + card.gfactv() + "回ごとに";
+		}else if(card.gskitp().equals("チェイン")){
+			rtn_skilltext = "自身を除く" + tprchain + "の特技がすべて発動すると";
+		}
+
+		rtn_skilltext = rtn_skilltext + card.gprob() + "%の確率で";
+		if(card.gsksha().equals("スコア")){
+			rtn_skilltext = rtn_skilltext + "スコアが" + card.gefsz() + "増える";
+		}else if(card.gsksha().equals("回復")){
+			rtn_skilltext = rtn_skilltext + "体力が" + card.gefsz() + "回復する";
+		}else if(card.gsksha().equals("判定")){
+			rtn_skilltext = rtn_skilltext + "判定が" + card.gaccut() + "秒強化される";
+		}else if(card.gsksha().equals("発動率")){
+			rtn_skilltext = rtn_skilltext + card.gaccut() + "秒間他の特技の発動確率が1." + card.gefsz() + "倍になる";
+		}else if(card.gsksha().equals("パラメーター")){
+			rtn_skilltext = rtn_skilltext + card.gaccut() + "秒間" + tprchain + "の属性Pが" + card.gefsz() + "%UPする";
+		}else if(card.gsksha().equals("パーフェクト")){
+			rtn_skilltext = rtn_skilltext + card.gaccut() + "秒間PERFECT時のタップSCOREが" + card.gefsz() + "増える";
+		}else if(card.gsksha().equals("シンクロ")){
+			rtn_skilltext = rtn_skilltext + card.gefsz() + "秒間" + tprchain + "のいずれかと同じ属性Pになる";
+		}else if(card.gsksha().equals("リピート")){
+			rtn_skilltext = rtn_skilltext + "直前に発動した特技リピート以外の特技効果を発動";
+		}
+		return rtn_skilltext;
 	}
 
 	public static Card_datas[] csmsort(Card_datas[] fldt) {
