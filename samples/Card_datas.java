@@ -1587,6 +1587,47 @@ class Card_datas{
 		return rtn_skilltext;
 	}
 
+	public static String getSISimagename(Card_datas card){
+		if(card.getname().equals("高坂穂乃果")){
+			return "スマイルパワフル";
+		}else if(card.getname().equals("絢瀬絵里")){
+			return "クールプリマ";
+		}else if(card.getname().equals("南ことり")){
+			return "ピュアチャープ";
+		}else if(card.getname().equals("園田海未")){
+			return "クールシューター";
+		}else if(card.getname().equals("星空凛")){
+			return "スマイルキティ";
+		}else if(card.getname().equals("西木野真姫")){
+			return "クールディーバ";
+		}else if(card.getname().equals("東條希")){
+			return "ピュアフォーチュン";
+		}else if(card.getname().equals("小泉花陽")){
+			return "ピュアフラワー";
+		}else if(card.getname().equals("矢澤にこ")){
+			return "スマイルギャラクシー";
+		}else if(card.getname().equals("高海千歌")){
+			return "スマイルオレンジ";
+		}else if(card.getname().equals("桜内梨子")){
+			return "クールブロッサム";
+		}else if(card.getname().equals("松浦果南")){
+			return "ピュアドルフィン";
+		}else if(card.getname().equals("黒澤ダイヤ")){
+			return "クールプラム";
+		}else if(card.getname().equals("渡辺曜")){
+			return "ピュアボヤージュ";
+		}else if(card.getname().equals("津島善子")){
+			return "クールリトルデーモン";
+		}else if(card.getname().equals("国木田花丸")){
+			return "スマイルフューチャー";
+		}else if(card.getname().equals("小原鞠莉")){
+			return "スマイルシャイニー";
+		}else if(card.getname().equals("黒澤ルビィ")){
+			return "ピュアロリポップ";
+		}
+		return "Error!!";
+	}
+
 	public static Card_datas[] csmsort(Card_datas[] fldt) {
 		//GUITest側からcdataを受け取るとcdata[0] = null;
 		//cdata[1]からデータが入っている。

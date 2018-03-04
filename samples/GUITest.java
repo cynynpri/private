@@ -12,6 +12,7 @@ import javafx.geometry.Pos;
 import javafx.collections.*;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.event.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -42,14 +43,34 @@ public class GUITest extends Application{
 	static int orcpr = 0;
 	static int orccl = 0;
 	static List<Music_data>music_list = new ArrayList<Music_data>();
+	static Stage tmpstage = new Stage();
+	static TabPane tpane = new TabPane();
+	static ObservableList<Card_datas> listtounit = FXCollections.observableList(cdatas);
+	static ListView<Card_datas> card_list = new ListView<Card_datas>(listtounit);
+	/*
+	private ListView<Card_datas> card_list_view;
+	private ObservableList<Card_datas> card_list_records = FXCollections.observableArrayList();
+
+	private void fillCard_datas(List<Card_datas> cdatas){
+		for(Card_datas cd : cdatas){
+			card_list_records.add(cd);
+		}
+		card_list_view.setItems(card_list_records);
+		card_list_view.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>(){
+			@Override
+			public ListCell<Card_datas> call(ListView<Card_datas> card){
+				return new carddatatoCell();
+			}
+		});
+	}*/
 
 	public void start(Stage stage){
+		tmpstage = stage;
 		//*表示されるパネルの大きさ
 		/*stage.setWidth(800);
 		stage.setHeight(600);*/
 		//タブパネルの作成
 		StackPane spane = new StackPane();
-		TabPane tpane = new TabPane();
 		tpane.setPrefSize(800, 600);
 
 		Tab chara_DataSet = new Tab();
@@ -825,6 +846,12 @@ public class GUITest extends Application{
 							bfod.setcskin(srdata.getcsknm());
 							bfod.setacskn(srdata.getscsnm());
 							cdatas.add(bfod);
+							card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
+								@Override
+								public ListCell<Card_datas> call(ListView<Card_datas> temp) {
+									return new carddatatoCell();
+								}
+							});
 							Card_read.setonecarddata(pw, bfod);
 							if(debuglevel >= 1){
 								Card_datas[] printd = new Card_datas[cdatas.size()];
@@ -895,6 +922,12 @@ public class GUITest extends Application{
 							Card_read.print_cdata(bfcdata,maxNum);
 							card_num = maxNum+1;
 							tpane.getSelectionModel().select(3);
+							card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
+								@Override
+								public ListCell<Card_datas> call(ListView<Card_datas> temp) {
+									return new carddatatoCell();
+								}
+							});
 						}
 					}catch(NullPointerException e){
 						System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ:変換するボタン:メソッドエラー");
@@ -947,7 +980,7 @@ public class GUITest extends Application{
 			GridPane c_SCgroot = new GridPane();//メインのグリッドペイン
 			GridPane c_SCguis = new GridPane();//guiのボタンなどを格納するペイン
 
-			c_SCgroot.setConstraints(c_SCguis, 0, 1);
+			c_SCgroot.add(c_SCguis, 0, 1);
 
 
 			//*チョイスボックス
@@ -978,7 +1011,10 @@ public class GUITest extends Application{
 
 			//タップアップ値入力ボックス。
 			Label tapuplbl = new Label("タップアップ値:");
-			Spinner<Double> settapup = new Spinner<Double>(1.00,1.40,1.00);
+			Spinner<Double> settapup = new Spinner<Double>(1.00,1.40,1.00,0.01);
+			Label tapupendlbl = new Label("倍");
+			HBox tapuphbox = new HBox();
+			tapuphbox.getChildren().addAll(settapup, tapupendlbl);
 			settapup.setEditable(true);
 
 			//プレイ回数を入力するボックス。
@@ -989,8 +1025,10 @@ public class GUITest extends Application{
 			String result_score_str = new String();
 			Label result_score_label = new Label(result_score_str);
 
-			ObservableList<Card_datas> listtounit = FXCollections.observableArrayList(cdatas);
-			ListView<Card_datas> card_list = new ListView<Card_datas>(listtounit);
+			//リストビュー(所持カード)
+			//ListView<Card_datas> card_list = card_list_view;
+			//fillCard_datas(cdatas);
+			listtounit = FXCollections.observableList(cdatas);
 			card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>(){
 				@Override
 				public ListCell<Card_datas> call(ListView<Card_datas> temp){
@@ -998,11 +1036,24 @@ public class GUITest extends Application{
 				}
 			});
 
+
 			//*計算用のボタンが押された時のイベント
 			/*calc_start.setOnAction(new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent event){
 				}
 			});*/
+
+			c_SCguis.add(music_SEl, 0, 0);
+			c_SCguis.add(perperlbl, 0, 1);
+			c_SCguis.add(setperper, 1, 1);
+			c_SCguis.add(depthlbl, 0, 2);
+			c_SCguis.add(setdepth, 1, 2);
+			c_SCguis.add(tapuplbl, 0, 3);
+			c_SCguis.add(tapuphbox, 1, 3);
+			c_SCguis.add(playcountlbl, 0, 4);
+			c_SCguis.add(setplaycount, 1, 4);
+			c_SCguis.add(card_list, 0, 5);
+
 //=============================================================================
 //タブ2 calc_SCore END
 //=============================================================================
@@ -1127,7 +1178,7 @@ public class GUITest extends Application{
 		root_c_d.setBottom(saver);
 
 		BorderPane root_c_s = new BorderPane();
-		root_c_s.setCenter(card_list);
+		root_c_s.setCenter(c_SCgroot);
 		root_c_s.setBottom(calc_start);
 
 		BorderPane root_s_l = new BorderPane();
@@ -1182,6 +1233,181 @@ public class GUITest extends Application{
 		}
 	}
 
+	private static class carddatatoCell extends ListCell<Card_datas> {
+		@Override
+		protected void updateItem(Card_datas card, boolean empty) {
+			super.updateItem(card, empty);
+			if (!empty) {
+				if(card == null || empty){
+					setText("");
+					return;
+				}
+				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm());
+				setTooltip(new Tooltip("効果:" + Card_datas.setskilltext(card) + "\n\n"
+						+ "装備済みキッス:" + card.gpkiss() + "個\t"
+						+ "装備済みパフューム:" + card.gppfm() + "個\n"
+						+ "装備済みリング:" + card.gpring() + "個\t"
+						+ "装備済みクロス:" + card.gpcross() + "個\n"
+						+ "装備済みオーラ:" + card.gpaura() + "個\t"
+						+ "装備済みヴェール:" + card.gpveil() + "個\n"
+						+ "装備済み"+ Card_datas.getSISimagename(card)+ ":" + card.gpimage() + "個\n"
+						+ "装備済みノネット:" + card.gpnnet() + "個\t"
+						+ "装備済みウインク:" + card.gpwink() + "個\n"
+						+ "装備済みトリル:" + card.gptrill() + "個\t"
+						+ "装備済みブルーム:" + card.gpbloom() + "個\n\n"
+						+ "ダブルクリックでSISを修正"));
+				setOnMouseClicked(new EventHandler<MouseEvent>() {
+					public void handle(MouseEvent event) {
+						if(event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)){
+							Stage setSIS = new Stage();
+							setSIS.initModality(Modality.APPLICATION_MODAL);
+							setSIS.initOwner(tmpstage);
+							setSIS.setMaxWidth(500);
+							GridPane setSISgroot = new GridPane();
+							Label setSISlbl = new Label("SIS設定画面");
+							Label explainlbl = new Label("装備しているSISにチェックを入れてください。");
+							VBox lbls = new VBox();
+							lbls.getChildren().addAll(setSISlbl, explainlbl);
+
+							CheckBox setkiss = new CheckBox();
+							if(card.gpkiss() != 0){
+								setkiss.setSelected(true);
+							}
+							Label setkisslbl = new Label("キッス:");
+							HBox setkisshb = new HBox();
+							setkisshb.getChildren().addAll(setkisslbl,setkiss);
+
+							CheckBox setppfm = new CheckBox();
+							if(card.gppfm() != 0){
+								setppfm.setSelected(true);
+							}
+							Label setppfmlbl = new Label("パフューム:");
+							HBox setppfmhb = new HBox();
+							setppfmhb.getChildren().addAll(setppfmlbl, setppfm);
+
+							CheckBox setring = new CheckBox();
+							if(card.gpring() != 0){
+								setring.setSelected(true);
+							}
+							Label setringlbl = new Label("リング:");
+							HBox setringhb = new HBox();
+							setringhb.getChildren().addAll(setringlbl, setring);
+
+							Button sissaver = new Button("SIS設定を保存して閉じる");
+							sissaver.setOnAction(new EventHandler<ActionEvent>() {
+								public void handle(ActionEvent event) {
+									if(setkiss.isSelected()){
+										for(int len = 0;len < cdatas.size();len++){
+											if(card.equals(cdatas.get(len))){
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gppfm();
+												temp.spkiss(1);
+												cdatas.set(len, temp);
+												if(getNowdata != temp.gpkiss()){
+													System.out.println("キッスをセットしました。");
+													System.out.println(cdatas.get(len).getname() +":キッス装備数:"+ cdatas.get(len).gpkiss());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpkiss();
+												temp.spkiss(0);
+												cdatas.set(len, temp);
+												if(getNowdata != temp.gpkiss()){
+													System.out.println("キッスのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":キッス装備数:" + cdatas.get(len).gpkiss());
+												}
+											}
+										}
+									}
+									if(setppfm.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gppfm();
+												temp.sppfm(1);
+												cdatas.set(len, temp);
+												if(temp.gppfm() != getNowdata){
+													System.out.println("パフュームをセットしました。");
+													System.out.println(
+															cdatas.get(len).getname() + ":パフューム装備数:" + cdatas.get(len).gppfm());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gppfm();
+												temp.sppfm(0);
+												cdatas.set(len, temp);
+												if(getNowdata != temp.gppfm()){
+													System.out.println("パフュームのセットを外しました。");
+													System.out.println(
+															cdatas.get(len).getname() + ":パフューム装備数:" + cdatas.get(len).gppfm());
+												}
+											}
+										}
+									}
+									if(setring.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpring();
+												temp.spring(1);
+												cdatas.set(len, temp);
+												if(getNowdata != temp.gpring()){
+													System.out.println("リングをセットしました。");
+													System.out.println(
+															cdatas.get(len).getname() + ":リング装備数:" + cdatas.get(len).gpring());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpring();
+												temp.spring(0);
+												cdatas.set(len, temp);
+												if(getNowdata != temp.gpring()){
+													System.out.println("リングのセットを外しました。");
+													System.out.println(
+															cdatas.get(len).getname() + ":リング装備数:" + cdatas.get(len).gpring());
+												}
+											}
+										}
+									}
+									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
+									card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
+												@Override
+												public ListCell<Card_datas> call(ListView<Card_datas> temp) {
+													return new carddatatoCell();
+												}
+											});
+									//tpane.getSelectionModel().select(3);
+									setSIS.close();
+								}
+							});
+							setSISgroot.add(sissaver, 0, 0);
+							setSISgroot.add(lbls, 0, 1);
+							setSISgroot.add(setkisshb, 0, 2);
+							setSISgroot.add(setppfmhb, 0, 3);
+							setSISgroot.add(setringhb, 0, 4);
+							Scene setSISscene = new Scene(setSISgroot);
+							setSIS.setScene(setSISscene);
+							setSIS.setTitle("SIS設定");
+							setSIS.show();
+						}
+					}
+				});
+			}
+		}
+	}
+
 	private static void redirectConsole(TextArea textarea, Button resetButton){
 		//https://qiita.com/snipsnipsnip/items/281bd6ad20417b10fa04
 		//上記のサイトを参考にjavafx仕様に書き直した。
@@ -1217,16 +1443,6 @@ public class GUITest extends Application{
 	public static void printerrTb(String str){
 		System.err.println(printlogc + ":" + str);
 		printlogc++;
-	}
-
-	private static class carddatatoCell extends ListCell<Card_datas> {
-		@Override
-		protected void updateItem(Card_datas card, boolean empty) {
-			super.updateItem(card, empty);
-			if (!empty) {
-				setText(card.gcnum() + ":" + card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm() + ":" + Card_datas.setskilltext(card));
-			}
-		}
 	}
 
 	//* メインメソッド
