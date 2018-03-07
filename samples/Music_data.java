@@ -89,10 +89,10 @@ class Music_data {
 		return lanes;
 	}
 
-	public static Music_data getMusicdt(Music_data[] music_list, String musicnm) throws DataNotFoundException {
-		for (int len = 0; len < music_list.length; len++) {
-			if (music_list[len].getmscnm().equals(musicnm)) {
-				return music_list[len];
+	public static Music_data getMusicdt(List<Music_data> music_list, String musicnm) throws DataNotFoundException {
+		for (int len = 0; len < music_list.size(); len++) {
+			if (music_list.get(len).getmscnm().equals(musicnm)) {
+				return music_list.get(len);
 			}
 		}
 		String err = new String();
@@ -150,6 +150,7 @@ class Music_data {
 
 			liner = br.readLine();
 		}
+		br.close();
 		Music_data[] rtn_fldt = new Music_data[aL_mscdts.size()];
 		for(int len = 0;len < rtn_fldt.length;len++){
 			rtn_fldt[len] = aL_mscdts.get(len);

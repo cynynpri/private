@@ -97,6 +97,10 @@ class Calc_data{
 		return calculation_time;
 	}
 	//---------------------------------------------------------
+	final public String toString(){
+		return regular_probably+","+up_regular_probably+","+skill_up_score+","+probably_up_skillupscore+","+base_score+","+calculation_time;
+	}
+	//---------------------------------------------------------
 
 	public static double nCr(int n, int r){
 		//https://teratail.com/questions/9363
@@ -1773,6 +1777,11 @@ class Calc_data{
 		int tempscr = 0;
 		int regularscr = 0;
 		double regularprob = 0.0;
+		int count = 0;
+		for(int temp : scrupT){
+			System.out.println("scrupT["+count+"]:"+unit[count].getname()+":"+scrupT[count]);
+			count++;
+		}
 
 		for(int alane = unitprbs[0].length-1;alane >= 0;alane--){
 			if(unitsprbs[0][alane] > discriminant && alane >= expactcnts[0] - depth){
@@ -1838,6 +1847,7 @@ class Calc_data{
 																					regularpivot[8] = ilane;
 																					regularprob = sumprob;
 																				}
+																				tempscr = 0;
 																			}
 																		}
 																	}else{
@@ -1977,6 +1987,7 @@ class Calc_data{
 																						regularpivot[8] = ilane;
 																						upedsumprob = sumprob;
 																					}
+																					tempscr = 0;
 																				}
 																			}
 																		} else {

@@ -5,12 +5,15 @@ import java.io.File.*;
 import java.util.*;
 
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.SetExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.collections.*;
+import javafx.concurrent.*;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.event.*;
@@ -18,11 +21,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.input.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DragEvent;
 import javafx.scene.chart.*;
 import javafx.util.Callback;
+import javafx.application.Platform;
 //import java.lang.Object;
 //import javafx.scene.Node;
-
 
 public class GUITest extends Application{
 	static int printlogc = 1;
@@ -45,27 +50,27 @@ public class GUITest extends Application{
 	static List<Music_data>music_list = new ArrayList<Music_data>();
 	static Stage tmpstage = new Stage();
 	static TabPane tpane = new TabPane();
-	static ObservableList<Card_datas> listtounit = FXCollections.observableList(cdatas);
-	static ListView<Card_datas> card_list = new ListView<Card_datas>(listtounit);
-	/*
-	private ListView<Card_datas> card_list_view;
-	private ObservableList<Card_datas> card_list_records = FXCollections.observableArrayList();
-
-	private void fillCard_datas(List<Card_datas> cdatas){
-		for(Card_datas cd : cdatas){
-			card_list_records.add(cd);
-		}
-		card_list_view.setItems(card_list_records);
-		card_list_view.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>(){
-			@Override
-			public ListCell<Card_datas> call(ListView<Card_datas> card){
-				return new carddatatoCell();
-			}
-		});
-	}*/
+	static ObservableList<Card_datas> listtounit = FXCollections.observableArrayList();
+	static ListView<Card_datas> card_list = new ListView<Card_datas>();
+	static Music_data calcMd = new Music_data();
+	static Card_datas frend = new Card_datas();
+	static double perper = 0.0;//パフェ率
+	static int playcount = 0;//プレイ回数
+	static double tapscrup = 0.0;//タップアップ値
+	static int depth = 0;//探索幅
+	static Calc_data calc_result = new Calc_data();
+	static String result_score_str = new String();
+	static Label result_score_label = new Label();
+	static boolean ctou = false;
+	static boolean utoc = false;
+	final private static CalcScoreService cSS = new CalcScoreService();
+	final private static ListView<Card_datas> unitListview = new ListView<Card_datas>();//ユニットのリストビュー
+	final private static ObservableList<Card_datas> unitList = FXCollections.observableArrayList();
 
 	public void start(Stage stage){
 		tmpstage = stage;
+		initializeComponents();
+		initializeListeners();
 		//*表示されるパネルの大きさ
 		/*stage.setWidth(800);
 		stage.setHeight(600);*/
@@ -846,12 +851,8 @@ public class GUITest extends Application{
 							bfod.setcskin(srdata.getcsknm());
 							bfod.setacskn(srdata.getscsnm());
 							cdatas.add(bfod);
-							card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
-								@Override
-								public ListCell<Card_datas> call(ListView<Card_datas> temp) {
-									return new carddatatoCell();
-								}
-							});
+							listtounit.add(bfod);
+							card_list.setItems(listtounit);
 							Card_read.setonecarddata(pw, bfod);
 							if(debuglevel >= 1){
 								Card_datas[] printd = new Card_datas[cdatas.size()];
@@ -907,9 +908,14 @@ public class GUITest extends Application{
 							if(cdatas.size() != 0){
 								cdatas.clear();//addするので、これまでにデータが入ってるとまずい
 							}
+							if(listtounit.size() != 0){
+								listtounit.clear();
+							}
 							for(int len = 0; len < bfcdata.length; len++){
 								cdatas.add(Card_read.one_carddata(bfcdata, len));
+								listtounit.add(Card_read.one_carddata(bfcdata, len));
 							}
+							card_list.setItems(listtounit);
 							FileWriter fwSIFSCsettings = new FileWriter(iniDataPath);
 							BufferedWriter bwSIFSCsettings = new BufferedWriter(fwSIFSCsettings);
 							PrintWriter pwSIFSCsettings = new PrintWriter(bwSIFSCsettings);
@@ -922,12 +928,6 @@ public class GUITest extends Application{
 							Card_read.print_cdata(bfcdata,maxNum);
 							card_num = maxNum+1;
 							tpane.getSelectionModel().select(3);
-							card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
-								@Override
-								public ListCell<Card_datas> call(ListView<Card_datas> temp) {
-									return new carddatatoCell();
-								}
-							});
 						}
 					}catch(NullPointerException e){
 						System.err.println(printlogc + ":例外発生:場所:キャラクターデータ登録タブ:変換するボタン:メソッドエラー");
@@ -986,32 +986,35 @@ public class GUITest extends Application{
 			//*チョイスボックス
 			/*ChoiceBox<String> music_SEl = new ChoiceBox<>(FXCollections.observableArrayList("僕らのLIVE 君とのLIFE"));*/
 			//*楽曲選択コンボボックス
-			String[] music_titles = new String[music_list.size()];
+			String[] music_titles = new String[music_list.size()];//これ配列になってるんでListにしようかと思います//元のMusic_data型はListなので
 			//ここでfor文回す意味を教えてほしい。
 			for(int len = 0;len < music_list.size();len++){
 				music_titles[len] = music_list.get(len).getmscnm();
 			}
+			Label music_SEl_lbl = new Label("楽曲選択:");
+			HBox music_SElhb = new HBox();
 			ComboBox<String> music_SEl = new ComboBox<String>();
 			for(String adder : music_titles){
 				music_SEl.getItems().add(adder);
 			}
+			music_SElhb.getChildren().addAll(music_SEl_lbl,music_SEl);
 
 			Button calc_start = new Button("スコアを計算する");
 			//パフェ率の入力ボックスと、探索幅を入力するボックスが必要。
 
 			//パフェ率入力ボックス。intを%に直す形式。
 			Label perperlbl = new Label("パーフェクト率:");
-			Spinner setperper = new Spinner(0,100,80);
+			Spinner<Integer> setperper = new Spinner<>(0,100,80);
 			setperper.setEditable(true);
 
 			//探索幅入力ボックス。
 			Label depthlbl = new Label("発動回数探索の最小値幅:");
-			Spinner setdepth = new Spinner(0,8,4);
+			Spinner<Integer> setdepth = new Spinner<>(0,8,4);
 			setdepth.setEditable(true);
 
 			//タップアップ値入力ボックス。
 			Label tapuplbl = new Label("タップアップ値:");
-			Spinner<Double> settapup = new Spinner<Double>(1.00,1.40,1.00,0.01);
+			Spinner<Double> settapup = new Spinner<Double>(1.00, 1.40, 1.00, 0.01);
 			Label tapupendlbl = new Label("倍");
 			HBox tapuphbox = new HBox();
 			tapuphbox.getChildren().addAll(settapup, tapupendlbl);
@@ -1019,31 +1022,149 @@ public class GUITest extends Application{
 
 			//プレイ回数を入力するボックス。
 			Label playcountlbl = new Label("プレイ回数(最大100000まで):");
-			Spinner setplaycount = new Spinner(1,100000,20);
+			Spinner<Integer> setplaycount = new Spinner<>(1,100000,20);
 			setplaycount.setEditable(true);
 
-			String result_score_str = new String();
-			Label result_score_label = new Label(result_score_str);
-
 			//リストビュー(所持カード)
+			Label card_listlbl = new Label("全カードリスト");
+			Label unitListlbl = new Label("ユニットカードリスト");
+
+			//ユニット解除ボタン
+			Button unitdelete = new Button("ユニットクリア");
+			unitdelete.setOnAction(new EventHandler<ActionEvent>(){
+
+				@Override
+				public void handle(ActionEvent event) {
+					if(unitList.size() != 0){
+						for(Card_datas temp:unitList){
+							listtounit.add(temp.gcnum()-1,temp);
+						}
+						unitList.clear();
+						unitListview.setItems(unitList);
+					}
+				}
+			});
+			HBox unitguishb = new HBox();
+			unitguishb.getChildren().addAll(unitListlbl, unitdelete);
 			//ListView<Card_datas> card_list = card_list_view;
 			//fillCard_datas(cdatas);
-			listtounit = FXCollections.observableList(cdatas);
-			card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>(){
+			listtounit = FXCollections.observableArrayList();
+			for(int len = 0;len < cdatas.size();len++){
+				listtounit.add(cdatas.get(len));
+			}
+			card_list.setItems(listtounit);
+			//リストビュー(ユニット)
+
+			//フレンドの有無チェックボックス
+			CheckBox frendcb = new CheckBox();
+			Label frcblbl = new Label("フレンドの有無");
+			HBox frendguishb = new HBox();
+			frendguishb.getChildren().addAll(frcblbl, frendcb);
+
+			//フレンドコンボボックス-> レアリティ,メインセンター,サブセンタースキルを入力
+			ComboBox<String> frendrrityselecter = new ComboBox<>();
+			Label frrtsellbl = new Label("フレンドのレアリティ");
+			String[] frendrrityies = {"SR","SSR","UR"};//Rは未実装
+			frendrrityselecter.getItems().addAll(frendrrityies);
+			frendrrityselecter.getSelectionModel().select(0);
+			HBox frrtselhb = new HBox();
+			frrtselhb.getChildren().addAll(frrtsellbl, frendrrityselecter);
+			frrtselhb.setVisible(frendcb.isSelected());
+
+			//フレンドのセンタースキル。
+			ComboBox<String> frendcenterselecter = new ComboBox<>();
+			Label frecenlbl = new Label("フレンドのセンタースキル");
+			String[] frendcenterskills = {"ハート","スター","プリンセス","エンジェル","エンプレス"};//スマイルなどの属性は楽曲データから取得できるので不問にできるかと。
+			frendcenterselecter.getItems().addAll(frendcenterskills);
+			HBox frcenselhb = new HBox();
+			frcenselhb.getChildren().addAll(frecenlbl, frendcenterselecter);
+			frcenselhb.setVisible(frendcb.isSelected());
+
+			//フレンドのサブセンタースキル
+			ComboBox<String> frendsubcenterselecter = new ComboBox<>();
+			String[] subcenterlist = {"μ's", "Aqours","1年生","2年生","3年生", "Printemps", "lily white", "BiBi", "CYaRon！", "Guilty Kiss", "AZALEA"};
+			frendsubcenterselecter.getItems().addAll(subcenterlist);
+			frendsubcenterselecter.getSelectionModel().select(0);
+			Label frscselbl = new Label("フレンドのサブセンター");
+			HBox frscselhb = new HBox();
+			frscselhb.getChildren().addAll(frscselbl, frendsubcenterselecter);
+			frscselhb.setVisible(frendcb.isSelected());
+			frendcb.setOnMouseClicked(new EventHandler<MouseEvent>() {
 				@Override
-				public ListCell<Card_datas> call(ListView<Card_datas> temp){
-					return new carddatatoCell();
+				public void handle(MouseEvent event) {
+					frrtselhb.setVisible(frendcb.isSelected());
+					frcenselhb.setVisible(frendcb.isSelected());
+					if (frendrrityselecter.getValue().equals("SR")) {
+						frscselhb.setVisible(false);
+					} else {
+						frscselhb.setVisible(frendcb.isSelected());
+					}
+				}
+			});
+			frendrrityselecter.setOnAction(new EventHandler<ActionEvent>() {
+
+				@Override
+				public void handle(ActionEvent event) {
+					if (frendrrityselecter.getValue().equals("SR")) {
+						frscselhb.setVisible(false);
+					}else{
+						frscselhb.setVisible(frendcb.isSelected());
+					}
 				}
 			});
 
-
 			//*計算用のボタンが押された時のイベント
-			/*calc_start.setOnAction(new EventHandler<ActionEvent>(){
+			calc_start.setOnAction(new EventHandler<ActionEvent>(){
 				public void handle(ActionEvent event){
+					if(unitList.size() == 9){
+						try{
+							calcMd = Music_data.getMusicdt(music_list, music_SEl.getValue());
+							if(debuglevel >= 1){
+								System.out.println("calcMd is setted. calcMd value is "+ calcMd.getmscnm());
+							}
+						}catch(DataNotFoundException e){
+							System.err.println(e);
+							tpane.getSelectionModel().select(3);
+							return;
+						}
+						for(int len = 0;len < 9;len++){
+							unitdt[len] = unitList.get(len);
+						}
+						if(frendcb.isSelected()){
+							frend.srrity(frendrrityselecter.getValue());
+							if(frendrrityselecter.getValue().equals("SSR") || frendrrityselecter.getValue().equals("UR")){
+								frend.setacskn(frendsubcenterselecter.getValue());
+							}else{
+								frend.setacskn("Empty");
+							}
+							frend.setcskin(calcMd.gpprty()+frendcenterselecter.getValue());
+						}else{
+							frend = null;
+						}
+						perper = setperper.getValue()/100.0;
+						playcount = setplaycount.getValue();
+						tapscrup = settapup.getValue();
+						depth = setdepth.getValue();
+						cSS.restart();
+					}else{
+						//エラー処理
+						System.err.println(printlogc+":エラー:ユニットが正しくセットできていません。");
+						int len = 1;
+						if(unitList.size() != 0){
+							for(Card_datas err: unitList){
+								System.out.println("ユニット"+len+"番目:"+err.getname()+":"+err.grrity()+":"+err.gpprty()+":"+err.getskinm());
+								len++;
+							}
+						}else{
+							System.err.println("ユニットが空です。");
+						}
+						printlogc++;
+						tpane.getSelectionModel().select(3);
+					}
 				}
-			});*/
+			});
 
-			c_SCguis.add(music_SEl, 0, 0);
+			c_SCguis.add(music_SElhb, 0, 0);
 			c_SCguis.add(perperlbl, 0, 1);
 			c_SCguis.add(setperper, 1, 1);
 			c_SCguis.add(depthlbl, 0, 2);
@@ -1052,7 +1173,15 @@ public class GUITest extends Application{
 			c_SCguis.add(tapuphbox, 1, 3);
 			c_SCguis.add(playcountlbl, 0, 4);
 			c_SCguis.add(setplaycount, 1, 4);
-			c_SCguis.add(card_list, 0, 5);
+			c_SCguis.add(card_listlbl, 0, 5);
+			c_SCguis.add(unitguishb, 1, 5);
+			c_SCguis.add(card_list, 0, 6);
+			c_SCguis.add(unitListview, 1, 6);
+			c_SCguis.add(frendguishb, 2, 0);
+			c_SCguis.add(frrtselhb, 2, 1);
+			c_SCguis.add(frcenselhb, 2, 2);
+			c_SCguis.add(frscselhb, 2, 3);
+			c_SCguis.add(result_score_label, 2, 4);
 
 //=============================================================================
 //タブ2 calc_SCore END
@@ -1233,12 +1362,884 @@ public class GUITest extends Application{
 		}
 	}
 
-	private static class carddatatoCell extends ListCell<Card_datas> {
+	private static class CalcScoreService extends Service<Boolean>{
+		//スコア計算するスレッド.
+		@Override
+			protected Task<Boolean> createTask(){
+				return new calcTask();
+			}
+
+	};
+	private static class calcTask extends Task<Boolean>{
+		@Override
+		protected Boolean call() throws Exception{
+			//スコア計算スレッドでの実際の処理.
+			calc_result = Calc_data.calcscrmain(unitdt, calcMd, frend, perper, playcount, tapscrup, depth);
+			int resultint = calc_result.getskill_up_score() + calc_result.getbase_score();
+			Platform.runLater(() -> System.out.println("スキルアップスコア:"+calc_result.getskill_up_score()));
+			Platform.runLater(()-> System.out.println("ベーススコア:"+ calc_result.getbase_score()));
+			Platform.runLater(() -> System.out.println("発生確率:"+calc_result.getregular_probably()));
+			for(Card_datas temp:unit){
+				Platform.runLater(() -> System.out.println(temp.getname()+":"+temp.gactcnt()));
+			}
+			result_score_str = String.valueOf(resultint);
+			Platform.runLater(() -> result_score_label.setText(result_score_str));
+
+			return true;
+		}
+	}
+
+	private void initializeListeners() {
+		//http://www.java2s.com/Tutorials/Java/JavaFX/0640__JavaFX_ListView.htm
+		//上記のサイトを参考にした。
+
+		//card_list -> unitListview.
+		card_list.setOnDragDetected(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				if (card_list.getSelectionModel().getSelectedItem() == null) {
+					return;
+				}
+				Dragboard dragBoard = card_list.startDragAndDrop(TransferMode.MOVE);
+				ClipboardContent content = new ClipboardContent();
+				Card_datas temp = card_list.getSelectionModel().getSelectedItem();
+				content.putString(temp.gcnum() + "," + temp.getname() + "," + temp.gpprty() + "," + temp.grrity() + ","
+						+ temp.getskinm() + "," + temp.gsawk() + "," + temp.gsislt() + "," + temp.gskilv() + ","
+						+ temp.gsksha() + "," + temp.gskitp() + "," + temp.gfactv() + "," + temp.gprob() + ","
+						+ temp.gaccut() + "," + temp.gefsz() + "," + temp.gcsm() + "," + temp.gcpr() + "," + temp.gccl()
+						+ "," + temp.getcskin() + "," + temp.getacskn() + "," + temp.gpkiss() + "," + temp.gppfm() + ","
+						+ temp.gpring() + "," + temp.gpcross() + "," + temp.gpaura() + "," + temp.gpveil() + ","
+						+ temp.gpcharm() + "," + temp.gpheal() + "," + temp.gptrick() + "," + temp.gpwink() + ","
+						+ temp.gpimage() + "," + temp.gpbloom() + "," + temp.gptrill() + "," + temp.gpnnet());
+				dragBoard.setContent(content);
+				ctou = true;
+			}
+		});
+		unitListview.setOnDragOver(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				if (ctou == true) {
+					event.acceptTransferModes(TransferMode.MOVE);
+				}
+			}
+		});
+		unitListview.setOnDragDropped(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				if (ctou == true) {
+					String getcard_data = event.getDragboard().getString();
+					System.out.println(getcard_data);
+					String[] temp = getcard_data.split(",", 0);
+					int cnum = Integer.parseInt(temp[0]);
+					String name = temp[1];
+					String pprty = temp[2];
+					String rrity = temp[3];
+					String skinm = temp[4];
+					boolean awake = Card_datas.chkrawake(temp[5]);
+					int sislt = Integer.parseInt(temp[6]);
+					int skilv = Integer.parseInt(temp[7]);
+					String sksha = temp[8];
+					String skitp = temp[9];
+					int factv = Integer.parseInt(temp[10]);
+					int prob = Integer.parseInt(temp[11]);
+					double accut = Double.parseDouble(temp[12]);
+					int efsz = Integer.parseInt(temp[13]);
+					int csm = Integer.parseInt(temp[14]);
+					int cpr = Integer.parseInt(temp[15]);
+					int ccl = Integer.parseInt(temp[16]);
+					String cskin = temp[17];
+					String acskn = temp[18];
+					int pkiss = Integer.parseInt(temp[19]);
+					int ppfm = Integer.parseInt(temp[20]);
+					int pring = Integer.parseInt(temp[21]);
+					int pcross = Integer.parseInt(temp[22]);
+					int paura = Integer.parseInt(temp[23]);
+					int pveil = Integer.parseInt(temp[24]);
+					int pcharm = Integer.parseInt(temp[25]);
+					int pheal = Integer.parseInt(temp[26]);
+					int ptrick = Integer.parseInt(temp[27]);
+					int pwink = Integer.parseInt(temp[28]);
+					int pimage = Integer.parseInt(temp[29]);
+					int pbloom = Integer.parseInt(temp[30]);
+					int ptrill = Integer.parseInt(temp[31]);
+					int pnnet = Integer.parseInt(temp[32]);
+					unitList.addAll(new Card_datas(cnum, name, pprty, rrity, skinm, awake, sislt, skilv, sksha, skitp,
+							factv, prob, accut, efsz, csm, cpr, ccl, cskin, acskn, pkiss, ppfm, pring, pcross, paura,
+							pveil, pcharm, pheal, ptrick, pwink, pimage, pbloom, ptrill, pnnet));
+					unitListview.setItems(unitList);
+					listtounit.remove(card_list.getSelectionModel().getSelectedItem());
+					card_list.setItems(listtounit);
+					event.setDropCompleted(true);
+					ctou = false;
+				}
+			}
+		});
+
+		//unitListview -> card_list
+		unitListview.setOnDragDetected(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				Dragboard dragBoard = unitListview.startDragAndDrop(TransferMode.MOVE);
+				ClipboardContent content = new ClipboardContent();
+				if (unitListview.getSelectionModel().getSelectedItem() != null) {
+					Card_datas temp = unitListview.getSelectionModel().getSelectedItem();
+					content.putString(temp.gcnum() + "," + temp.getname() + "," + temp.gpprty() + "," + temp.grrity()
+							+ "," + temp.getskinm() + "," + temp.gsawk() + "," + temp.gsislt() + "," + temp.gskilv()
+							+ "," + temp.gsksha() + "," + temp.gskitp() + "," + temp.gfactv() + "," + temp.gprob() + ","
+							+ temp.gaccut() + "," + temp.gefsz() + "," + temp.gcsm() + "," + temp.gcpr() + ","
+							+ temp.gccl() + "," + temp.getcskin() + "," + temp.getacskn() + "," + temp.gpkiss() + ","
+							+ temp.gppfm() + "," + temp.gpring() + "," + temp.gpcross() + "," + temp.gpaura() + ","
+							+ temp.gpveil() + "," + temp.gpcharm() + "," + temp.gpheal() + "," + temp.gptrick() + ","
+							+ temp.gpwink() + "," + temp.gpimage() + "," + temp.gpbloom() + "," + temp.gptrill() + ","
+							+ temp.gpnnet());
+					dragBoard.setContent(content);
+					utoc = true;
+				} else {
+					System.err.println("表示バグによりNullPointerExceptionが発生しました。");
+					unitListview.getSelectionModel()
+							.clearSelection(unitListview.getSelectionModel().getSelectedIndex());
+				}
+			}
+		});
+
+		card_list.setOnDragOver(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				if (utoc == true) {
+					event.acceptTransferModes(TransferMode.MOVE);
+				}
+			}
+		});
+
+		card_list.setOnDragDropped(new EventHandler<DragEvent>() {
+			@Override
+			public void handle(DragEvent event) {
+				if (utoc == true) {
+					int index = unitListview.getSelectionModel().getSelectedIndex();
+					String getcard_data = event.getDragboard().getString();
+					System.out.println(getcard_data);
+					String[] temp = getcard_data.split(",", 0);
+					int cnum = Integer.parseInt(temp[0]);
+					String name = temp[1];
+					String pprty = temp[2];
+					String rrity = temp[3];
+					String skinm = temp[4];
+					boolean awake = Card_datas.chkrawake(temp[5]);
+					int sislt = Integer.parseInt(temp[6]);
+					int skilv = Integer.parseInt(temp[7]);
+					String sksha = temp[8];
+					String skitp = temp[9];
+					int factv = Integer.parseInt(temp[10]);
+					int prob = Integer.parseInt(temp[11]);
+					double accut = Double.parseDouble(temp[12]);
+					int efsz = Integer.parseInt(temp[13]);
+					int csm = Integer.parseInt(temp[14]);
+					int cpr = Integer.parseInt(temp[15]);
+					int ccl = Integer.parseInt(temp[16]);
+					String cskin = temp[17];
+					String acskn = temp[18];
+					int pkiss = Integer.parseInt(temp[19]);
+					int ppfm = Integer.parseInt(temp[20]);
+					int pring = Integer.parseInt(temp[21]);
+					int pcross = Integer.parseInt(temp[22]);
+					int paura = Integer.parseInt(temp[23]);
+					int pveil = Integer.parseInt(temp[24]);
+					int pcharm = Integer.parseInt(temp[25]);
+					int pheal = Integer.parseInt(temp[26]);
+					int ptrick = Integer.parseInt(temp[27]);
+					int pwink = Integer.parseInt(temp[28]);
+					int pimage = Integer.parseInt(temp[29]);
+					int pbloom = Integer.parseInt(temp[30]);
+					int ptrill = Integer.parseInt(temp[31]);
+					int pnnet = Integer.parseInt(temp[32]);
+					card_list.getItems().add(cnum - 1,
+							new Card_datas(cnum, name, pprty, rrity, skinm, awake, sislt, skilv, sksha, skitp, factv,
+									prob, accut, efsz, csm, cpr, ccl, cskin, acskn, pkiss, ppfm, pring, pcross, paura,
+									pveil, pcharm, pheal, ptrick, pwink, pimage, pbloom, ptrill, pnnet));
+					unitList.remove(index);
+					unitListview.refresh();
+					unitListview.setItems(unitList);
+					event.setDropCompleted(true);
+					utoc = false;
+				}
+			}
+		});
+	}
+
+	private void initializeComponents() {
+		initializeListView(card_list);
+		initializeunitListView(unitListview);
+	}
+
+	private void initializeListView(ListView<Card_datas> listView) {
+		listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		listView.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
+			@Override
+			public ListCell<Card_datas> call(ListView<Card_datas> temp) {
+				return new carddatatoCell();
+			}
+		});
+	}
+
+	private void initializeunitListView(ListView<Card_datas> listView) {
+		listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		listView.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
+			@Override
+			public ListCell<Card_datas> call(ListView<Card_datas> temp) {
+				return new unitdatatoCell();
+			}
+		});
+	}
+
+	static class unitdatatoCell extends ListCell<Card_datas> {
 		@Override
 		protected void updateItem(Card_datas card, boolean empty) {
 			super.updateItem(card, empty);
 			if (!empty) {
-				if(card == null || empty){
+				if (card == null || empty || card.getunitnm().equals("empty") || card.getgrade().equals("empty")
+						|| card.getsubuntnm().equals("empty")) {
+					setText("");
+					return;
+				}
+				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm());
+				setTooltip(new Tooltip("効果:" + Card_datas.setskilltext(card) + "\n\n" + "装備済みキッス:" + card.gpkiss()
+						+ "個\t" + "装備済みパフューム:" + card.gppfm() + "個\n" + "装備済みリング:" + card.gpring() + "個\t" + "装備済みクロス:"
+						+ card.gpcross() + "個\n" + "装備済みオーラ:" + card.gpaura() + "個\t" + "装備済みヴェール:" + card.gpveil()
+						+ "個\n" + "装備済みチャーム:" + card.gpcharm() + "個\t" + "装備済みヒール:" + card.gpheal() + "個\n"
+						+ "装備済みトリック:" + card.gptrick() + "個\n" + "装備済み" + Card_datas.getSISimagename(card) + ":"
+						+ card.gpimage() + "個\n" + "装備済みノネット:" + card.gpnnet() + "個\t" + "装備済みウィンク:" + card.gpwink()
+						+ "個\n" + "装備済みトリル:" + card.gptrill() + "個\t" + "装備済みブルーム:" + card.gpbloom() + "個"));
+				/*setOnMouseClicked(new EventHandler<MouseEvent>() {
+					public void handle(MouseEvent event) {
+						if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
+							Stage setSIS = new Stage();
+							setSIS.initModality(Modality.APPLICATION_MODAL);
+							setSIS.initOwner(tmpstage);
+							setSIS.setMaxWidth(500);
+							GridPane setSISgroot = new GridPane();
+							Label setSISlbl = new Label("SIS設定画面");
+							Label explainlbl = new Label("装備しているSISにチェックを入れてください。");
+							VBox lbls = new VBox();
+							lbls.getChildren().addAll(setSISlbl, explainlbl);
+
+							CheckBox setkiss = new CheckBox();
+							if (card.gpkiss() != 0) {
+								setkiss.setSelected(true);
+							}
+							Label setkisslbl = new Label("キッス:");
+							HBox setkisshb = new HBox();
+							setkisshb.getChildren().addAll(setkisslbl, setkiss);
+
+							CheckBox setppfm = new CheckBox();
+							if (card.gppfm() != 0) {
+								setppfm.setSelected(true);
+							}
+							Label setppfmlbl = new Label("パフューム:");
+							HBox setppfmhb = new HBox();
+							setppfmhb.getChildren().addAll(setppfmlbl, setppfm);
+
+							CheckBox setring = new CheckBox();
+							if (card.gpring() != 0) {
+								setring.setSelected(true);
+							}
+							Label setringlbl = new Label("リング:");
+							HBox setringhb = new HBox();
+							setringhb.getChildren().addAll(setringlbl, setring);
+
+							CheckBox setcross = new CheckBox();
+							if (card.gpcross() != 0) {
+								setcross.setSelected(true);
+							}
+							Label setcrosslbl = new Label("クロス:");
+							HBox setcrosshb = new HBox();
+							setcrosshb.getChildren().addAll(setcrosslbl, setcross);
+
+							CheckBox setaura = new CheckBox();
+							if (card.gpaura() != 0) {
+								setaura.setSelected(true);
+							}
+							Label setauralbl = new Label("オーラ:");
+							HBox setaurahb = new HBox();
+							setaurahb.getChildren().addAll(setauralbl, setaura);
+
+							CheckBox setveil = new CheckBox();
+							if (card.gpveil() != 0) {
+								setveil.setSelected(true);
+							}
+							Label setveillbl = new Label("ヴェール:");
+							HBox setveilhb = new HBox();
+							setveilhb.getChildren().addAll(setveillbl, setveil);
+
+							CheckBox setcharm = new CheckBox();
+							if (card.gpcharm() != 0) {
+								setcharm.setSelected(true);
+							}
+							Label setcharmlbl = new Label("チャーム:");
+							HBox setcharmhb = new HBox();
+							setcharmhb.getChildren().addAll(setcharmlbl, setcharm);
+
+							CheckBox setheal = new CheckBox();
+							if (card.gpheal() != 0) {
+								setheal.setSelected(true);
+							}
+							Label setheallbl = new Label("ヒール:");
+							HBox sethealhb = new HBox();
+							sethealhb.getChildren().addAll(setheallbl, setheal);
+
+							CheckBox settrick = new CheckBox();
+							if (card.gptrick() != 0) {
+								settrick.setSelected(true);
+							}
+							Label settricklbl = new Label("トリック:");
+							HBox settrickhb = new HBox();
+							settrickhb.getChildren().addAll(settricklbl, settrick);
+
+							CheckBox setimage = new CheckBox();
+							if (card.gpimage() != 0) {
+								setimage.setSelected(true);
+							}
+							Label setimagelbl = new Label(Card_datas.getSISimagename(card) + ":");
+							HBox setimagehb = new HBox();
+							setimagehb.getChildren().addAll(setimagelbl, setimage);
+
+							CheckBox setnonette = new CheckBox();
+							if (card.gpnnet() != 0) {
+								setnonette.setSelected(true);
+							}
+							Label setnonettelbl = new Label("ノネット:");
+							HBox setnonettehb = new HBox();
+							setnonettehb.getChildren().addAll(setnonettelbl, setnonette);
+
+							CheckBox setwink = new CheckBox();
+							if (card.gpwink() != 0) {
+								setwink.setSelected(true);
+							}
+							Label setwinklbl = new Label("ウインク:");
+							HBox setwinkhb = new HBox();
+							setwinkhb.getChildren().addAll(setwinklbl, setwink);
+
+							CheckBox settrill = new CheckBox();
+							if (card.gptrill() != 0) {
+								settrill.setSelected(true);
+							}
+							Label settrilllbl = new Label("トリル:");
+							HBox settrillhb = new HBox();
+							settrillhb.getChildren().addAll(settrilllbl, settrill);
+
+							CheckBox setbloom = new CheckBox();
+							if (card.gpbloom() != 0) {
+								setbloom.setSelected(true);
+							}
+							Label setbloomlbl = new Label("ブルーム:");
+							HBox setbloomhb = new HBox();
+							setbloomhb.getChildren().addAll(setbloomlbl, setbloom);
+
+							Button sissaver = new Button("SIS設定を保存して閉じる");
+							sissaver.setOnAction(new EventHandler<ActionEvent>() {
+								public void handle(ActionEvent event) {
+									if (setkiss.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gppfm();
+												temp.spkiss(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpkiss()) {
+													System.out.println("キッスをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":キッス装備数:"
+															+ cdatas.get(len).gpkiss());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpkiss();
+												temp.spkiss(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpkiss()) {
+													System.out.println("キッスのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":キッス装備数:"
+															+ cdatas.get(len).gpkiss());
+												}
+											}
+										}
+									}
+									if (setppfm.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gppfm();
+												temp.sppfm(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (temp.gppfm() != getNowdata) {
+													System.out.println("パフュームをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":パフューム装備数:"
+															+ cdatas.get(len).gppfm());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gppfm();
+												temp.sppfm(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gppfm()) {
+													System.out.println("パフュームのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":パフューム装備数:"
+															+ cdatas.get(len).gppfm());
+												}
+											}
+										}
+									}
+									if (setring.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpring();
+												temp.spring(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpring()) {
+													System.out.println("リングをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":リング装備数:"
+															+ cdatas.get(len).gpring());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpring();
+												temp.spring(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpring()) {
+													System.out.println("リングのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":リング装備数:"
+															+ cdatas.get(len).gpring());
+												}
+											}
+										}
+									}
+									if (setcross.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcross();
+												temp.spcross(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpcross()) {
+													System.out.println("クロスをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":クロス装備数:"
+															+ cdatas.get(len).gpcross());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcross();
+												temp.spcross(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpcross()) {
+													System.out.println("クロスのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":クロス装備数:"
+															+ cdatas.get(len).gpcross());
+												}
+											}
+										}
+									}
+									if (setaura.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpaura();
+												temp.spaura(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpaura()) {
+													System.out.println("オーラをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":オーラ装備数:"
+															+ cdatas.get(len).gpaura());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpaura();
+												temp.spaura(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpaura()) {
+													System.out.println("オーラのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":オーラ装備数:"
+															+ cdatas.get(len).gpaura());
+												}
+											}
+										}
+									}
+									if (setveil.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpveil();
+												temp.spveil(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpveil()) {
+													System.out.println("ヴェールをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ヴェール装備数:"
+															+ cdatas.get(len).gpveil());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpveil();
+												temp.spveil(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpveil()) {
+													System.out.println("ヴェールのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ヴェール装備数:"
+															+ cdatas.get(len).gpveil());
+												}
+											}
+										}
+									}
+									if (setcharm.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcharm();
+												temp.spcharm(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpcharm()) {
+													System.out.println("チャームをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":チャーム装備数:"
+															+ cdatas.get(len).gpcharm());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcharm();
+												temp.spcharm(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpcharm()) {
+													System.out.println("チャームのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":チャーム装備数:"
+															+ cdatas.get(len).gpcharm());
+												}
+											}
+										}
+									}
+									if (setheal.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpheal();
+												temp.spheal(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpheal()) {
+													System.out.println("ヒールをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ヒール装備数:"
+															+ cdatas.get(len).gpheal());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpheal();
+												temp.spheal(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpheal()) {
+													System.out.println("ヒールのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ヒール装備数:"
+															+ cdatas.get(len).gpheal());
+												}
+											}
+										}
+									}
+									if (settrick.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrick();
+												temp.sptrick(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gptrick()) {
+													System.out.println("トリックをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":トリック装備数:"
+															+ cdatas.get(len).gptrick());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrick();
+												temp.sptrick(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gptrick()) {
+													System.out.println("トリックのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":トリック装備数:"
+															+ cdatas.get(len).gptrick());
+												}
+											}
+										}
+									}
+									if (setimage.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpimage();
+												temp.spimage(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpimage()) {
+													System.out.println(Card_datas.getSISimagename(card) + "をセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":"
+															+ Card_datas.getSISimagename(card) + "装備数:"
+															+ cdatas.get(len).gpimage());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpimage();
+												temp.spimage(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpimage()) {
+													System.out
+															.println(Card_datas.getSISimagename(card) + "のセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":"
+															+ Card_datas.getSISimagename(card) + "装備数:"
+															+ cdatas.get(len).gpimage());
+												}
+											}
+										}
+									}
+									if (setnonette.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpnnet();
+												temp.spnnet(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpnnet()) {
+													System.out.println("ノネットをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ノネット装備数:"
+															+ cdatas.get(len).gpnnet());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpnnet();
+												temp.spnnet(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpnnet()) {
+													System.out.println("ノネットのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ノネット装備数:"
+															+ cdatas.get(len).gpnnet());
+												}
+											}
+										}
+									}
+									if (setwink.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpwink();
+												temp.spwink(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpwink()) {
+													System.out.println("ウインクをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ウインク装備数:"
+															+ cdatas.get(len).gpwink());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpwink();
+												temp.spwink(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpwink()) {
+													System.out.println("ウインクのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ウインク装備数:"
+															+ cdatas.get(len).gpwink());
+												}
+											}
+										}
+									}
+									if (settrill.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrill();
+												temp.sptrill(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gptrill()) {
+													System.out.println("トリルをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":トリル装備数:"
+															+ cdatas.get(len).gptrill());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrill();
+												temp.sptrill(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gptrill()) {
+													System.out.println("トリルのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":トリル装備数:"
+															+ cdatas.get(len).gptrill());
+												}
+											}
+										}
+									}
+									if (setbloom.isSelected()) {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpbloom();
+												temp.spbloom(1);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpbloom()) {
+													System.out.println("ブルームをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ブルーム装備数:"
+															+ cdatas.get(len).gpbloom());
+												}
+											}
+										}
+									} else {
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpbloom();
+												temp.spbloom(0);
+												cdatas.set(len, temp);
+												unitList.set(len, temp);
+												unitListview.setItems(unitList);
+												if (getNowdata != temp.gpbloom()) {
+													System.out.println("ブルームのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ブルーム装備数:"
+															+ cdatas.get(len).gpbloom());
+												}
+											}
+										}
+									}
+									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
+									//tpane.getSelectionModel().select(3);
+									setSIS.close();
+								}
+							});
+							setSISgroot.add(sissaver, 0, 0);
+							setSISgroot.add(lbls, 0, 1);
+							setSISgroot.add(setkisshb, 0, 2);
+							setSISgroot.add(setppfmhb, 1, 2);
+							setSISgroot.add(setringhb, 0, 3);
+							setSISgroot.add(setcrosshb, 1, 3);
+							setSISgroot.add(setaurahb, 0, 4);
+							setSISgroot.add(setveilhb, 1, 4);
+							setSISgroot.add(setcharmhb, 0, 5);
+							setSISgroot.add(sethealhb, 1, 5);
+							setSISgroot.add(settrickhb, 0, 6);
+							setSISgroot.add(setimagehb, 1, 6);
+							setSISgroot.add(setnonettehb, 0, 7);
+							setSISgroot.add(setwinkhb, 1, 7);
+							setSISgroot.add(settrillhb, 0, 8);
+							setSISgroot.add(setbloomhb, 1, 8);
+							Scene setSISscene = new Scene(setSISgroot);
+							setSIS.setScene(setSISscene);
+							setSIS.setTitle(card.grrity() + card.getname() + "SIS設定");
+							setSIS.show();
+						}
+					}
+				});*/
+			}
+		}
+	}
+
+	static class carddatatoCell extends ListCell<Card_datas> {
+		@Override
+		protected void updateItem(Card_datas card, boolean empty) {
+			super.updateItem(card, empty);
+			if (!empty) {
+				if(card == null || empty || card.getunitnm().equals("empty") || card.getgrade().equals("empty") || card.getsubuntnm().equals("empty")){
 					setText("");
 					return;
 				}
@@ -1250,20 +2251,24 @@ public class GUITest extends Application{
 						+ "装備済みクロス:" + card.gpcross() + "個\n"
 						+ "装備済みオーラ:" + card.gpaura() + "個\t"
 						+ "装備済みヴェール:" + card.gpveil() + "個\n"
+						+ "装備済みチャーム:" + card.gpcharm() + "個\t"
+						+ "装備済みヒール:" + card.gpheal() + "個\n"
+						+ "装備済みトリック:" + card.gptrick() + "個\n"
 						+ "装備済み"+ Card_datas.getSISimagename(card)+ ":" + card.gpimage() + "個\n"
 						+ "装備済みノネット:" + card.gpnnet() + "個\t"
-						+ "装備済みウインク:" + card.gpwink() + "個\n"
+						+ "装備済みウィンク:" + card.gpwink() + "個\n"
 						+ "装備済みトリル:" + card.gptrill() + "個\t"
 						+ "装備済みブルーム:" + card.gpbloom() + "個\n\n"
 						+ "ダブルクリックでSISを修正"));
 				setOnMouseClicked(new EventHandler<MouseEvent>() {
 					public void handle(MouseEvent event) {
 						if(event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)){
-							Stage setSIS = new Stage();
+							Stage setSIS = new Stage(/*StageStyle.TRANSPARENT*/);
 							setSIS.initModality(Modality.APPLICATION_MODAL);
 							setSIS.initOwner(tmpstage);
 							setSIS.setMaxWidth(500);
 							GridPane setSISgroot = new GridPane();
+							//setSISgroot.setStyle("-fx-background-color: rgba(0,0,0,0.5);-fx-text-background-color:white");
 							Label setSISlbl = new Label("SIS設定画面");
 							Label explainlbl = new Label("装備しているSISにチェックを入れてください。");
 							VBox lbls = new VBox();
@@ -1293,6 +2298,98 @@ public class GUITest extends Application{
 							HBox setringhb = new HBox();
 							setringhb.getChildren().addAll(setringlbl, setring);
 
+							CheckBox setcross = new CheckBox();
+							if(card.gpcross() != 0){
+								setcross.setSelected(true);
+							}
+							Label setcrosslbl = new Label("クロス:");
+							HBox setcrosshb = new HBox();
+							setcrosshb.getChildren().addAll(setcrosslbl, setcross);
+
+							CheckBox setaura = new CheckBox();
+							if(card.gpaura() != 0){
+								setaura.setSelected(true);
+							}
+							Label setauralbl = new Label("オーラ:");
+							HBox setaurahb = new HBox();
+							setaurahb.getChildren().addAll(setauralbl, setaura);
+
+							CheckBox setveil = new CheckBox();
+							if(card.gpveil() != 0){
+								setveil.setSelected(true);
+							}
+							Label setveillbl = new Label("ヴェール:");
+							HBox setveilhb = new HBox();
+							setveilhb.getChildren().addAll(setveillbl, setveil);
+
+							CheckBox setcharm = new CheckBox();
+							if(card.gpcharm() != 0){
+								setcharm.setSelected(true);
+							}
+							Label setcharmlbl = new Label("チャーム:");
+							HBox setcharmhb = new HBox();
+							setcharmhb.getChildren().addAll(setcharmlbl, setcharm);
+							setcharmhb.setVisible(card.gsksha().equals("スコア"));
+
+
+							CheckBox setheal = new CheckBox();
+							if(card.gpheal() != 0){
+								setheal.setSelected(true);
+							}
+							Label setheallbl = new Label("ヒール:");
+							HBox sethealhb = new HBox();
+							sethealhb.getChildren().addAll(setheallbl, setheal);
+							sethealhb.setVisible(card.gsksha().equals("回復"));
+
+							CheckBox settrick = new CheckBox();
+							if(card.gptrick() != 0){
+								settrick.setSelected(true);
+							}
+							Label settricklbl = new Label("トリック:");
+							HBox settrickhb = new HBox();
+							settrickhb.getChildren().addAll(settricklbl, settrick);
+							settrickhb.setVisible(card.gsksha().equals("判定"));
+
+							CheckBox setimage = new CheckBox();
+							if(card.gpimage() != 0){
+								setimage.setSelected(true);
+							}
+							Label setimagelbl = new Label(Card_datas.getSISimagename(card)+":");
+							HBox setimagehb = new HBox();
+							setimagehb.getChildren().addAll(setimagelbl, setimage);
+
+							CheckBox setnonette = new CheckBox();
+							if(card.gpnnet() != 0){
+								setnonette.setSelected(true);
+							}
+							Label setnonettelbl = new Label("ノネット:");
+							HBox setnonettehb = new HBox();
+							setnonettehb.getChildren().addAll(setnonettelbl, setnonette);
+
+							CheckBox setwink = new CheckBox();
+							if(card.gpwink() != 0){
+								setwink.setSelected(true);
+							}
+							Label setwinklbl = new Label("ウィンク:");
+							HBox setwinkhb = new HBox();
+							setwinkhb.getChildren().addAll(setwinklbl, setwink);
+
+							CheckBox settrill = new CheckBox();
+							if(card.gptrill() != 0){
+								settrill.setSelected(true);
+							}
+							Label settrilllbl = new Label("トリル:");
+							HBox settrillhb = new HBox();
+							settrillhb.getChildren().addAll(settrilllbl, settrill);
+
+							CheckBox setbloom = new CheckBox();
+							if(card.gpbloom() != 0){
+								setbloom.setSelected(true);
+							}
+							Label setbloomlbl = new Label("ブルーム:");
+							HBox setbloomhb = new HBox();
+							setbloomhb.getChildren().addAll(setbloomlbl, setbloom);
+
 							Button sissaver = new Button("SIS設定を保存して閉じる");
 							sissaver.setOnAction(new EventHandler<ActionEvent>() {
 								public void handle(ActionEvent event) {
@@ -1300,9 +2397,15 @@ public class GUITest extends Application{
 										for(int len = 0;len < cdatas.size();len++){
 											if(card.equals(cdatas.get(len))){
 												Card_datas temp = cdatas.get(len);
-												int getNowdata = temp.gppfm();
+												int getNowdata = temp.gpkiss();
 												temp.spkiss(1);
-												cdatas.set(len, temp);
+												cdatas.get(len).spkiss(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spkiss(1);
+													}
+												}
+												card_list.setItems(listtounit);
 												if(getNowdata != temp.gpkiss()){
 													System.out.println("キッスをセットしました。");
 													System.out.println(cdatas.get(len).getname() +":キッス装備数:"+ cdatas.get(len).gpkiss());
@@ -1315,7 +2418,13 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpkiss();
 												temp.spkiss(0);
-												cdatas.set(len, temp);
+												cdatas.get(len).spkiss(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spkiss(0);
+													}
+												}
+												card_list.setItems(listtounit);
 												if(getNowdata != temp.gpkiss()){
 													System.out.println("キッスのセットを外しました。");
 													System.out.println(cdatas.get(len).getname() + ":キッス装備数:" + cdatas.get(len).gpkiss());
@@ -1329,7 +2438,13 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gppfm();
 												temp.sppfm(1);
-												cdatas.set(len, temp);
+												cdatas.get(len).sppfm(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).sppfm(1);
+													}
+												}
+												card_list.setItems(listtounit);
 												if(temp.gppfm() != getNowdata){
 													System.out.println("パフュームをセットしました。");
 													System.out.println(
@@ -1343,7 +2458,11 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gppfm();
 												temp.sppfm(0);
-												cdatas.set(len, temp);
+												cdatas.get(len).sppfm(0);
+												for(int k = 0;k < listtounit.size(); k++){
+													listtounit.get(k).sppfm(0);
+												}
+												card_list.setItems(listtounit);
 												if(getNowdata != temp.gppfm()){
 													System.out.println("パフュームのセットを外しました。");
 													System.out.println(
@@ -1358,7 +2477,13 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpring();
 												temp.spring(1);
-												cdatas.set(len, temp);
+												cdatas.get(len).spring(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spring(1);
+													}
+												}
+												card_list.setItems(listtounit);
 												if(getNowdata != temp.gpring()){
 													System.out.println("リングをセットしました。");
 													System.out.println(
@@ -1372,7 +2497,13 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpring();
 												temp.spring(0);
-												cdatas.set(len, temp);
+												cdatas.get(len).spring(0);
+												for(int k = 0; k < listtounit.size();k++){
+													if(card.equals(listtounit.get(k))){
+														listtounit.get(k).spring(0);
+													}
+												}
+												card_list.setItems(listtounit);
 												if(getNowdata != temp.gpring()){
 													System.out.println("リングのセットを外しました。");
 													System.out.println(
@@ -1381,13 +2512,459 @@ public class GUITest extends Application{
 											}
 										}
 									}
-									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
-									card_list.setCellFactory(new Callback<ListView<Card_datas>, ListCell<Card_datas>>() {
-												@Override
-												public ListCell<Card_datas> call(ListView<Card_datas> temp) {
-													return new carddatatoCell();
+									if(setcross.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcross();
+												temp.spcross(1);
+												cdatas.get(len).spcross(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spcross(1);
+													}
 												}
-											});
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpcross()) {
+													System.out.println("クロスをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":クロス装備数:"
+															+ cdatas.get(len).gpcross());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcross();
+												temp.spcross(0);
+												cdatas.get(len).spcross(0);
+												for(int k = 0; k < listtounit.size();k++){
+													if(card.equals(listtounit.get(k))){
+														listtounit.get(k).spcross(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpcross()) {
+													System.out.println("クロスのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":クロス装備数:"
+															+ cdatas.get(len).gpcross());
+												}
+											}
+										}
+									}
+									if(setaura.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpaura();
+												temp.spaura(1);
+												cdatas.get(len).spaura(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spaura(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpaura()) {
+													System.out.println("オーラをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":オーラ装備数:"
+															+ cdatas.get(len).gpaura());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpaura();
+												temp.spaura(0);
+												cdatas.get(len).spaura(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spaura(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpaura()) {
+													System.out.println("オーラのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":オーラ装備数:"
+															+ cdatas.get(len).gpaura());
+												}
+											}
+										}
+									}
+									if(setveil.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpveil();
+												temp.spveil(1);
+												cdatas.get(len).spveil(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spveil(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpveil()) {
+													System.out.println("ヴェールをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ヴェール装備数:"
+															+ cdatas.get(len).gpveil());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpveil();
+												temp.spveil(0);
+												cdatas.get(len).spveil(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spveil(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpveil()) {
+													System.out.println("ヴェールのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ヴェール装備数:"
+															+ cdatas.get(len).gpveil());
+												}
+											}
+										}
+									}
+									if(setcharm.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcharm();
+												temp.spcharm(1);
+												cdatas.get(len).spcharm(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spcharm(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpcharm()) {
+													System.out.println("チャームをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":チャーム装備数:"
+															+ cdatas.get(len).gpcharm());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpcharm();
+												temp.spcharm(0);
+												cdatas.get(len).spcharm(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spcharm(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpcharm()) {
+													System.out.println("チャームのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":チャーム装備数:"
+															+ cdatas.get(len).gpcharm());
+												}
+											}
+										}
+									}
+									if(setheal.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpheal();
+												temp.spheal(1);
+												cdatas.get(len).spheal(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spheal(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpheal()) {
+													System.out.println("ヒールをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ヒール装備数:"
+															+ cdatas.get(len).gpheal());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpheal();
+												temp.spheal(0);
+												cdatas.get(len).spheal(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spheal(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpheal()) {
+													System.out.println("ヒールのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ヒール装備数:"
+															+ cdatas.get(len).gpheal());
+												}
+											}
+										}
+									}
+									if(settrick.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrick();
+												temp.sptrick(1);
+												cdatas.get(len).sptrick(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).sptrick(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gptrick()) {
+													System.out.println("トリックをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":トリック装備数:"
+															+ cdatas.get(len).gptrick());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrick();
+												temp.sptrick(0);
+												cdatas.get(len).sptrick(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).sptrick(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gptrick()) {
+													System.out.println("トリックのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":トリック装備数:"
+															+ cdatas.get(len).gptrick());
+												}
+											}
+										}
+									}
+									if(setimage.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpimage();
+												temp.spimage(1);
+												cdatas.get(len).spimage(1);
+												for(int k = 0; k < listtounit.size();k++){
+													if(card.equals(listtounit.get(k))){
+														listtounit.get(k).spimage(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpimage()) {
+													System.out.println(Card_datas.getSISimagename(card)+"をセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":"+Card_datas.getSISimagename(card)+"装備数:"
+															+ cdatas.get(len).gpimage());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpimage();
+												temp.spimage(0);
+												cdatas.get(len).spimage(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spimage(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpimage()) {
+													System.out.println(Card_datas.getSISimagename(card) + "のセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":"
+															+ Card_datas.getSISimagename(card) + "装備数:"
+															+ cdatas.get(len).gpimage());
+												}
+											}
+										}
+									}
+									if(setnonette.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpnnet();
+												temp.spnnet(1);
+												cdatas.get(len).spnnet(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spnnet(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpnnet()) {
+													System.out.println("ノネットをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ノネット装備数:"
+															+ cdatas.get(len).gpnnet());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpnnet();
+												temp.spnnet(0);
+												cdatas.get(len).spnnet(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spnnet(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpnnet()) {
+													System.out.println("ノネットのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ノネット装備数:"
+															+ cdatas.get(len).gpnnet());
+												}
+											}
+										}
+									}
+									if(setwink.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpwink();
+												temp.spwink(1);
+												cdatas.get(len).spwink(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spwink(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpwink()) {
+													System.out.println("ウィンクをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ウィンク装備数:"
+															+ cdatas.get(len).gpwink());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpwink();
+												temp.spwink(0);
+												cdatas.get(len).spwink(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spwink(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpwink()) {
+													System.out.println("ウィンクのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ウィンク装備数:"
+															+ cdatas.get(len).gpwink());
+												}
+											}
+										}
+									}
+									if(settrill.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrill();
+												temp.sptrill(1);
+												cdatas.get(len).sptrill(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).sptrill(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gptrill()) {
+													System.out.println("トリルをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":トリル装備数:"
+															+ cdatas.get(len).gptrill());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gptrill();
+												temp.sptrill(0);
+												cdatas.get(len).sptrill(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).sptrill(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gptrill()) {
+													System.out.println("トリルのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":トリル装備数:"
+															+ cdatas.get(len).gptrill());
+												}
+											}
+										}
+									}
+									if(setbloom.isSelected()){
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpbloom();
+												temp.spbloom(1);
+												cdatas.get(len).spbloom(1);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spbloom(1);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpbloom()) {
+													System.out.println("ブルームをセットしました。");
+													System.out.println(cdatas.get(len).getname() + ":ブルーム装備数:"
+															+ cdatas.get(len).gpbloom());
+												}
+											}
+										}
+									}else{
+										for (int len = 0; len < cdatas.size(); len++) {
+											if (card.equals(cdatas.get(len))) {
+												Card_datas temp = cdatas.get(len);
+												int getNowdata = temp.gpbloom();
+												temp.spbloom(0);
+												cdatas.get(len).spbloom(0);
+												for (int k = 0; k < listtounit.size(); k++) {
+													if (card.equals(listtounit.get(k))) {
+														listtounit.get(k).spbloom(0);
+													}
+												}
+												card_list.setItems(listtounit);
+												if (getNowdata != temp.gpbloom()) {
+													System.out.println("ブルームのセットを外しました。");
+													System.out.println(cdatas.get(len).getname() + ":ブルーム装備数:"
+															+ cdatas.get(len).gpbloom());
+												}
+											}
+										}
+									}
+									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
 									//tpane.getSelectionModel().select(3);
 									setSIS.close();
 								}
@@ -1395,11 +2972,23 @@ public class GUITest extends Application{
 							setSISgroot.add(sissaver, 0, 0);
 							setSISgroot.add(lbls, 0, 1);
 							setSISgroot.add(setkisshb, 0, 2);
-							setSISgroot.add(setppfmhb, 0, 3);
-							setSISgroot.add(setringhb, 0, 4);
+							setSISgroot.add(setppfmhb, 1, 2);
+							setSISgroot.add(setringhb, 0, 3);
+							setSISgroot.add(setcrosshb, 1, 3);
+							setSISgroot.add(setaurahb, 0, 4);
+							setSISgroot.add(setveilhb, 1, 4);
+							setSISgroot.add(setcharmhb, 0, 5);
+							setSISgroot.add(sethealhb, 1, 5);
+							setSISgroot.add(settrickhb, 0, 6);
+							setSISgroot.add(setimagehb, 1, 6);
+							setSISgroot.add(setnonettehb, 0, 7);
+							setSISgroot.add(setwinkhb, 1, 7);
+							setSISgroot.add(settrillhb, 0, 8);
+							setSISgroot.add(setbloomhb, 1, 8);
 							Scene setSISscene = new Scene(setSISgroot);
+							//setSISscene.setFill(null);
 							setSIS.setScene(setSISscene);
-							setSIS.setTitle("SIS設定");
+							setSIS.setTitle(card.grrity()+card.getname()+"SIS設定");
 							setSIS.show();
 						}
 					}
@@ -1464,8 +3053,10 @@ public class GUITest extends Application{
 				maxNum = Card_read.getMaxnum(dfilePath);
 				for(int len = 1; len < maxNum; len++){
 					cdatas.add(Card_read.one_carddata(Card_read.reading_rdata(dfilePath), len));
+					listtounit.add(Card_read.one_carddata(Card_read.reading_rdata(dfilePath), len));
 				}
 			}
+			card_list.setItems(listtounit);
 			brinifile.close();
 			Music_data[] ar_mlist = Music_data.r_Rdata();
 			for(Music_data tmp:ar_mlist){

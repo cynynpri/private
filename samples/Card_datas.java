@@ -41,7 +41,7 @@ class Card_datas{
 	private int pcharm;//SIS‚Ìƒ`ƒƒ[ƒ€ private charm
 	private int pheal;//SIS‚Ìƒq[ƒ‹ private heal
 	private int ptrick;//SIS‚ÌƒgƒŠƒbƒN private trick
-	private int pwink;//SIS‚ÌƒEƒCƒ“ƒN private wink
+	private int pwink;//SIS‚ÌƒEƒBƒ“ƒN private wink
 	private int pimage;//ƒLƒƒƒ‰ŒÀ’èSIS private character image item
 	private int pbloom;//SIS‚Ìƒuƒ‹[ƒ€ private bloom
 	private int ptrill;//SIS‚ÌƒgƒŠƒ‹ private trill
@@ -116,6 +116,86 @@ class Card_datas{
 		}else if(name.equals("‘–Ø“c‰ÔŠÛ")||name.equals("¼‰Y‰Ê“ì")||name.equals("•àVƒ_ƒCƒ„")){
 			subuntnm = "AZALEA";
 		}else{
+			subuntnm = "empty";
+		}
+	}
+
+	public Card_datas(int cnum, String name, String pprty, String rrity, String skinm, boolean awake, int sislt,
+			int skilv, String sksha, String skitp, int factv, int prob, double accut, int efsz, int csm, int cpr,
+			int ccl, String cskin, String acskn, int pkiss, int ppfm, int pring, int pcross, int paura, int pveil,
+			int pcharm, int pheal, int ptrick, int pwink, int pimage, int pbloom, int ptrill, int pnnet) {
+		this.cnum = cnum;
+		this.name = name;
+		this.pprty = pprty;
+		this.rrity = rrity;
+		this.skinm = skinm;
+		this.awake = awake;
+		this.sislt = sislt;
+		this.skilv = skilv;
+		this.sksha = sksha;
+		this.skitp = skitp;
+		this.factv = factv;
+		this.prob = prob;
+		this.accut = accut;
+		this.efsz = efsz;
+		this.csm = csm;
+		this.ccl = ccl;
+		this.cpr = cpr;
+		this.cskin = cskin;
+		this.acskn = acskn;
+		this.pkiss = pkiss;
+		this.ppfm = ppfm;
+		this.pring = pring;
+		this.pcross = pcross;
+		this.paura = paura;
+		this.pveil = pveil;
+		this.pcharm = pcharm;
+		this.pheal = pheal;
+		this.ptrick = ptrick;
+		this.pwink = pwink;
+		this.pimage = pimage;
+		this.pbloom = pbloom;
+		this.ptrill = ptrill;
+		this.pnnet = pnnet;
+		//set grade
+		if (name.equals("¬ò‰Ô—z") || name.equals("¼–Ø–ì^•P") || name.equals("¯‹ó™z") || name.equals("’Ã“‡‘Pq")
+				|| name.equals("•àVƒ‹ƒrƒB") || name.equals("‘–Ø“c‰ÔŠÛ")) {
+			grade = "1”N¶";
+		} else if (name.equals("“ì‚±‚Æ‚è") || name.equals("‚â•ä”T‰Ê") || name.equals("‰€“cŠC–¢") || name.equals("“n•Ó—j")
+				|| name.equals("‚ŠCç‰Ì") || name.equals("÷“à—œq")) {
+			grade = "2”N¶";
+		} else if (name.equals("“ŒŠŠó") || name.equals("–îàV‚É‚±") || name.equals("ˆº£ŠG—¢") || name.equals("•àVƒ_ƒCƒ„")
+				|| name.equals("¬Œ´‹fä»") || name.equals("¼‰Y‰Ê“ì")) {
+			grade = "3”N¶";
+		} else {
+			grade = "empty";
+		}
+		//set unitnm
+		if (name.equals("¬ò‰Ô—z") || name.equals("¼–Ø–ì^•P") || name.equals("¯‹ó™z") || name.equals("“ì‚±‚Æ‚è")
+				|| name.equals("‚â•ä”T‰Ê") || name.equals("‰€“cŠC–¢") || name.equals("“ŒŠŠó") || name.equals("ˆº£ŠG—¢")
+				|| name.equals("–îàV‚É‚±")) {
+			unitnm = "ƒÊ's";
+		} else if (name.equals("•àVƒ‹ƒrƒB") || name.equals("‘–Ø“c‰ÔŠÛ") || name.equals("’Ã“‡‘Pq") || name.equals("“n•Ó—j")
+				|| name.equals("‚ŠCç‰Ì") || name.equals("÷“à—œq") || name.equals("¬Œ´‹fä»") || name.equals("•àVƒ_ƒCƒ„")
+				|| name.equals("¼‰Y‰Ê“ì")) {
+			unitnm = "Aqours";
+		} else {
+			unitnm = "empty";
+		}
+		//set subuntnm
+		if (name.equals("¬ò‰Ô—z") || name.equals("‚â•ä”T‰Ê") || name.equals("“ì‚±‚Æ‚è")) {
+			subuntnm = "Printemps";
+		} else if (name.equals("¯‹ó™z") || name.equals("‰€“cŠC–¢") || name.equals("“ŒŠŠó")) {
+			subuntnm = "lily white";
+		} else if (name.equals("¼–Ø–ì^•P") || name.equals("–îàV‚É‚±") || name.equals("ˆº£ŠG—¢")) {
+			subuntnm = "BiBi";
+		} else if (name.equals("•àVƒ‹ƒrƒB") || name.equals("‚ŠCç‰Ì") || name.equals("“n•Ó—j")) {
+			subuntnm = "CYaRonI";
+		} else if (name.equals("’Ã“‡‘Pq") || name.equals("÷“à—œq") || name.equals("¬Œ´‹fä»")) {
+			subuntnm = "Guilty Kiss";
+		} else if (name.equals("‘–Ø“c‰ÔŠÛ") || name.equals("¼‰Y‰Ê“ì") || name.equals("•àVƒ_ƒCƒ„")) {
+			subuntnm = "AZALEA";
+		} else {
 			subuntnm = "empty";
 		}
 	}
