@@ -1492,7 +1492,8 @@ class Calc_data{
 		// ある特定の確率で出る最大スコアを計算するメソッド
 		// メインのスコア計算メソッドとする。
 		// 派生版として、 1/プレイ回数 の確率を1ビットとして、グラフを表示させるメソッドも作成可能。
-		double discriminant = 1/playcount;
+		double discriminant = (double)(1.0/playcount);
+		//System.out.println("discriminant is "+discriminant);
 		String sf = setUnitsf(unit, frend, calcMd);
 		int base_scr = calcBS(unit, calcMd, sf, tapscoreup);
 		String actsf = new String();
@@ -1516,12 +1517,19 @@ class Calc_data{
 		}
 		for(int len = 0; len < unit.length;len++){
 			expactcnts[len] = (int)Math.floor(maxactcnts[len]*unit[len].gprob()/100.0);
+			//System.out.println("expactcnts is "+ expactcnts[len]);
 		}
 		for(int len = 0; len < unit.length;len++){
 			unitprbs[len] = setrealprob(maxactcnts[len], unit[len].gprob()/100.0);
 			unitsprbs[len] = setprob(maxactcnts[len], unit[len].gprob()/100.0);
+			//for(double temp : setprob(maxactcnts[len], unit[len].gprob()/100.0)){
+				//System.out.println("setprob["+len+"] is"+temp);
+			//}
 		}
+
 		for(int len = 0;len < unit.length;len++){
+			//System.out.println("unitprbs[len].length is "+unitprbs[len].length);
+			//System.out.println("unitsprbs[len].length is " + unitsprbs[len].length);
 			if(unit[len].gsksha().equals("スコア")){
 				scrupT[len] = unit[len].gefsz();
 				if(unit[len].gpcharm() != 0 && unit[len].gpcharm() != -1){
@@ -1778,10 +1786,10 @@ class Calc_data{
 		int regularscr = 0;
 		double regularprob = 0.0;
 		int count = 0;
-		for(int temp : scrupT){
+		/*for(int temp : scrupT){
 			System.out.println("scrupT["+count+"]:"+unit[count].getname()+":"+scrupT[count]);
 			count++;
-		}
+		}*/
 
 		for(int alane = unitprbs[0].length-1;alane >= 0;alane--){
 			if(unitsprbs[0][alane] > discriminant && alane >= expactcnts[0] - depth){
@@ -1854,12 +1862,14 @@ class Calc_data{
 																		steps += unitprbs[8].length;
 																		sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane] * unitsprbs[6][glane] * unitsprbs[7][hlane];
 																		tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane] * unitprbs[5][flane] * unitprbs[6][glane];
+																		tempsprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane] * unitsprbs[6][glane];
 																	}
 																}
 															}else{
 																steps += unitprbs[7].length * unitprbs[8].length;
 																sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane] * unitsprbs[6][glane];
 																tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane] * unitprbs[5][flane];
+																tempsprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane];
 															}
 														}
 
@@ -1867,35 +1877,41 @@ class Calc_data{
 														steps += unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
 														sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane];
 														tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane] * unitprbs[4][elane];
+														tempsprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane];
 													}
 												}
 											}else{
 												steps += unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
 												sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane];
 												tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane] * unitprbs[3][dlane];
+												tempsprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane];
 											}
 										}
 									}else{
 										steps += unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
 										sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane];
 										tempprob = unitprbs[0][alane] * unitprbs[1][blane] * unitprbs[2][clane];
+										tempsprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane];
 									}
 								}
 							}else{
 								steps += unitprbs[3].length * unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
 								sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane];
 								tempprob = unitprbs[0][alane] * unitprbs[1][blane];
+								tempsprob = unitsprbs[0][alane] * unitsprbs[1][blane];
 							}
 						}
 					}else{
 						steps += unitprbs[2].length * unitprbs[3].length * unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
 						sumprob = unitsprbs[0][alane] * unitsprbs[1][blane];
 						tempprob = unitprbs[0][alane];
+						tempsprob = unitsprbs[0][alane];
 					}
 				}
 			}else{
 				steps += unitprbs[1].length * unitprbs[2].length * unitprbs[3].length * unitprbs[4].length * unitprbs[5].length * unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
 				sumprob = unitsprbs[0][alane];
+				tempsprob = 0.0;
 				tempprob = 0.0;
 			}
 		}
@@ -2007,6 +2023,13 @@ class Calc_data{
 																					* untupprbs[4][elane]
 																					* untupprbs[5][flane]
 																					* untupprbs[6][glane];
+																			tempsprob = untupsprbs[0][alane]
+																					* untupsprbs[1][blane]
+																					* untupsprbs[2][clane]
+																					* untupsprbs[3][dlane]
+																					* untupsprbs[4][elane]
+																					* untupsprbs[5][flane]
+																					* untupsprbs[6][glane];
 																		}
 																	}
 																} else {
@@ -2018,6 +2041,9 @@ class Calc_data{
 																	tempprob = untupprbs[0][alane] * untupprbs[1][blane]
 																			* untupprbs[2][clane] * untupprbs[3][dlane]
 																			* untupprbs[4][elane] * untupprbs[5][flane];
+																	tempsprob = untupsprbs[0][alane] * untupsprbs[1][blane]
+																			* untupsprbs[2][clane] * untupsprbs[3][dlane]
+																			* untupsprbs[4][elane] * untupsprbs[5][flane];
 																}
 															}
 
@@ -2030,6 +2056,9 @@ class Calc_data{
 															tempprob = untupprbs[0][alane] * untupprbs[1][blane]
 																	* untupprbs[2][clane] * untupprbs[3][dlane]
 																	* untupprbs[4][elane];
+															tempsprob = untupsprbs[0][alane] * untupsprbs[1][blane]
+																	* untupsprbs[2][clane] * untupsprbs[3][dlane]
+																	* untupsprbs[4][elane];
 														}
 													}
 												} else {
@@ -2040,6 +2069,8 @@ class Calc_data{
 															* untupsprbs[4][elane];
 													tempprob = untupprbs[0][alane] * untupprbs[1][blane]
 															* untupprbs[2][clane] * untupprbs[3][dlane];
+													tempsprob = untupsprbs[0][alane] * untupsprbs[1][blane]
+															* untupsprbs[2][clane] * untupsprbs[3][dlane];
 												}
 											}
 										} else {
@@ -2048,6 +2079,7 @@ class Calc_data{
 											sumprob = untupsprbs[0][alane] * untupsprbs[1][blane] * untupsprbs[2][clane]
 													* untupsprbs[3][dlane];
 											tempprob = untupprbs[0][alane] * untupprbs[1][blane] * untupprbs[2][clane];
+											tempsprob = untupsprbs[0][alane] * untupsprbs[1][blane] * untupsprbs[2][clane];
 										}
 									}
 								} else {
@@ -2055,6 +2087,7 @@ class Calc_data{
 											* untupprbs[6].length * untupprbs[7].length * untupprbs[8].length;
 									sumprob = untupsprbs[0][alane] * untupsprbs[1][blane] * untupsprbs[2][clane];
 									tempprob = untupprbs[0][alane] * untupprbs[1][blane];
+									tempsprob = untupsprbs[0][alane] * untupsprbs[1][blane];
 								}
 							}
 						} else {
@@ -2062,6 +2095,7 @@ class Calc_data{
 									* untupprbs[6].length * untupprbs[7].length * untupprbs[8].length;
 							sumprob = untupsprbs[0][alane] * untupsprbs[1][blane];
 							tempprob = untupprbs[0][alane];
+							tempsprob = untupsprbs[0][alane];
 						}
 					}
 				} else {
@@ -2069,12 +2103,23 @@ class Calc_data{
 							* untupprbs[5].length * untupprbs[6].length * untupprbs[7].length * untupprbs[8].length;
 					sumprob = untupsprbs[0][alane];
 					tempprob = 0.0;
+					tempsprob = 0.0;
 				}
 			}
 
 
 			for (int len = 0; len < unit.length; len++) {
 				unit[len].supactcnt(regularpivot[len]);
+			}
+			//発動率アップがすべての時間において発動してるときのスコアなのでmusictmでaccut(発動率アップ時間)を割る必要がある。
+
+		}
+
+		for(Card_datas sklup:unit){
+			if(sklup.getskinm().equals("発動率")){
+				double permusic = sklup.gaccut()/calcMd.gmusictm();
+				int defscr = upregularscr - regularscr;
+				upregularscr = (int)Math.floor(sklup.gactcnt()*defscr*permusic);
 			}
 		}
 		Calc_data rtn_data = new Calc_data();
@@ -2119,17 +2164,4 @@ class Calc_data{
 				+ note[4]*Math.floor(1.15*base) + note[5]*Math.floor( 1.15 * ln * base) + note[6]*Math.floor(1.20 * base)
 				+ note[7]*Math.floor(1.20 * ln * base) + note[8]*Math.floor(1.25 * base) + note[9]*Math.floor(1.25 * ln * base);
 	}
-
-	/*public static void main(String[] args)throws Exception{
-		String str = System.getProperty("user.dir")+"/Character_cdata.ini";
-		File dPath = new File(str);
-		Card_datas[] bfcdata = new Card_datas[1];
-		bfcdata = Card_read.reading_rdata(dPath);
-		ArrayList<Card_datas> cdatas = new ArrayList<Card_datas>();
-		for(int len = 1; len < bfcdata.length; len++){
-			cdatas.add(Card_read.one_carddata(bfcdata, len));
-		}
-
-		ArrayList<Card_datas[]> a = setUnitlist(cdatas);
-	}*/
 }

@@ -1041,6 +1041,7 @@ public class GUITest extends Application{
 						}
 						unitList.clear();
 						unitListview.setItems(unitList);
+						initializeComponents();
 					}
 				}
 			});
@@ -1142,9 +1143,10 @@ public class GUITest extends Application{
 							frend = null;
 						}
 						perper = setperper.getValue()/100.0;
-						playcount = setplaycount.getValue();
-						tapscrup = settapup.getValue();
-						depth = setdepth.getValue();
+						playcount = (int)setplaycount.getValue();
+						//System.out.println("playcount is "+playcount);
+						tapscrup = (double)settapup.getValue();
+						depth = (int)setdepth.getValue();
 						cSS.restart();
 					}else{
 						//エラー処理
@@ -1374,15 +1376,17 @@ public class GUITest extends Application{
 		@Override
 		protected Boolean call() throws Exception{
 			//スコア計算スレッドでの実際の処理.
+			//Platform.runLater(() ->System.out.println("Thread getted playcount is"+playcount));
 			calc_result = Calc_data.calcscrmain(unitdt, calcMd, frend, perper, playcount, tapscrup, depth);
 			int resultint = calc_result.getskill_up_score() + calc_result.getbase_score();
-			Platform.runLater(() -> System.out.println("スキルアップスコア:"+calc_result.getskill_up_score()));
+			/*Platform.runLater(() -> System.out.println("スキルアップスコア:"+calc_result.getskill_up_score()));
 			Platform.runLater(()-> System.out.println("ベーススコア:"+ calc_result.getbase_score()));
 			Platform.runLater(() -> System.out.println("発生確率:"+calc_result.getregular_probably()));
 			for(Card_datas temp:unit){
 				Platform.runLater(() -> System.out.println(temp.getname()+":"+temp.gactcnt()));
-			}
+			}*/
 			result_score_str = String.valueOf(resultint);
+			result_score_str = "スコア期待値:"+result_score_str;
 			Platform.runLater(() -> result_score_label.setText(result_score_str));
 
 			return true;
@@ -1428,7 +1432,7 @@ public class GUITest extends Application{
 			public void handle(DragEvent event) {
 				if (ctou == true) {
 					String getcard_data = event.getDragboard().getString();
-					System.out.println(getcard_data);
+					//System.out.println(getcard_data);
 					String[] temp = getcard_data.split(",", 0);
 					int cnum = Integer.parseInt(temp[0]);
 					String name = temp[1];
@@ -1471,6 +1475,7 @@ public class GUITest extends Application{
 					card_list.setItems(listtounit);
 					event.setDropCompleted(true);
 					ctou = false;
+					initializeComponents();
 				}
 			}
 		});
@@ -1498,6 +1503,7 @@ public class GUITest extends Application{
 					System.err.println("表示バグによりNullPointerExceptionが発生しました。");
 					unitListview.getSelectionModel()
 							.clearSelection(unitListview.getSelectionModel().getSelectedIndex());
+					initializeComponents();
 				}
 			}
 		});
@@ -1517,7 +1523,7 @@ public class GUITest extends Application{
 				if (utoc == true) {
 					int index = unitListview.getSelectionModel().getSelectedIndex();
 					String getcard_data = event.getDragboard().getString();
-					System.out.println(getcard_data);
+					//System.out.println(getcard_data);
 					String[] temp = getcard_data.split(",", 0);
 					int cnum = Integer.parseInt(temp[0]);
 					String name = temp[1];
@@ -1561,6 +1567,7 @@ public class GUITest extends Application{
 					unitListview.setItems(unitList);
 					event.setDropCompleted(true);
 					utoc = false;
+					initializeComponents();
 				}
 			}
 		});
@@ -1602,6 +1609,15 @@ public class GUITest extends Application{
 					return;
 				}
 				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm());
+				if (card.gpprty().equals("スマイル")) {
+					setStyle("-fx-background-color:#ffecec");
+				} else if (card.gpprty().equals("ピュア")) {
+					setStyle("-fx-background-color:#ecffec");
+				} else if (card.gpprty().equals("クール")) {
+					setStyle("-fx-background-color:#ececff");
+				} else {
+					setStyle("-fx-background-color:#eeeeee");
+				}
 				setTooltip(new Tooltip("効果:" + Card_datas.setskilltext(card) + "\n\n" + "装備済みキッス:" + card.gpkiss()
 						+ "個\t" + "装備済みパフューム:" + card.gppfm() + "個\n" + "装備済みリング:" + card.gpring() + "個\t" + "装備済みクロス:"
 						+ card.gpcross() + "個\n" + "装備済みオーラ:" + card.gpaura() + "個\t" + "装備済みヴェール:" + card.gpveil()
@@ -2244,6 +2260,16 @@ public class GUITest extends Application{
 					return;
 				}
 				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm());
+				if(card.gpprty().equals("スマイル")){
+					setStyle("-fx-background-color:#ffecec");
+				}else if(card.gpprty().equals("ピュア")){
+					setStyle("-fx-background-color:#ecffec");
+				}else if(card.gpprty().equals("クール")){
+					setStyle("-fx-background-color:#ececff");
+				}else{
+					setStyle("-fx-background-color:#eeeeee");
+				}
+
 				setTooltip(new Tooltip("効果:" + Card_datas.setskilltext(card) + "\n\n"
 						+ "装備済みキッス:" + card.gpkiss() + "個\t"
 						+ "装備済みパフューム:" + card.gppfm() + "個\n"
