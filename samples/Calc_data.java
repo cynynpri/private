@@ -20,8 +20,12 @@ class Calc_data{
 	private int probably_up_skillupscore;
 	private int base_score;
 	private long calculation_time;
+	private int unit_pprty;//ユニット値
+	private int centerskill_up_unit_pprty;//センタースキルによる上昇分ユニット値
 
-	/*public static ArrayList<Card_datas[]> setUnitlist(ArrayList<Card_datas> cdata,String pprty,int maxnotes){
+	/*
+	public static List<Card_datas[]> setUnitlist(List<Card_datas> cdata, Music_data calcMd){
+		//ユニット提案メソッド
 		int max = cdata.size();
 		Card_datas[] untdt = new Card_datas[9];
 		Card_datas[] fldt = new Card_datas[cdata.size()];
@@ -38,8 +42,10 @@ class Calc_data{
 			fldt = Card_datas.csmsort(fldt);
 		}else if(pprty.equals("ピュア")){
 			//
+			fldt = Card_datas.cprsort(fldt);
 		}else{
 			//
+			fldt = Card_datas.cclsort(fldt);
 		}
 
 		for (int len = 0; len < 20; len++) {
@@ -49,8 +55,9 @@ class Calc_data{
 			//
 		}
 
-		return null;
-	}*/
+		return;
+	}
+	*/
 	public Calc_data(){
 		super();
 	}
@@ -101,6 +108,21 @@ class Calc_data{
 		return regular_probably+","+up_regular_probably+","+skill_up_score+","+probably_up_skillupscore+","+base_score+","+calculation_time;
 	}
 	//---------------------------------------------------------
+	final public void setunit_pprty(int unit_pprty){
+		this.unit_pprty = unit_pprty;
+	}
+	final public int getunit_pprty(){
+		return unit_pprty;
+	}
+	//---------------------------------------------------------
+	final public void setcenterskill_up_unit_pprty(int centerskill_up_unit_pprty){
+		this.centerskill_up_unit_pprty = centerskill_up_unit_pprty;
+	}
+	final public int getcenterskill_up_unit_pprty(){
+		return centerskill_up_unit_pprty;
+	}
+	//---------------------------------------------------------
+
 
 	public static double nCr(int n, int r){
 		//https://teratail.com/questions/9363
@@ -159,8 +181,10 @@ class Calc_data{
 			//対象カードの最大スキル発動回数の最低値がチェインの最大発動回数．(e.g. {19,28,17,22} -> maxactcnt of Chain is 17)
 			List<Card_datas> targetCd = new ArrayList<Card_datas>();
 			for(int len = 0;len < 9;len++){
-				//無限ループ回避に失敗した場合
-				//下記if文内のunit[len].gskitp().equals(ondt.gskitp()) == falseを確認のこと。plz check ctrl + f.
+				/*
+				 * 無限ループ回避に失敗した場合
+				 * 下記if文内のunit[len].gskitp().equals(ondt.gskitp()) == falseを確認のこと。plz check ctrl + f.
+				 */
 				if(unit[len].getgrade().equals(ondt.getgrade()) && unit[len].getunitnm().equals(ondt.getunitnm()) && unit[len].gskitp().equals(ondt.gskitp()) == false){
 					targetCd.add(unit[len]);
 				}
@@ -177,7 +201,7 @@ class Calc_data{
 			int[] tmpac = new int[targetCd.size()];
 			for(int len = 0;len < targetCd.size();len++){
 				tmpac[len] = setMaxactcnt(targetCd.get(len), calcMd, perper, sf, unit);
-				if (tmpac[len] > mactct) {//0から最大値を入れるようにする。
+				if (tmpac[len] > mactct) {// <- 0から最大値を入れるようにする。
 					mactct = tmpac[len];
 				}
 			}
@@ -187,7 +211,7 @@ class Calc_data{
 				return 0;
 			}
 			for (int len = 0; len < tmpac.length; len++){
-				if (tmpac[len] < mactct) {//mactctには最大値が入っているので0との比較にはならない。
+				if (tmpac[len] < mactct) {// <- mactctには最大値が入っているので0との比較にはならない。
 					mactct = tmpac[len];
 				}
 			}
@@ -198,10 +222,12 @@ class Calc_data{
 
 	//スキル発動によるスコアアップ期待値を計算するメソッド
 	public static int setsklexp(Card_datas calcCd, Music_data calcMd, double perper, String sf, Card_datas[] unit, Card_datas frend, double tapscoreup)throws NullPointerException{
-		//引数のperperはパフェ率のこと。
-		//sfはユニットの値
-		//unitは一枚のカード
-		//calcMdは計算したい楽曲
+		/*
+		 * 引数のperperはパフェ率のこと。
+		 * sfはユニットの値
+		 * unitは一枚のカード
+		 * calcMdは計算したい楽曲
+		 */
 		int efsz = calcCd.gefsz();
 		double prob = calcCd.gprob()/100.0;
 		int maxactcnt = 0;
@@ -230,13 +256,14 @@ class Calc_data{
 			}
 		}else if(calcCd.gsksha().equals("判定")){
 			if(calcCd.gptrick() == 1){
-				//トリックが付いている場合
-				/*sfを再定義し、判定強化時間その再定義されたrsfで
-				rsf - sfを計算し、1タップ上昇分を計算する。
-				そして、楽曲の1秒当たりのノーツ数から、
-				accut分の時間を掛け算して、rsf-sfの数値と掛け算し、
-				トリック上昇分を出力する。
-				*/
+				/*
+				 * トリックが付いている場合
+				 * sfを再定義し、判定強化時間その再定義されたrsfで
+				 * rsf - sfを計算し、1タップ上昇分を計算する。
+				 * そして、楽曲の1秒当たりのノーツ数から、
+				 * accut分の時間を掛け算して、rsf-sfの数値と掛け算し、
+				 * トリック上昇分を出力する。
+				 */
 				int counter = 0;
 				boolean prupbl = false;
 				for(int len = 0;len < unit.length;len++){
@@ -330,11 +357,13 @@ class Calc_data{
 		}else if(calcCd.gsksha().equals("パラメーター")){
 			double accut = calcCd.gaccut();
 			String prsf = setprupsf(unit, frend, calcMd);
-			//対象となるカードの属性値をefsz%分アップさせる
-			//そしてsfを計算する-> prsf
-			//後は判定強化と同じ処理。
-			//sfの計算メソッドの再定義が必要。
-			//テストメソッドにて計算式確認済み
+			/*
+			 * 対象となるカードの属性値をefsz%分アップさせる
+			 * そしてsfを計算する-> prsf
+			 * 後は判定強化と同じ処理。
+			 * sfの計算メソッドの再定義が必要。
+			 * テストメソッドにて計算式確認済み
+			 */
 			int counter = 0;
 			boolean trunt = false;
 			for(int len = 0;len < unit.length;len++){
@@ -375,8 +404,10 @@ class Calc_data{
 		}else if(calcCd.gsksha().equals("シンクロ")){
 			double accut = calcCd.gaccut();
 			double oefsz = 0.0;
-			//対象のカードの中から1枚取得し、ユニットを作成しsfを再計算する。-> sysf
-			//sysfから元のsfを引きあとは判定強化の処理と同一。
+			/*
+			 * 対象のカードの中から1枚取得し、ユニットを作成しsfを再計算する。-> sysf
+			 * sysfから元のsfを引きあとは判定強化の処理と同一。
+			 */
 			boolean clctrprupbl = false;
 			List<Card_datas> calcs = new ArrayList<Card_datas>();
 			Card_datas[] syunt = new Card_datas[9];
@@ -447,13 +478,14 @@ class Calc_data{
 					oefsz += dfBS *(calcCd.gaccut()/calcMd.gmusictm());//シンクロなので特に数値を戻す必要なし。
 				}else{
 
-				/*
-				if(calcCd.gptrick() == 1){
-					tempsysf[len] = settrsf(syunt, frend, calcMd);
-				}else{
-					tempsysf[len] = setUnitsf(syunt, frend, calcMd);//シンクロ時のsfを格納させる。
-				}*/
-				tempsysf[len] = setUnitsf(syunt, frend, calcMd);
+					/*
+					if(calcCd.gptrick() == 1){
+						tempsysf[len] = settrsf(syunt, frend, calcMd);
+					}else{
+						tempsysf[len] = setUnitsf(syunt, frend, calcMd);//シンクロ時のsfを格納させる。
+					}
+					 */
+					tempsysf[len] = setUnitsf(syunt, frend, calcMd);
 				}
 			}
 			if(clctrprupbl){
@@ -491,23 +523,6 @@ class Calc_data{
 		}
 		return -1;
 	}
-	/*public void realsklef(Card_datas[] unit, Music_data calcMd, int playcount){
-		ArrayList<float[]> bfrtnscrT = new ArrayList<float[]>();
-		for(int len = 0;len < 9;len++){
-			//unit[len].sactcnt(setsklcntT(unit[len],calcMd,playcount));
-			//unit[len].gactcnt()[0] = min.
-			//unit[len].gactcnt()[unit[len].gactcnt().length -1] = max.
-		}
-		//(1/プレイ回数)の確率で出せる最大スコア計算アルゴリズムを以下に示す.
-		// 1.スコア期待値順にソートする。
-		// 2.スコア期待値のもっとも高い子が最も発動し、他のカードとの発動確率の積が(1/プレイ回数)を満たせばよい
-		// 3.以上のものを計算する。しかし、計算には条件が存在し、
-		// まず１より小の積であるゆえ、1/120*1*1...*1みたいなことはできない(各カードの確率分布的にもありえない)
-		// それ故各カード1/120以上の確率で発生しうる事象を積に使わざるを得ない。
-		// ここまでくると高々有限個さらには１桁回数の計算にもなりうるが、方程式を解く必要がある。
-
-
-	}*/
 
 	public static String setUnitsf(Card_datas[] unit,Card_datas frend, Music_data cmdt/*, Boolean trbl*/){
 		//ユニット値Sfを求めるメソッド ユニット値,センタースキル増加分 という文字列を出力する。
@@ -527,6 +542,7 @@ class Calc_data{
 		int allsu = 0;
 		Music_data cmscdt = cmdt;//もしかしたら渡す楽曲データは配列じゃなくて1つだけになるかも…
 
+		//ノネットの処理．
 		int muse = 0;
 		int aqua = 0;
 		for(Card_datas tmp: unit){
@@ -554,6 +570,7 @@ class Calc_data{
 			nonette += unit[len].gpnnet();
 			bloom += unit[len].gpbloom();
 		}
+
 		//SIS処理
 		for (int len = 0; len < 9; len++) {
 			if (unit[len].gpcross() > 0 || unit[len].gpring() > 0 || unit[len].gptrill() > 0 || unit[len].gpimage() > 0) {
@@ -565,6 +582,7 @@ class Calc_data{
 				sa[len] += Math.ceil(sa[len] * 0.018) * aura + Math.ceil(sa[len] * 0.024) * veil + Math.ceil(sa[len] * 0.042) * nonette * unitnnt + unit[len].gpkiss() * 200.0 + unit[len].gppfm() * 450.0 + unit[len].gpwink() * 1400.0;
 			}
 		}
+
 		//自ユニットのセンターサブセンター処理 SSRセンターとSRセンター処理できてませんねぇ？！
 		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
 			if(rrity.equals("SSR")){
@@ -592,37 +610,38 @@ class Calc_data{
 			}
 		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 				|| centersklnm.indexOf("プリンセス") != -1) {
+			cenup = 0.12;
 			if (centersklnm.indexOf("エンジェル") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr());
 					}
 				}
 			} else if (centersklnm.indexOf("エンプレス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl());
 					}
 				}
 			} else if (centersklnm.indexOf("プリンセス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm());
 					}
 				}
 			}
@@ -650,9 +669,17 @@ class Calc_data{
 			subcentersklnm = frend.getacskn();
 			centersklnm = frend.getcskin();
 			if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
-				subcenup = 0.03;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.01;
+				} else {
+					subcenup = 0.03;
+				}
 			} else {
-				subcenup = 0.06;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.02;
+				} else {
+					subcenup = 0.06;
+				}
 			}
 			if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
 				cenup = 0.09;
@@ -666,30 +693,31 @@ class Calc_data{
 			} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 					|| centersklnm.indexOf("プリンセス") != -1) {
 				if (centersklnm.indexOf("エンジェル") != -1) {
+					cenup = 0.12;
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr());
 						}
 					}
 				} else if (centersklnm.indexOf("エンプレス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl());
 						}
 					}
 				} else if (centersklnm.indexOf("プリンセス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm());
 						}
 					}
 				}
@@ -735,6 +763,7 @@ class Calc_data{
 		int allsu = 0;
 		Music_data cmscdt = cmdt;//もしかしたら渡す楽曲データは配列じゃなくて1つだけになるかも…
 
+		//ノネットの処理．
 		int muse = 0;
 		int aqua = 0;
 		for (Card_datas tmp : unit) {
@@ -793,6 +822,7 @@ class Calc_data{
 				}
 			}
 		}
+
 		//自ユニットのセンターサブセンター処理 SSRセンターとSRセンター処理できてませんねぇ？！
 		if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
 			if (rrity.equals("SSR")) {
@@ -821,36 +851,37 @@ class Calc_data{
 		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 				|| centersklnm.indexOf("プリンセス") != -1) {
 			if (centersklnm.indexOf("エンジェル") != -1) {
+				cenup = 0.12;
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr());
 					}
 				}
 			} else if (centersklnm.indexOf("エンプレス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl());
 					}
 				}
 			} else if (centersklnm.indexOf("プリンセス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm());
 					}
 				}
 			}
@@ -878,9 +909,17 @@ class Calc_data{
 			subcentersklnm = frend.getacskn();
 			centersklnm = frend.getcskin();
 			if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
-				subcenup = 0.03;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.01;
+				} else {
+					subcenup = 0.03;
+				}
 			} else {
-				subcenup = 0.06;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.02;
+				} else {
+					subcenup = 0.06;
+				}
 			}
 			if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
 				cenup = 0.09;
@@ -893,31 +932,32 @@ class Calc_data{
 				}
 			} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 					|| centersklnm.indexOf("プリンセス") != -1) {
+				cenup = 0.12;
 				if (centersklnm.indexOf("エンジェル") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr());
 						}
 					}
 				} else if (centersklnm.indexOf("エンプレス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl());
 						}
 					}
 				} else if (centersklnm.indexOf("プリンセス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm());
 						}
 					}
 				}
@@ -1021,7 +1061,7 @@ class Calc_data{
 		if(tmp != null){
 			for(int len = 0;len < unit.length;len++){
 				if(unit[len].getgrade().equals(tmp.getgrade()) && unit[len].getunitnm().equals(tmp.getunitnm())){
-				//学年とメインユニット名が等しければ。
+					//学年とメインユニット名が等しければ。
 					sa[len] *= upp;
 				}
 			}
@@ -1054,37 +1094,38 @@ class Calc_data{
 			}
 		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 				|| centersklnm.indexOf("プリンセス") != -1) {
+			cenup = 0.12;
 			if (centersklnm.indexOf("エンジェル") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr());
 					}
 				}
 			} else if (centersklnm.indexOf("エンプレス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl());
 					}
 				}
 			} else if (centersklnm.indexOf("プリンセス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm());
 					}
 				}
 			}
@@ -1112,9 +1153,17 @@ class Calc_data{
 			subcentersklnm = frend.getacskn();
 			centersklnm = frend.getcskin();
 			if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
-				subcenup = 0.03;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.01;
+				} else {
+					subcenup = 0.03;
+				}
 			} else {
-				subcenup = 0.06;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.02;
+				} else {
+					subcenup = 0.06;
+				}
 			}
 			if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
 				cenup = 0.09;
@@ -1127,31 +1176,32 @@ class Calc_data{
 				}
 			} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 					|| centersklnm.indexOf("プリンセス") != -1) {
+				cenup = 0.12;
 				if (centersklnm.indexOf("エンジェル") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr());
 						}
 					}
 				} else if (centersklnm.indexOf("エンプレス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl());
 						}
 					}
 				} else if (centersklnm.indexOf("プリンセス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm());
 						}
 					}
 				}
@@ -1271,6 +1321,7 @@ class Calc_data{
 			}
 		}
 
+		//パラメーターアップの処理．
 		double upp = 0.0;
 		Card_datas tmp = new Card_datas();
 		for(int len = 0;len < unit.length;len++){
@@ -1315,37 +1366,38 @@ class Calc_data{
 			}
 		} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 				|| centersklnm.indexOf("プリンセス") != -1) {
+			cenup = 0.12;
 			if (centersklnm.indexOf("エンジェル") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcpr());
 					}
 				}
 			} else if (centersklnm.indexOf("エンプレス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+						su[len] = (int) Math.ceil(cenup * unit[len].gccl());
 					}
 				}
 			} else if (centersklnm.indexOf("プリンセス") != -1) {
 				for (int len = 0; len < unit.length; len++) {
 					if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm())
 								+ (int) Math.ceil(sa[len] * subcenup);
 					} else {
 						tmpsu += sa[len];
-						su[len] = (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+						su[len] = (int) Math.ceil(cenup * unit[len].gcsm());
 					}
 				}
 			}
@@ -1373,9 +1425,17 @@ class Calc_data{
 			subcentersklnm = frend.getacskn();
 			centersklnm = frend.getcskin();
 			if (subcentersklnm.equals("μ's") || subcentersklnm.equals("Aqours")) {
-				subcenup = 0.03;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.01;
+				} else {
+					subcenup = 0.03;
+				}
 			} else {
-				subcenup = 0.06;
+				if (rrity.equals("SSR")) {
+					subcenup = 0.02;
+				} else {
+					subcenup = 0.06;
+				}
 			}
 			if (centersklnm.equals("ピュアエンジェル") || centersklnm.equals("クールエンプレス") || centersklnm.equals("スマイルプリンセス")) {
 				cenup = 0.09;
@@ -1388,31 +1448,32 @@ class Calc_data{
 				}
 			} else if (centersklnm.indexOf("エンジェル") != -1 || centersklnm.indexOf("エンプレス") != -1
 					|| centersklnm.indexOf("プリンセス") != -1) {
+				cenup = 0.12;
 				if (centersklnm.indexOf("エンジェル") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcpr());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcpr());
 						}
 					}
 				} else if (centersklnm.indexOf("エンプレス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl())
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gccl());
+							su[len] += (int) Math.ceil(cenup * unit[len].gccl());
 						}
 					}
 				} else if (centersklnm.indexOf("プリンセス") != -1) {
 					for (int len = 0; len < unit.length; len++) {
 						if (subcentersklnm.equals(unit[len].getgrade()) || subcentersklnm.equals(unit[len].getsubuntnm())) {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm())
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm())
 									+ (int) Math.ceil(sa[len] * subcenup);
 						} else {
-							su[len] += (int) Math.ceil(sa[len] + 0.12 * unit[len].gcsm());
+							su[len] += (int) Math.ceil(cenup * unit[len].gcsm());
 						}
 					}
 				}
@@ -1441,8 +1502,10 @@ class Calc_data{
 	}
 
 	public static Card_datas[] setsortsklUnit(Card_datas[] unit, Music_data cmdt, double perper, String sf, Card_datas frend, double tapscoreup){
-		//スキル発動期待値が高い順にソートするメソッド
-		//unit[0]が一番期待値が高く、unit[8]が一番期待値が小さい。
+		/*
+		 * スキル発動期待値が高い順にソートするメソッド
+		 * unit[0]が一番期待値が高く、unit[8]が一番期待値が小さい。
+		 */
 		int[] sklexpT = new int[unit.length];
 		for(int len = 0;len < sklexpT.length;len++){
 			sklexpT[len] = setsklexp(unit[len], cmdt, perper, sf, unit, frend, tapscoreup);
@@ -1469,11 +1532,7 @@ class Calc_data{
 			if (r == 0) {
 				bf_p[r] = 1;
 			} else {
-				/*if (bf_p[r - 1] - (nCr(n, r)) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r)) < 0) {
-					bf_p[r] = bf_p[r - 1];
-				} else {*/
 				bf_p[r] = bf_p[r - 1] - (nCr(n, r)) * Math.pow(prob, r) * Math.pow((1 - prob), (n - r));
-				//}
 			}
 		}
 		return bf_p;
@@ -1489,15 +1548,15 @@ class Calc_data{
 	}
 
 	public static Calc_data calcscrmain(Card_datas[] unit, Music_data calcMd, Card_datas frend, double perper, int playcount, double tapscoreup, int depth)throws DataNotFoundException{
-		// ある特定の確率で出る最大スコアを計算するメソッド
-		// メインのスコア計算メソッドとする。
-		// 派生版として、 1/プレイ回数 の確率を1ビットとして、グラフを表示させるメソッドも作成可能。
+		/*
+		 *  ある特定の確率で出る最大スコアを計算するメソッド
+		 *  メインのスコア計算メソッドとする。
+		 *  派生版として、 1/プレイ回数 の確率を1ビットとして、グラフを表示させるメソッドも作成可能。
+		 */
 		double discriminant = (double)(1.0/playcount);
-		//System.out.println("discriminant is "+discriminant);
 		String sf = setUnitsf(unit, frend, calcMd);
 		int base_scr = calcBS(unit, calcMd, sf, tapscoreup);
 		String actsf = new String();
-		//Card_datas[] sklcalc = setsortsklUnit(unit, calcMd, perper, sf, frend, tapscoreup);
 		double[][] unitprbs = new double[9][];//実際の積分済みの確率分布を格納する配列
 		double[][] unitsprbs = new double[9][];//積分する前の実際の確率を格納する配列。
 		double[][] untupprbs = new double[9][];//発動確率アップの積分済みの確率分布を格納する配列
@@ -1522,9 +1581,11 @@ class Calc_data{
 		for(int len = 0; len < unit.length;len++){
 			unitprbs[len] = setrealprob(maxactcnts[len], unit[len].gprob()/100.0);
 			unitsprbs[len] = setprob(maxactcnts[len], unit[len].gprob()/100.0);
-			//for(double temp : setprob(maxactcnts[len], unit[len].gprob()/100.0)){
-				//System.out.println("setprob["+len+"] is"+temp);
-			//}
+			/*
+			for(double temp : setprob(maxactcnts[len], unit[len].gprob()/100.0)){
+				System.out.println("setprob["+len+"] is"+temp);
+			}
+			*/
 		}
 
 		for(int len = 0;len < unit.length;len++){
@@ -1572,7 +1633,7 @@ class Calc_data{
 						//常に判定強化が発動し、トリックが発動してるときのスコア(実際には起こりえない)
 						int iBs = calcBS(unit, calcMd, sf, tapscoreup);
 						//全く判定強化が発動せず、トリックが発動しないときのスコア
-						int dfBs = iBs - trBs;
+						int dfBs = trBs - iBs;
 						//上記のスコア差(すなわちこれがトリックによる1曲中のすべてのスコア上昇分。)
 						//※近似。最初の数秒は確実に判定強化が発動しない部分があるがそこが加味できていない。
 						//つまり実際のトリックによる上昇分よりも高めに出力される。
@@ -1587,11 +1648,13 @@ class Calc_data{
 					scrupT[len] = 0;//スキルが何回発動しようがスコア上昇分は0.
 				}
 			}else if(unit[len].gsksha().equals("パーフェクト")){
-				//SISの処理無し
-				//楽曲中に一定時間発動する。
-				//その一定時間中に飛んでくるノーツ数は未知数である。
-				//正確な数値が計算できない。
-				//多分だけれども判定強化の上位互換。
+				/*
+				 * SISの処理無し
+				 * 楽曲中に一定時間発動する。
+				 * その一定時間中に飛んでくるノーツ数は未知数である。
+				 * 正確な数値が計算できない。
+				 * 多分だけれども判定強化の上位互換。
+				 */
 				double pfupt = unit[len].gaccut();
 				int musictm = calcMd.gmusictm();
 				int maxcombo = calcMd.gmaxcb();
@@ -1654,8 +1717,10 @@ class Calc_data{
 				Card_datas calcCd = unit[len];
 				double accut = calcCd.gaccut();
 				double oefsz = 0.0;
-				//対象のカードの中から1枚取得し、ユニットを作成しsfを再計算する。-> sysf
-				//sysfから元のsfを引きあとは判定強化の処理と同一。
+				/*
+				 * 対象のカードの中から1枚取得し、ユニットを作成しsfを再計算する。-> sysf
+				 * sysfから元のsfを引きあとは判定強化の処理と同一。
+				 */
 				boolean clctrprupbl = false;
 				List<Card_datas> calcs = new ArrayList<Card_datas>();
 				Card_datas[] syunt = new Card_datas[9];
@@ -1736,8 +1801,9 @@ class Calc_data{
 						tempsysf[k] = settrsf(syunt, frend, calcMd);
 					}else{
 						tempsysf[k] = setUnitsf(syunt, frend, calcMd);//シンクロ時のsfを格納させる。
-					}*/
-					tempsysf[k] = setUnitsf(syunt, frend, calcMd);
+					}
+					*/
+						tempsysf[k] = setUnitsf(syunt, frend, calcMd);
 					}
 				}
 				if(clctrprupbl){
@@ -1782,77 +1848,136 @@ class Calc_data{
 		long steps = 0;
 		int[] tmppivot = new int[9];
 		int[] regularpivot = new int[9];
+		int[] regurarpivot_pointer = new int[9];
 		int tempscr = 0;
 		int regularscr = 0;
 		double regularprob = 0.0;
+		/*
 		int count = 0;
-		/*for(int temp : scrupT){
+		for(int temp : scrupT){
 			System.out.println("scrupT["+count+"]:"+unit[count].getname()+":"+scrupT[count]);
 			count++;
-		}*/
+		}
+		*/
+		for(int len = 0;len < unit.length;len++){
+			regurarpivot_pointer[len] = len;
+		}
 
-		for(int alane = unitprbs[0].length-1;alane >= 0;alane--){
+		/*
+		 * 確率でソート。0番目が一番発動確率が高くなるようにユニットをソートする。
+		 * pivotを制御する必要があるのでpointerを追加。
+		 * その他確率分布を格納してる配列なども場合によってはnullpo落ちしかねないのでソートする。
+		 */
+		for(int i = 0;i < unit.length;i++){
+			for(int k = unit.length-1;k > i;k--){
+				//コピーを作成。
+				Card_datas temp = unit[i];
+				int pointer = regurarpivot_pointer[i];
+				double[] prbs = unitprbs[i];
+				double[] sprbs = unitsprbs[i];
+				double[] upprbs = untupprbs[i];
+				double[] upsprbs = untupsprbs[i];
+				int actcnts = expactcnts[i];
+				if(temp.gprob() < unit[k].gprob()){
+					/*
+					 * 大きい方の入力処理部分
+					 * unit[i] = unit[k];
+					 */
+					regurarpivot_pointer[i] = k;
+					unitprbs[i] = unitprbs[k];
+					unitsprbs[i] = unitsprbs[k];
+					expactcnts[i] = expactcnts[k];
+					untupprbs[i] = untupprbs[k];
+					untupsprbs[i] = untupsprbs[k];
+					/*
+					 * 小さい方の入力処理部分 コピーを代入。
+					 * unit[k] = temp;
+					 */
+					regurarpivot_pointer[k] = pointer;
+					unitprbs[k] = prbs;
+					unitsprbs[k] = sprbs;
+					expactcnts[k] = actcnts;
+					untupprbs[k] = upprbs;
+					untupsprbs[k] = upsprbs;
+				}
+			}
+		}
+		int[] lanelength = new int[9];
+		for (int len = 0; len < unit.length; len++) {
+			lanelength[len] = unitprbs[len].length - 1;
+			if (scrupT[len] == 0) {
+				for (int k = 0; k < unitsprbs[len].length; k++) {
+					unitsprbs[len][k] = 1;
+					unitprbs[len][k] = 1;
+				}
+				lanelength[len] = 1;
+				expactcnts[len] = depth;
+			}
+		}
+
+		for(int alane = lanelength[0];alane >= 0;alane--){
 			if(unitsprbs[0][alane] > discriminant && alane >= expactcnts[0] - depth){
 				tempprob = unitprbs[0][alane];
 				tempsprob = unitsprbs[0][alane];
-				for(int blane = unitprbs[1].length-1;blane >= 0;blane--){
+				for(int blane = lanelength[1];blane >= 0;blane--){
 					if(tempsprob * unitsprbs[1][blane] > discriminant && blane >= expactcnts[1] - depth && unitsprbs[1][blane] > discriminant){
 						tempprob *= unitprbs[1][blane];
 						tempsprob *= unitsprbs[1][blane];
-						for(int clane = unitprbs[2].length-1;clane >= 0;clane--){
+						for(int clane = lanelength[2];clane >= 0;clane--){
 							if(tempsprob * unitsprbs[2][clane] > discriminant && clane >= expactcnts[2] - depth && unitsprbs[2][clane] > discriminant){
 								tempprob *= unitprbs[2][clane];
 								tempsprob *= unitsprbs[2][clane];
-								for(int dlane = unitprbs[3].length-1;dlane >= 0;dlane--){
+								for(int dlane = lanelength[3];dlane >= 0;dlane--){
 									if(tempsprob * unitsprbs[3][dlane] > discriminant && dlane >= expactcnts[3] - depth && unitsprbs[3][dlane] > discriminant){
 										tempprob *= unitprbs[3][dlane];
 										tempsprob *= unitsprbs[3][dlane];
-										for(int elane = unitsprbs[4].length-1;elane >= 0;elane--){
+										for(int elane = lanelength[4];elane >= 0;elane--){
 											if(tempsprob * unitsprbs[4][elane] > discriminant && elane >= expactcnts[4] - depth && unitsprbs[4][elane] > discriminant){
 												tempprob *= unitprbs[4][elane];
 												tempsprob *= unitsprbs[4][elane];
-												for(int flane = unitprbs[5].length-1;flane >= 0;flane--){
-													if(tempsprob * unitprbs[5][flane] > discriminant && flane >= expactcnts[5] - depth && unitsprbs[5][flane] > discriminant){
+												for(int flane = lanelength[5];flane >= 0;flane--){
+													if(tempsprob * unitsprbs[5][flane] > discriminant && flane >= expactcnts[5] - depth && unitsprbs[5][flane] > discriminant){
 														tempprob *= unitprbs[5][flane];
 														tempsprob *= unitsprbs[5][flane];
-														for(int glane = unitprbs[6].length-1;glane >= 0;glane--){
+														for(int glane = lanelength[6];glane >= 0;glane--){
 															if(tempsprob * unitsprbs[6][glane] > discriminant && glane >= expactcnts[6] - depth && unitsprbs[6][glane] > discriminant){
 																tempprob *= unitprbs[6][glane];
 																tempsprob *= unitsprbs[6][glane];
-																for(int hlane = unitprbs[7].length-1;hlane >= 0;hlane--){
+																for(int hlane = lanelength[7];hlane >= 0;hlane--){
 																	if(tempsprob * unitsprbs[7][hlane] > discriminant && hlane >= expactcnts[7] - depth && unitsprbs[7][hlane] > discriminant){
 																		tempprob *= unitprbs[7][hlane];
 																		tempsprob *= unitsprbs[7][hlane];
-																		for(int ilane = unitprbs[8].length-1;ilane >= 0;ilane--){
+																		for(int ilane = lanelength[8];ilane >= 0;ilane--){
 																			//pivotの処理して、スコア比較。
 																			tempprob *= unitprbs[8][ilane];
 																			sumprob += tempprob;
 																			steps++;
 																			tempprob /= unitprbs[8][ilane];
-																			if(sumprob > discriminant && unitsprbs[8][ilane] > discriminant){
-																				tmppivot[0] = alane;
-																				tmppivot[1] = blane;
-																				tmppivot[2] = clane;
-																				tmppivot[3] = dlane;
-																				tmppivot[4] = elane;
-																				tmppivot[5] = flane;
-																				tmppivot[6] = glane;
-																				tmppivot[7] = hlane;
-																				tmppivot[8] = ilane;
+																			if(sumprob > discriminant && unitsprbs[8][ilane] > discriminant && ilane >= expactcnts[8] - depth){
+																				tmppivot[regurarpivot_pointer[0]] = alane;
+																				tmppivot[regurarpivot_pointer[1]] = blane;
+																				tmppivot[regurarpivot_pointer[2]] = clane;
+																				tmppivot[regurarpivot_pointer[3]] = dlane;
+																				tmppivot[regurarpivot_pointer[4]] = elane;
+																				tmppivot[regurarpivot_pointer[5]] = flane;
+																				tmppivot[regurarpivot_pointer[6]] = glane;
+																				tmppivot[regurarpivot_pointer[7]] = hlane;
+																				tmppivot[regurarpivot_pointer[8]] = ilane;
 																				for(int len = 0;len < unit.length;len++){
 																					tempscr += scrupT[len] * tmppivot[len];
 																				}
+																				//System.out.println("tempscr is "+tempscr);
 																				if(tempscr > regularscr){
 																					regularscr = tempscr;
-																					regularpivot[0] = alane;
-																					regularpivot[1] = blane;
-																					regularpivot[2] = clane;
-																					regularpivot[3] = dlane;
-																					regularpivot[4] = elane;
-																					regularpivot[5] = flane;
-																					regularpivot[6] = glane;
-																					regularpivot[7] = hlane;
-																					regularpivot[8] = ilane;
+																					regularpivot[regurarpivot_pointer[0]] = alane;
+																					regularpivot[regurarpivot_pointer[1]] = blane;
+																					regularpivot[regurarpivot_pointer[2]] = clane;
+																					regularpivot[regurarpivot_pointer[3]] = dlane;
+																					regularpivot[regurarpivot_pointer[4]] = elane;
+																					regularpivot[regurarpivot_pointer[5]] = flane;
+																					regularpivot[regurarpivot_pointer[6]] = glane;
+																					regularpivot[regurarpivot_pointer[7]] = hlane;
+																					regularpivot[regurarpivot_pointer[8]] = ilane;
 																					regularprob = sumprob;
 																				}
 																				tempscr = 0;
@@ -1872,7 +1997,6 @@ class Calc_data{
 																tempsprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane];
 															}
 														}
-
 													}else{
 														steps += unitprbs[6].length * unitprbs[7].length * unitprbs[8].length;
 														sumprob = unitsprbs[0][alane] * unitsprbs[1][blane] * unitsprbs[2][clane] * unitsprbs[3][dlane] * unitsprbs[4][elane] * unitsprbs[5][flane];
@@ -1919,88 +2043,99 @@ class Calc_data{
 		for(int len = 0;len < unit.length;len++){
 			unit[len].sactcnt(regularpivot[len]);
 		}
+		if(upprbsbl){
+			for(int len = 0;len < unit.length;len++){
+				lanelength[len] = untupprbs[len].length - 1;
+				if(scrupT[len] == 0){
+					lanelength[len] = 1;
+					expactcnts[len] = depth;
+					for(int k = 0;k < untupsprbs[len].length;k++){
+						untupprbs[len][k] = 1;
+						untupsprbs[len][k] = 1;
+					}
+				}
+			}
+		}
 
 		int upregularscr = 0;
 		double upedsumprob = 0.0;
 		if(upprbsbl){
-			for (int alane = untupprbs[0].length - 1; alane >= 0; alane--) {
+			for (int alane = lanelength[0]; alane >= 0; alane--) {
 				if (untupprbs[0][alane] > discriminant && alane >= expactcnts[0] - depth) {
 					tempprob = untupprbs[0][alane];
 					tempsprob = untupsprbs[0][alane];
-					for (int blane = untupprbs[1].length - 1; blane >= 0; blane--) {
+					for (int blane = lanelength[1]; blane >= 0; blane--) {
 						if (tempsprob * untupsprbs[1][blane] > discriminant && blane >= expactcnts[1] - depth
 								&& untupsprbs[1][blane] > discriminant) {
 							tempprob *= untupprbs[1][blane];
 							tempsprob *= untupsprbs[1][blane];
-							for (int clane = untupprbs[2].length - 1; clane >= 0; clane--) {
+							for (int clane = lanelength[2]; clane >= 0; clane--) {
 								if (tempsprob * untupsprbs[2][clane] > discriminant && clane >= expactcnts[2] - depth
 										&& untupsprbs[2][clane] > discriminant) {
 									tempprob *= untupprbs[2][clane];
 									tempsprob *= untupsprbs[2][clane];
-									for (int dlane = untupprbs[3].length - 1; dlane >= 0; dlane--) {
+									for (int dlane = lanelength[3]; dlane >= 0; dlane--) {
 										if (tempsprob * untupsprbs[3][dlane] > discriminant && dlane >= expactcnts[3] - depth
 												&& untupsprbs[3][dlane] > discriminant) {
 											tempprob *= untupprbs[3][dlane];
 											tempsprob *= untupsprbs[3][dlane];
-											for (int elane = untupprbs[4].length - 1; elane >= 0; elane--) {
+											for (int elane = lanelength[4]; elane >= 0; elane--) {
 												if (tempsprob * untupsprbs[4][elane] > discriminant
 														&& elane >= expactcnts[4] - depth
 														&& untupsprbs[4][elane] > discriminant) {
 													tempprob *= untupprbs[4][elane];
 													tempsprob *= untupsprbs[4][elane];
-													for (int flane = untupprbs[5].length - 1; flane >= 0; flane--) {
+													for (int flane = lanelength[5]; flane >= 0; flane--) {
 														if (tempsprob * untupsprbs[5][flane] > discriminant
 																&& flane >= expactcnts[5] - depth
 																&& untupsprbs[5][flane] > discriminant) {
 															tempprob *= untupprbs[5][flane];
 															tempsprob *= untupsprbs[5][flane];
-															for (int glane = untupprbs[6].length
-																	- 1; glane >= 0; glane--) {
+															for (int glane = lanelength[6]; glane >= 0; glane--) {
 																if (tempsprob * untupsprbs[6][glane] > discriminant
 																		&& glane >= expactcnts[6] - depth
 																		&& untupsprbs[6][glane] > discriminant) {
 																	tempprob *= untupprbs[6][glane];
 																	tempsprob *= untupsprbs[6][glane];
-																	for (int hlane = untupprbs[7].length
-																			- 1; hlane >= 0; hlane--) {
+																	for (int hlane = lanelength[7]; hlane >= 0; hlane--) {
 																		if (tempsprob * untupsprbs[7][hlane] > discriminant
 																				&& hlane >= expactcnts[7] - depth
 																				&& untupsprbs[7][hlane] > discriminant) {
 																			tempprob *= untupprbs[7][hlane];
 																			tempsprob *= untupsprbs[7][hlane];
-																			for (int ilane = untupprbs[8].length
-																					- 1; ilane >= 0; ilane--) {
+																			for (int ilane = lanelength[8]; ilane >= 0; ilane--) {
 																				//pivotの処理して、スコア比較。
 																				tempprob *= untupprbs[8][ilane];
 																				sumprob += tempprob;
 																				steps++;
 																				tempprob /= untupprbs[8][ilane];
 																				if (sumprob > discriminant
-																						&& untupsprbs[8][ilane] > discriminant) {
-																					tmppivot[0] = alane;
-																					tmppivot[1] = blane;
-																					tmppivot[2] = clane;
-																					tmppivot[3] = dlane;
-																					tmppivot[4] = elane;
-																					tmppivot[5] = flane;
-																					tmppivot[6] = glane;
-																					tmppivot[7] = hlane;
-																					tmppivot[8] = ilane;
+																						&& untupsprbs[8][ilane] > discriminant
+																						&& ilane >= expactcnts[8] - depth) {
+																					tmppivot[regurarpivot_pointer[0]] = alane;
+																					tmppivot[regurarpivot_pointer[1]] = blane;
+																					tmppivot[regurarpivot_pointer[2]] = clane;
+																					tmppivot[regurarpivot_pointer[3]] = dlane;
+																					tmppivot[regurarpivot_pointer[4]] = elane;
+																					tmppivot[regurarpivot_pointer[5]] = flane;
+																					tmppivot[regurarpivot_pointer[6]] = glane;
+																					tmppivot[regurarpivot_pointer[7]] = hlane;
+																					tmppivot[regurarpivot_pointer[8]] = ilane;
 																					for (int len = 0; len < unit.length; len++) {
 																						tempscr += scrupT[len]
 																								* tmppivot[len];
 																					}
 																					if (tempscr > upregularscr) {
 																						upregularscr = tempscr;
-																						regularpivot[0] = alane;
-																						regularpivot[1] = blane;
-																						regularpivot[2] = clane;
-																						regularpivot[3] = dlane;
-																						regularpivot[4] = elane;
-																						regularpivot[5] = flane;
-																						regularpivot[6] = glane;
-																						regularpivot[7] = hlane;
-																						regularpivot[8] = ilane;
+																						regularpivot[regurarpivot_pointer[0]] = alane;
+																						regularpivot[regurarpivot_pointer[1]] = blane;
+																						regularpivot[regurarpivot_pointer[2]] = clane;
+																						regularpivot[regurarpivot_pointer[3]] = dlane;
+																						regularpivot[regurarpivot_pointer[4]] = elane;
+																						regularpivot[regurarpivot_pointer[5]] = flane;
+																						regularpivot[regurarpivot_pointer[6]] = glane;
+																						regularpivot[regurarpivot_pointer[7]] = hlane;
+																						regularpivot[regurarpivot_pointer[8]] = ilane;
 																						upedsumprob = sumprob;
 																					}
 																					tempscr = 0;
@@ -2128,6 +2263,8 @@ class Calc_data{
 		rtn_data.setbase_score(base_scr);
 		rtn_data.set_up_regular_probably(upedsumprob);
 		rtn_data.set_probably_up_skillupscore(upregularscr);
+		rtn_data.setunit_pprty(Integer.parseInt(sf.split(",",0)[0]));
+		rtn_data.setcenterskill_up_unit_pprty(Integer.parseInt(sf.split(",",0)[1]));
 
 		return rtn_data;
 	}
@@ -2160,8 +2297,18 @@ class Calc_data{
 			tapscoreup = 1.0;
 		}
 		base = base*unit*pprty*tapscoreup;
-		return note[0]*Math.floor(base) + note[1]*Math.floor(ln*base)+note[2]*Math.floor(1.10 * base) + note[3]*Math.floor(1.10*ln*base)
-				+ note[4]*Math.floor(1.15*base) + note[5]*Math.floor( 1.15 * ln * base) + note[6]*Math.floor(1.20 * base)
-				+ note[7]*Math.floor(1.20 * ln * base) + note[8]*Math.floor(1.25 * base) + note[9]*Math.floor(1.25 * ln * base);
+		if(note.length == 10){// <- Easy ～ Expertまでの譜面データの処理．
+			return note[0]*Math.floor(base) + note[1]*Math.floor(ln*base)+note[2]*Math.floor(1.10 * base) + note[3]*Math.floor(1.10*ln*base)
+					+ note[4]*Math.floor(1.15*base) + note[5]*Math.floor( 1.15 * ln * base) + note[6]*Math.floor(1.20 * base)
+					+ note[7]*Math.floor(1.20 * ln * base) + note[8]*Math.floor(1.25 * base) + note[9]*Math.floor(1.25 * ln * base);
+		}else if(note.length == 14){// <- Masterの処理の準備．メドフェスにも対応可能？
+			return note[0]*Math.floor(base) + note[1]*Math.floor(ln*base)+note[2]*Math.floor(1.10 * base) + note[3]*Math.floor(1.10*ln*base)
+					+ note[4]*Math.floor(1.15*base) + note[5]*Math.floor( 1.15 * ln * base) + note[6]*Math.floor(1.20 * base)
+					+ note[7]*Math.floor(1.20 * ln * base) + note[8]*Math.floor(1.25 * base) + note[9]*Math.floor(1.25 * ln * base)
+					+ note[10]*Math.floor(1.30 * base) + note[11]*Math.floor(1.30 * ln * base) + note[12]*Math.floor(1.35 * base) + note[13]*Math.floor(1.35 * base * ln);
+		}else{
+			System.err.println("楽曲の譜面データが読み込めませんでした。");
+			return 0;
+		}
 	}
 }

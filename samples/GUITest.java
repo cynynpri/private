@@ -26,8 +26,6 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.chart.*;
 import javafx.util.Callback;
 import javafx.application.Platform;
-//import java.lang.Object;
-//import javafx.scene.Node;
 
 public class GUITest extends Application{
 	static int printlogc = 1;
@@ -61,8 +59,13 @@ public class GUITest extends Application{
 	static Calc_data calc_result = new Calc_data();
 	static String result_score_str = new String();
 	static Label result_score_label = new Label();
+	static String unit_pprty = new String();
+	static Label result_unit_pprty = new Label();
 	static boolean ctou = false;
 	static boolean utoc = false;
+	final static String rely_datapath = System.getProperty("user.dir") + "/Datalist/music_results.tsv";
+	static List<Rely> rely_list = new ArrayList<Rely>();
+	static String analyzedstr = new String();
 	final private static CalcScoreService cSS = new CalcScoreService();
 	final private static ListView<Card_datas> unitListview = new ListView<Card_datas>();//ユニットのリストビュー
 	final private static ObservableList<Card_datas> unitList = FXCollections.observableArrayList();
@@ -107,7 +110,7 @@ public class GUITest extends Application{
 			//* ->1 色々不都合しかなかったので、コンボボックス化
 			ComboBox<String> chara_Sel = new ComboBox<>(FXCollections.observableArrayList("高坂穂乃果","絢瀬絵里","南ことり","園田海未","星空凛","西木野真姫","東条希","小泉花陽","矢澤にこ","高海千歌","桜内梨子","松浦果南","黒澤ダイヤ","渡辺曜","津島善子","国木田花丸","小原鞠莉","黒澤ルビィ"));
 			chara_Sel.setVisibleRowCount(9);
-			chara_Sel.setValue("高坂穂乃果");
+			chara_Sel.getSelectionModel().select(0);
 			//chara_Sel.getItems().addAll("高坂穂乃果","絢瀬絵里","南ことり","園田海未","星空凛","西木野真姫","東条希","小泉花陽","矢澤にこ","高海千歌","桜内梨子","松浦果南","黒澤ダイヤ","渡辺曜","津島善子","国木田花丸","小原鞠莉","黒澤ルビィ");
 
 			//skills cb
@@ -178,10 +181,17 @@ public class GUITest extends Application{
 				for(int len = 0; len < sdata.size(); len++){
 					table[len] = sdata.get(len);
 				}
+				/*
+				int skill_temp = 0;
+				for(Skill_data tabletemp : sdata){
+					table[skill_temp] = tabletemp;
+					skill_temp++;
+				}
+				 */
 				String[] skilT = Skill_read.setSkillnameT("スマイル" ,Skill_read.setSkill("SR", table));
 				chara_SKills.getItems().clear();
 				chara_SKills.getItems().addAll(skilT);
-				chara_SKills.setValue(String.valueOf(skilT[0].toString()));
+				chara_SKills.getSelectionModel().select(0);
 				if(skilT.length >= 15){
 					chara_SKills.setVisibleRowCount(15);
 				}else{
@@ -853,6 +863,7 @@ public class GUITest extends Application{
 							cdatas.add(bfod);
 							listtounit.add(bfod);
 							card_list.setItems(listtounit);
+							initializeComponents();
 							Card_read.setonecarddata(pw, bfod);
 							if(debuglevel >= 1){
 								Card_datas[] printd = new Card_datas[cdatas.size()];
@@ -916,6 +927,7 @@ public class GUITest extends Application{
 								listtounit.add(Card_read.one_carddata(bfcdata, len));
 							}
 							card_list.setItems(listtounit);
+							initializeComponents();
 							FileWriter fwSIFSCsettings = new FileWriter(iniDataPath);
 							BufferedWriter bwSIFSCsettings = new BufferedWriter(fwSIFSCsettings);
 							PrintWriter pwSIFSCsettings = new PrintWriter(bwSIFSCsettings);
@@ -974,6 +986,12 @@ public class GUITest extends Application{
 			Tab calc_SCore = new Tab();
 			calc_SCore.setClosable(false);
 			calc_SCore.setText("楽曲スコア計算");
+			calc_SCore.setOnSelectionChanged(new EventHandler<Event>(){
+				@Override
+				public void handle(Event event){
+					initializeComponents();
+				}
+			});
 			StackPane spane_c_s = new StackPane();
 			calc_SCore.setContent(spane_c_s);
 
@@ -998,6 +1016,7 @@ public class GUITest extends Application{
 				music_SEl.getItems().add(adder);
 			}
 			music_SElhb.getChildren().addAll(music_SEl_lbl,music_SEl);
+			music_SEl.getSelectionModel().select(0);
 
 			Button calc_start = new Button("スコアを計算する");
 			//パフェ率の入力ボックスと、探索幅を入力するボックスが必要。
@@ -1047,14 +1066,12 @@ public class GUITest extends Application{
 			});
 			HBox unitguishb = new HBox();
 			unitguishb.getChildren().addAll(unitListlbl, unitdelete);
-			//ListView<Card_datas> card_list = card_list_view;
-			//fillCard_datas(cdatas);
 			listtounit = FXCollections.observableArrayList();
 			for(int len = 0;len < cdatas.size();len++){
 				listtounit.add(cdatas.get(len));
 			}
-			card_list.setItems(listtounit);
 			//リストビュー(ユニット)
+			card_list.setItems(listtounit);
 
 			//フレンドの有無チェックボックス
 			CheckBox frendcb = new CheckBox();
@@ -1125,6 +1142,7 @@ public class GUITest extends Application{
 							}
 						}catch(DataNotFoundException e){
 							System.err.println(e);
+							System.err.println("楽曲データが正しくセットされていないか、壊れている可能性があります。");
 							tpane.getSelectionModel().select(3);
 							return;
 						}
@@ -1144,7 +1162,6 @@ public class GUITest extends Application{
 						}
 						perper = setperper.getValue()/100.0;
 						playcount = (int)setplaycount.getValue();
-						//System.out.println("playcount is "+playcount);
 						tapscrup = (double)settapup.getValue();
 						depth = (int)setdepth.getValue();
 						cSS.restart();
@@ -1184,106 +1201,106 @@ public class GUITest extends Application{
 			c_SCguis.add(frcenselhb, 2, 2);
 			c_SCguis.add(frscselhb, 2, 3);
 			c_SCguis.add(result_score_label, 2, 4);
+			c_SCguis.add(result_unit_pprty, 2, 5);
 
 //=============================================================================
 //タブ2 calc_SCore END
 //=============================================================================
 
 //=============================================================================
-//タブ3 plot_SCoreGraph START
+//タブ3 plot_REsult_anaLYzer START
 //=============================================================================
-			Tab plot_SCoreGraph = new Tab();
-			plot_SCoreGraph.setClosable(false);
-			plot_SCoreGraph.setText("楽曲スコア確率分布表示");
-			StackPane spane_p_sg = new StackPane();
-			plot_SCoreGraph.setContent(spane_p_sg);
-			/*tpane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>(){
-				public void changed(ObservableValue<? extends Tab>ov, Tab t, Tab t1){
+			Tab plot_REsult_anaLYzer = new Tab();
+			plot_REsult_anaLYzer.setClosable(false);
+			plot_REsult_anaLYzer.setText("楽曲リザルト分析表示");
+			StackPane spane_re_ly = new StackPane();
+			plot_REsult_anaLYzer.setContent(spane_re_ly);
 
-				}
-			});*/
-			//グリッドパネ設定
-			//右側をグラフ表示、左側をボタンやコンボボックス等の操作画面とする。
-			GridPane groot = new GridPane();
-			GridPane gguis = new GridPane();
+			GridPane gpane_rely = new GridPane();
 
-			//グラフ表示部
-			NumberAxis xAxis = new NumberAxis();
-			NumberAxis yAxis = new NumberAxis();
-			LineChart<Number,Number> plot = new LineChart<Number,Number>(xAxis, yAxis);
+			TextField music_name = new TextField("");
+			Label music_nmlbl = new Label("楽曲名:");
+			HBox music_nmhb = new HBox();
+			music_nmhb.getChildren().addAll(music_nmlbl, music_name);
 
-			//操作画面部
-			//ComboBox settings
-			ComboBox<String> aLcb = new ComboBox<>();
-			ComboBox<String> bLcb = new ComboBox<>();
-			ComboBox<String> cLcb = new ComboBox<>();
-			ComboBox<String> dLcb = new ComboBox<>();
-			ComboBox<String> eLcb = new ComboBox<>();
-			ComboBox<String> fLcb = new ComboBox<>();
-			ComboBox<String> gLcb = new ComboBox<>();
-			ComboBox<String> hLcb = new ComboBox<>();
-			ComboBox<String> iLcb = new ComboBox<>();
-			//Label settings
-			Label aLane = new Label("aレーン:");
-			Label bLane = new Label("bレーン:");
-			Label cLane = new Label("cレーン:");
-			Label dLane = new Label("dレーン:");
-			Label eLane = new Label("eレーン(センター):");//center
-			Label fLane = new Label("fレーン:");
-			Label gLane = new Label("gレーン:");
-			Label hLane = new Label("hレーン:");
-			Label iLane = new Label("iレーン:");
-			//Boolean
-			Boolean unitbl = false;
+			CheckBox fullcombocb = new CheckBox();
+			Label flcmblbl = new Label("フルコンボ:");
+			HBox flcmbhb = new HBox();
+			flcmbhb.getChildren().addAll(flcmblbl, fullcombocb);
 
-			Button readBtn = new Button("カードデータ読み込み");
-			readBtn.setOnAction(new EventHandler<ActionEvent>(){
+			TextField perfecttf = new TextField("");
+			Label perlbl = new Label("パフェの数:");
+			HBox perhb = new HBox();
+			perhb.getChildren().addAll(perlbl, perfecttf);
 
+			TextField greattf = new TextField("");
+			Label grelbl = new Label("グレの数:");
+			HBox grehb = new HBox();
+			grehb.getChildren().addAll(grelbl, greattf);
+
+			TextField goodtf = new TextField("0");
+			Label goodlbl = new Label("グッドの数:");
+			HBox goodhb = new HBox();
+			goodhb.getChildren().addAll(goodlbl, goodtf);
+
+			TextField badtf = new TextField("0");
+			Label badlbl = new Label("バッドの数");
+			HBox badhb = new HBox();
+			badhb.getChildren().addAll(badlbl, badtf);
+
+			TextField misstf = new TextField("0");
+			Label mslbl = new Label("ミスの数:");
+			HBox mshb = new HBox();
+			mshb.getChildren().addAll(mslbl, misstf);
+
+			Label analbl = new Label("分析結果:");
+			Label analyzedlbl = new Label("");
+			analyzedlbl.setText(analyzedstr);
+			VBox anavb = new VBox();
+			anavb.getChildren().addAll(analbl, analyzedlbl);
+
+			Button rely_saver = new Button("保存する");
+			rely_saver.setOnAction(new EventHandler<ActionEvent>(){
 				@Override
-				public void handle(ActionEvent event) {
-					try{
-						Card_datas.toStringCard_datas(cdatas, aLcb);
-						Card_datas.toStringCard_datas(cdatas, bLcb);
-						Card_datas.toStringCard_datas(cdatas, cLcb);
-						Card_datas.toStringCard_datas(cdatas, dLcb);
-						Card_datas.toStringCard_datas(cdatas, eLcb);
-						Card_datas.toStringCard_datas(cdatas, fLcb);
-						Card_datas.toStringCard_datas(cdatas, gLcb);
-						Card_datas.toStringCard_datas(cdatas, hLcb);
-						Card_datas.toStringCard_datas(cdatas, iLcb);
-					}catch(DataNotFoundException e){
-						System.err.println(printlogc + ":読み込むデータがありません。");
-						if(debuglevel >= 1)System.err.println(e);
+				public void handle(ActionEvent event){
+					String fcstr = new String();
+					fcstr = "miss!";
+					if(fullcombocb.isSelected()){
+						fcstr = "fullcombo!";
+					}
+					try {
+						PrintWriter rely_pw = new PrintWriter(new BufferedWriter(new FileWriter(rely_datapath)));
+						rely_pw.println(music_name.getText()+"\t"+fcstr+ "\t"+perfecttf.getText()+"\t"+greattf.getText()+"\t"+goodtf.getText()+ "\t" +badtf.getText() + "\t" + misstf.getText());
+						int perfects = Integer.parseInt(perfecttf.getText());
+						int greats = Integer.parseInt(greattf.getText());
+						int goods = Integer.parseInt(goodtf.getText());
+						int bads = Integer.parseInt(badtf.getText());
+						int missies = Integer.parseInt(misstf.getText());
+						rely_list.add(new Rely(music_name.getText(),fullcombocb.isSelected(),perfects, greats, goods, bads, missies));
+						analyzedlbl.setText(Rely.analysed_data(rely_list));
+						rely_pw.close();
+					} catch (IOException e) {
+						System.err.println(printlogc + ":楽曲リザルト分析表示タブのファイル書き込み処理においてエラーが発生しました。");
+						System.err.println(e);
 						printlogc++;
-						tpane.getSelectionModel().select(3);
 					}
 				}
 			});
-			aLcb.setOnMouseClicked(event -> chkclc = true);
-			aLcb.setOnAction(new EventHandler<ActionEvent>(){
-				public void handle(ActionEvent event){
-					if(chkclc == true){
-						Card_datas.setGuitoUnit(unitdt[0], cdatas, aLcb);
-						chkclc = false;
-					}
-				}
-			});
-			/*Button setUnitBtn = new Button("ユニット編成");
-			setUnitBtn.setOnAction(new EventHandler<ActionEvent>(){
-				public void handle(ActionEvent event){
-					unitbl = true;
-					aLcb.getValue();
-				}
-			});*/
-			Button plotBtn = new Button("グラフ表示");
+			gpane_rely.add(music_nmhb, 0, 0);
+			gpane_rely.add(flcmbhb, 0, 1);
+			gpane_rely.add(perhb, 0, 2);
+			gpane_rely.add(grehb, 0, 3);
+			gpane_rely.add(goodhb, 0, 4);
+			gpane_rely.add(badhb, 0, 5);
+			gpane_rely.add(mshb, 0, 6);
+			gpane_rely.add(anavb, 0, 7);
 
-
-			BorderPane root_p_sg = new BorderPane();
-			root_p_sg.setCenter(aLcb);
-			root_p_sg.setBottom(readBtn);
-			spane_p_sg.getChildren().addAll(root_p_sg);
+			BorderPane root_re_ly = new BorderPane();
+			root_re_ly.setCenter(gpane_rely);
+			root_re_ly.setBottom(rely_saver);
+			spane_re_ly.getChildren().addAll(root_re_ly);
 //=============================================================================
-//タブ3 plot_SCoreGraph END
+//タブ3 plot_REsult_anaLYzer END
 //=============================================================================
 
 //=============================================================================
@@ -1321,7 +1338,7 @@ public class GUITest extends Application{
 		syslogsp.getChildren().addAll(root_s_l);
 
 		tpane.getSelectionModel().select(0);
-		tpane.getTabs().addAll(chara_DataSet, calc_SCore, plot_SCoreGraph, system_log);
+		tpane.getTabs().addAll(chara_DataSet, calc_SCore, plot_REsult_anaLYzer, system_log);
 
 		spane.getChildren().add(tpane);
 		Scene sroot = new Scene(spane);
@@ -1367,26 +1384,24 @@ public class GUITest extends Application{
 	private static class CalcScoreService extends Service<Boolean>{
 		//スコア計算するスレッド.
 		@Override
-			protected Task<Boolean> createTask(){
-				return new calcTask();
-			}
-
+		protected Task<Boolean> createTask(){
+			return new calcTask();
+		}
 	};
+
 	private static class calcTask extends Task<Boolean>{
 		@Override
 		protected Boolean call() throws Exception{
 			//スコア計算スレッドでの実際の処理.
-			//Platform.runLater(() ->System.out.println("Thread getted playcount is"+playcount));
+			Platform.runLater(() -> result_score_label.setText("計算中..."));
+			unit_pprty = "ユニット値:" + Calc_data.setUnitsf(unitdt, frend, calcMd).replaceAll(",", "\\+");
+			Platform.runLater(() -> result_unit_pprty.setText(unit_pprty));
 			calc_result = Calc_data.calcscrmain(unitdt, calcMd, frend, perper, playcount, tapscrup, depth);
 			int resultint = calc_result.getskill_up_score() + calc_result.getbase_score();
-			/*Platform.runLater(() -> System.out.println("スキルアップスコア:"+calc_result.getskill_up_score()));
-			Platform.runLater(()-> System.out.println("ベーススコア:"+ calc_result.getbase_score()));
-			Platform.runLater(() -> System.out.println("発生確率:"+calc_result.getregular_probably()));
-			for(Card_datas temp:unit){
-				Platform.runLater(() -> System.out.println(temp.getname()+":"+temp.gactcnt()));
-			}*/
 			result_score_str = String.valueOf(resultint);
-			result_score_str = "スコア期待値:"+result_score_str;
+			result_score_str = "スコア期待値:"+result_score_str+":発生確率:"+(calc_result.getregular_probably()*100.0)
+							   +"%\n"+"ベーススコア:"+calc_result.getbase_score()+ ":特技スコアアップ値:"
+							   +calc_result.getskill_up_score();
 			Platform.runLater(() -> result_score_label.setText(result_score_str));
 
 			return true;
@@ -1401,7 +1416,7 @@ public class GUITest extends Application{
 		card_list.setOnDragDetected(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if (card_list.getSelectionModel().getSelectedItem() == null) {
+				if (card_list.getSelectionModel().getSelectedItem() == null || unitList.size() >= 9) {
 					return;
 				}
 				Dragboard dragBoard = card_list.startDragAndDrop(TransferMode.MOVE);
@@ -1422,7 +1437,7 @@ public class GUITest extends Application{
 		unitListview.setOnDragOver(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (ctou == true) {
+				if (ctou == true && unitList.size() < 9) {
 					event.acceptTransferModes(TransferMode.MOVE);
 				}
 			}
@@ -1430,7 +1445,7 @@ public class GUITest extends Application{
 		unitListview.setOnDragDropped(new EventHandler<DragEvent>() {
 			@Override
 			public void handle(DragEvent event) {
-				if (ctou == true) {
+				if (ctou == true && unitList.size() < 9) {
 					String getcard_data = event.getDragboard().getString();
 					//System.out.println(getcard_data);
 					String[] temp = getcard_data.split(",", 0);
@@ -1598,7 +1613,7 @@ public class GUITest extends Application{
 		});
 	}
 
-	static class unitdatatoCell extends ListCell<Card_datas> {
+	class unitdatatoCell extends ListCell<Card_datas> {
 		@Override
 		protected void updateItem(Card_datas card, boolean empty) {
 			super.updateItem(card, empty);
@@ -1608,7 +1623,7 @@ public class GUITest extends Application{
 					setText("");
 					return;
 				}
-				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm());
+				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm() /*+ ":" + card.gprob() + "%"*/);
 				if (card.gpprty().equals("スマイル")) {
 					setStyle("-fx-background-color:#ffecec");
 				} else if (card.gpprty().equals("ピュア")) {
@@ -2191,8 +2206,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpbloom();
 												temp.spbloom(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spbloom(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.ger(k))){
+														unitList.get(k).spbloom(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpbloom()) {
 													System.out.println("ブルームをセットしました。");
@@ -2207,8 +2226,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpbloom();
 												temp.spbloom(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spbloom(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spbloom(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpbloom()) {
 													System.out.println("ブルームのセットを外しました。");
@@ -2218,6 +2241,7 @@ public class GUITest extends Application{
 											}
 										}
 									}
+									initializeComponents();
 									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
 									//tpane.getSelectionModel().select(3);
 									setSIS.close();
@@ -2250,7 +2274,7 @@ public class GUITest extends Application{
 		}
 	}
 
-	static class carddatatoCell extends ListCell<Card_datas> {
+	class carddatatoCell extends ListCell<Card_datas> {
 		@Override
 		protected void updateItem(Card_datas card, boolean empty) {
 			super.updateItem(card, empty);
@@ -2259,7 +2283,7 @@ public class GUITest extends Application{
 					setText("");
 					return;
 				}
-				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm());
+				setText(card.grrity() + ":" + card.gpprty() + ":" + card.getname() + ":" + card.getskinm() /*+ ":" + card.gprob() + "%"*/);
 				if(card.gpprty().equals("スマイル")){
 					setStyle("-fx-background-color:#ffecec");
 				}else if(card.gpprty().equals("ピュア")){
@@ -2990,6 +3014,7 @@ public class GUITest extends Application{
 											}
 										}
 									}
+									initializeComponents();
 									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
 									//tpane.getSelectionModel().select(3);
 									setSIS.close();
@@ -3035,7 +3060,7 @@ public class GUITest extends Application{
 
 		resetButton.setOnAction(new EventHandler<ActionEvent>(){
 			//*リセットボタンが押された時のイベント
-				public void handle(ActionEvent e){
+			public void handle(ActionEvent e){
 				synchronized(bytes){
 					bytes.reset();
 					printlogc = 1;
@@ -3082,13 +3107,14 @@ public class GUITest extends Application{
 					listtounit.add(Card_read.one_carddata(Card_read.reading_rdata(dfilePath), len));
 				}
 			}
+			rely_list = Rely.setfrtolistrely(rely_datapath);
+			analyzedstr = Rely.analysed_data(rely_list);
 			card_list.setItems(listtounit);
 			brinifile.close();
 			Music_data[] ar_mlist = Music_data.r_Rdata();
 			for(Music_data tmp:ar_mlist){
 				music_list.add(tmp);
 			}
-
 		}catch(NullPointerException e){
 				System.err.println(e);
 				printlogc = -1;

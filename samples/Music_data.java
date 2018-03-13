@@ -14,7 +14,7 @@ class Music_data {
 	private int star_icon;//スターノーツの数
 	private int musictm;//楽曲時間(秒)
 
-	//スコア計算用楽曲データ群
+	//スコア計算用楽曲データ群 <- Easy ～ Expertにおける譜面データ．
 	private int[] alane = new int[10];// 1~50 LN1~50 51~100 LN51~100 101~200 LN101~200 201~400 LN201~400 401~599 LN401~599の数値を格納。aから左上bはその隣eがセンターiが右上
 	private int[] blane = new int[10];
 	private int[] clane = new int[10];

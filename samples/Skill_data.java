@@ -242,7 +242,12 @@ class Skill_data{
 	public static Skill_data[] setdata(String chara_name)throws FileNotFoundException, IOException{
 		//String型のキャラ名からsdataにデータをセットするメソッド.
 		ArrayList<Skill_data> setdata = new ArrayList<Skill_data>();
-		String sdfpath = rtn_charasd(chara_name);
+		String sdfpath = new String();
+		try{
+			sdfpath = rtn_charasd(chara_name);
+		}catch(DataNotFoundException e){
+			throw new FileNotFoundException(new String());
+		}
 		FileReader fr = new FileReader(sdfpath);
 		BufferedReader br = new BufferedReader(fr);
 		int index = 0;
@@ -284,7 +289,7 @@ class Skill_data{
 		return sdata;
 	}
 
-	public static String rtn_charasd(String chara_name){
+	public static String rtn_charasd(String chara_name) throws DataNotFoundException{
 		String dPath = System.getProperty("user.dir");
 
 		if(chara_name.equals("高坂穂乃果")){
@@ -325,23 +330,24 @@ class Skill_data{
 			dPath = dPath + "/Datalist/rubysd.csv";
 		}else {
 			System.out.println("データ読み込みエラー：キャラクター名が読み込めません");
-			System.exit(1);
+			throw new DataNotFoundException(new String());
 		}
 
 		return dPath;
 	}
 
+	/*
 	public static String[] sKillName(String chara_name)throws IOException{
 		//String filep = System.getProperty("user.dir");
-		/*
-		Scanner scanner = new Scanner(Chara_Sds);
-		scanner.useDelimiter(",");
 
-		while(scanner.hasNext()){
-			int mAx = 0;
-			mAx++;
-		}
-		*/
+		//Scanner scanner = new Scanner(Chara_Sds);
+		//scanner.useDelimiter(",");
+
+		//while(scanner.hasNext()){
+		//	int mAx = 0;
+		//	mAx++;
+		//}
+
 		String[] chara_sKillName = new String[1];
 		String dPath = rtn_charasd(chara_name);
 
@@ -355,11 +361,7 @@ class Skill_data{
 		br_CSds.close();
 		return chara_sKillName;
 	}
-
-	public static int mAx(String chara_name){
-		int mAx = 1;
-		return mAx;
-	}
+	*/
 
 	/*public static void main(String[] args)throws IOException{
 		Skill_data[] sdata = setdata("園田海未");

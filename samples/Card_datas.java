@@ -2,6 +2,7 @@ package samples;
 
 import java.io.*;
 import java.util.*;
+
 import javafx.scene.control.*;
 
 class Card_datas{
@@ -1333,142 +1334,6 @@ class Card_datas{
 	}
 
 //=============================================================
-	public static String[] skill_list(String chara_name, String rrity)throws IOException{
-		if(chara_name.equals("園田海未")){
-			String[] skill_allList = new String[Skill_data.mAx(chara_name)];
-			skill_allList = Skill_data.sKillName(chara_name);
-			if(rrity.equals("UR")){
-				int[] ur_skillcard = {1,5,10,13,19,26,31,39,47,53,58};
-				String[] skill_List = new String[ur_skillcard.length];
-				for(int len = 0; len < ur_skillcard.length; len++){
-					for(int i = 0; i < skill_allList.length; i++){
-						if(i == ur_skillcard[len]){
-							skill_List[len] = skill_allList[i];
-						}
-					}
-				}
-				return skill_List;
-			}else if(rrity.equals("SSR")){
-				int[] ssr_skillcard = {46,52,57};
-				String[] skill_List = new String[ssr_skillcard.length];
-				for(int len = 0; len < ssr_skillcard.length; len++){
-					for(int i = 0; i < skill_allList.length; i++){
-						if(i == ssr_skillcard[len]){
-							skill_List[len] = skill_allList[i];
-						}
-					}
-				}
-				return skill_List;
-			}else{
-				int[] urssr_skillcard = {1,5,10,13,19,26,31,39,46,47,52,53,57,58};
-				String[] skill_List = new String[skill_allList.length - urssr_skillcard.length];
-				int sklistc = 0;
-				for(int len = 0;len < urssr_skillcard.length;len++){
-					for(int i = 0; i < skill_allList.length; i++){
-						//ここのif文の実装が甘いせいでレアリティからスキルがセットできない
-						if(i == urssr_skillcard[len]){
-							skill_allList[i] = "Empty";
-							//System.out.println(skill_allList[i]);
-						}
-					}
-				}
-				for(int i = 0; i < skill_allList.length; i++){
-					if(!skill_allList[i].equals("Empty")){
-						skill_List[sklistc] = skill_allList[i];
-						sklistc++;
-					}
-				}
-				return skill_List;
-			}
-		}
-
-		return null;
-	}
-	public static String[] skill_Pprtylist(String pprty, String chara_name, String rrity)throws IOException{
-		String[] skill_list = skill_list(chara_name,rrity);
-		if(chara_name.equals("園田海未")){
-			if(pprty.equals("スマイル")){
-				if(rrity.equals("UR")){
-					String[] rtn_skils = new String[4];
-					rtn_skils[0] = skill_list[1];
-					rtn_skils[1] = skill_list[5];
-					rtn_skils[2] = skill_list[7];
-					rtn_skils[3] = skill_list[10];
-
-					return rtn_skils;
-				}else if(rrity.equals("SSR")){
-					String[] rtn_skils = new String[1];
-					rtn_skils[0] = skill_list[2];
-
-					return rtn_skils;
-				}else if(rrity.equals("SR")){
-					int[] sm_skillList = {5,6,8,10,13,18,20,23,25,29,33,34,36,39,42,45};//smile
-					String[] rtn_skils = new String[sm_skillList.length];
-					for(int len = 0; len < rtn_skils.length; len++){
-						for(int i = 0; i <skill_list.length; i++){
-							if(i == sm_skillList[len]){
-								rtn_skils[len] = skill_list[i];
-							}
-						}
-					}
-					return rtn_skils;
-				}
-			}else if(pprty.equals("ピュア")){
-				if(rrity.equals("UR")){
-					String[] rtn_skils = new String[3];
-					rtn_skils[0] = skill_list[2];
-					rtn_skils[1] = skill_list[4];
-					rtn_skils[2] = skill_list[8];
-
-					return rtn_skils;
-				}else if(rrity.equals("SSR")){
-					String[] rtn_skils = new String[1];
-					rtn_skils[0] = skill_list[1];
-
-					return rtn_skils;
-				}else if(rrity.equals("SR")){
-					int[] pr_skillList = {3,4,7,11,12,16,19,21,26,28,31,32,37,38,40,43};//pure
-					String[] rtn_skils = new String[pr_skillList.length];
-					for(int len = 0; len < rtn_skils.length; len++){
-						for(int i = 0; i <skill_list.length; i++){
-							if(i == pr_skillList[len]){
-								rtn_skils[len] = skill_list[i];
-							}
-						}
-					}
-					return rtn_skils;
-				}
-			}else if(pprty.equals("クール")){
-				if(rrity.equals("UR")){
-					String[] rtn_skils = new String[4];
-					rtn_skils[0] = skill_list[0];
-					rtn_skils[1] = skill_list[3];
-					rtn_skils[2] = skill_list[6];
-					rtn_skils[3] = skill_list[9];
-
-					return rtn_skils;
-				}else if(rrity.equals("SSR")){
-					String[] rtn_skils = new String[1];
-					rtn_skils[0] = skill_list[0];
-
-					return rtn_skils;
-				}else if(rrity.equals("SR")){
-					int[] cl_skillList = {0,1,2,9,14,15,17,22,24,27,30,35,41,44};//cool
-					String[] rtn_skils = new String[cl_skillList.length];
-					for(int len = 0; len < rtn_skils.length; len++){
-						for(int i = 0; i <skill_list.length; i++){
-							if(i == cl_skillList[len]){
-								rtn_skils[len] = skill_list[i];
-							}
-						}
-					}
-					return rtn_skils;
-				}
-			}
-		}
-		return null;
-	}
-
 	public static int sfloor(double basescore){
 		int rtn = 0;
 		if(basescore > 0){
@@ -1481,7 +1346,7 @@ class Card_datas{
 	}
 
 //=============================================================================
-//特技レベルテーブル ->Start 1203 to 1310
+//特技レベルテーブル ->Start 1347 to 1453
 //=============================================================================
 	public static Integer[] healTable(int iniheal, int finheal){
 		Integer[] rtnTable = new Integer[8];
@@ -1587,7 +1452,7 @@ class Card_datas{
 		return rtnTable;
 	}
 //=============================================================================
-//特技レベルテーブル ->End 1203 to 1310
+//特技レベルテーブル ->End 1347 to 1453
 //=============================================================================
 	public static void toStringCard_datas(List<Card_datas> cdata, ComboBox<String> cb)throws DataNotFoundException{
 		if(cb.getItems().size() != 0){
@@ -1708,6 +1573,14 @@ class Card_datas{
 		return "Error!!";
 	}
 
+	public boolean equals(Card_datas target){
+		if(cnum == target.gcnum() && skinm.equals(target.getskinm())){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
 	public static Card_datas[] csmsort(Card_datas[] fldt) {
 		//GUITest側からcdataを受け取るとcdata[0] = null;
 		//cdata[1]からデータが入っている。
@@ -1731,10 +1604,61 @@ class Card_datas{
 		for (int len = 0; len < max - 1; len++) {
 			fldt[len + 1] = rfldt[len];
 		}
-		//Card_read.print_cdata(fldt, fldt.length);
-
 		return fldt;
 	}
+
+	public static Card_datas[] cprsort(Card_datas[] fldt) {
+		//GUITest側からcdataを受け取るとcdata[0] = null;
+		//cdata[1]からデータが入っている。
+		//この形式に合わせるため、ソートしsorted[0]のデータをrtncdata[1]に書き直す必要がある。
+		int max = fldt.length;
+		Card_datas[] rfldt = new Card_datas[max - 1];
+		for (int len = 0; len < max - 1; len++) {
+			rfldt[len] = fldt[len + 1];
+		}
+		//ピュア値でのソート例(最後の配列が最大)
+		for (int len = 0; len < max - 1; ++len) {
+			for (int j = len + 1; j < max - 1; ++j) {
+				Card_datas temp = new Card_datas();
+				temp = rfldt[len];
+				if (temp.gcpr() <= rfldt[j].gcpr()) {
+					rfldt[len] = rfldt[j];
+					rfldt[j] = temp;
+				}
+			}
+		}
+		for (int len = 0; len < max - 1; len++) {
+			fldt[len + 1] = rfldt[len];
+		}
+		return fldt;
+	}
+
+	public static Card_datas[] cclsort(Card_datas[] fldt) {
+		//GUITest側からcdataを受け取るとcdata[0] = null;
+		//cdata[1]からデータが入っている。
+		//この形式に合わせるため、ソートしsorted[0]のデータをrtncdata[1]に書き直す必要がある。
+		int max = fldt.length;
+		Card_datas[] rfldt = new Card_datas[max - 1];
+		for (int len = 0; len < max - 1; len++) {
+			rfldt[len] = fldt[len + 1];
+		}
+		//クール値でのソート例(最後の配列が最大)
+		for (int len = 0; len < max - 1; ++len) {
+			for (int j = len + 1; j < max - 1; ++j) {
+				Card_datas temp = new Card_datas();
+				temp = rfldt[len];
+				if (temp.gccl() <= rfldt[j].gccl()) {
+					rfldt[len] = rfldt[j];
+					rfldt[j] = temp;
+				}
+			}
+		}
+		for (int len = 0; len < max - 1; len++) {
+			fldt[len + 1] = rfldt[len];
+		}
+		return fldt;
+	}
+
 	//public static void main(String[] args)throws IOException{
 		/*String[] skilist = skill_list("園田海未","UR");
 		for(int i = 0;i < skilist.length;i++){
