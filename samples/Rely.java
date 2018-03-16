@@ -1,3 +1,5 @@
+package samples;
+
 import java.util.*;
 import java.io.*;
 
@@ -104,7 +106,7 @@ class Rely {
 		return missies;
 	}
 
-	final public static List<Rely> setfrtolistrely(String rely_datapath){
+	final public static List<Rely> setfrtolistrely(String rely_datapath, int printlogc){
 		List<Rely> rely_list = new ArrayList<Rely>();
 		try{
 			BufferedReader bfrely = new BufferedReader(new FileReader(rely_datapath));
@@ -129,6 +131,7 @@ class Rely {
 		}catch(FileNotFoundException e){
 			System.err.println(e);
 			System.err.println("Relyクラスのsetfrtolistrelyメソッドエラー:ファイルが見つかりません");
+			printlogc = -5;
 		}catch(IOException e){
 			System.err.println(e);
 			System.err.println("Relyクラスのsetfrtolistrelyメソッドエラー:ファイルが読み込めません");

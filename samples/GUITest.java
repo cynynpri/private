@@ -1,7 +1,6 @@
 package samples;
 
 import java.io.*;
-import java.io.File.*;
 import java.util.*;
 
 import javafx.application.Application;
@@ -23,7 +22,6 @@ import javafx.scene.layout.*;
 import javafx.scene.input.*;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
-import javafx.scene.chart.*;
 import javafx.util.Callback;
 import javafx.application.Platform;
 
@@ -61,8 +59,8 @@ public class GUITest extends Application{
 	static Label result_score_label = new Label();
 	static String unit_pprty = new String();
 	static Label result_unit_pprty = new Label();
-	static boolean ctou = false;
-	static boolean utoc = false;
+	static boolean ctou = false;//cardlist to unitlist boolean
+	static boolean utoc = false;//unitlist to cardlist boolean
 	final static String rely_datapath = System.getProperty("user.dir") + "/Datalist/music_results.tsv";
 	static List<Rely> rely_list = new ArrayList<Rely>();
 	static String analyzedstr = new String();
@@ -70,13 +68,17 @@ public class GUITest extends Application{
 	final private static ListView<Card_datas> unitListview = new ListView<Card_datas>();//ユニットのリストビュー
 	final private static ObservableList<Card_datas> unitList = FXCollections.observableArrayList();
 
+//========================================================================================================================================
+//GUI settings start.
+//========================================================================================================================================
 	public void start(Stage stage){
 		tmpstage = stage;
 		initializeComponents();
 		initializeListeners();
 		//*表示されるパネルの大きさ
-		/*stage.setWidth(800);
-		stage.setHeight(600);*/
+		/* stage.setWidth(800);
+		 * stage.setHeight(600);
+		 */
 		//タブパネルの作成
 		StackPane spane = new StackPane();
 		tpane.setPrefSize(800, 600);
@@ -101,9 +103,9 @@ public class GUITest extends Application{
 
 			/* GridPane */
 			/*
-			GridPane mainPane = new GridPane();
-			GridPane subPane = new GridPane();
-			*/
+			 * GridPane mainPane = new GridPane();
+			 * GridPane subPane = new GridPane();
+			 */
 
 			//*チョイスボックス
 			//ChoiceBox<String> chara_Sel = new ChoiceBox<>(FXCollections.observableArrayList("高坂穂乃果","絢瀬絵里","南ことり","園田海未","星空凛","西木野真姫","東条希","小泉花陽","矢澤にこ","高海千歌","桜内梨子","松浦果南","黒澤ダイヤ","渡辺曜","津島善子","国木田花丸","小原鞠莉","黒澤ルビィ"));
@@ -307,7 +309,7 @@ public class GUITest extends Application{
 								if(sdata.size() >= 0){
 									sdata.clear();
 								}
-								if(debuglevel == 1){
+								if(debuglevel >= 1){
 									System.out.println("sdata.size() = "+ sdata.size());
 								}
 								for(int len = 0; len < bfdata.length; len++){
@@ -346,7 +348,7 @@ public class GUITest extends Application{
 								if (sdata.size() >= 0) {
 									sdata.clear();
 								}
-								if (debuglevel == 1) {
+								if (debuglevel >= 1) {
 									System.out.println("sdata.size() = " + sdata.size());
 								}
 								for (int len = 0; len < bfdata.length; len++) {
@@ -387,7 +389,7 @@ public class GUITest extends Application{
 								if(sdata.size() >= 0){
 									sdata.clear();
 								}
-								if(debuglevel == 1){
+								if(debuglevel >= 1){
 									System.out.println("sdata.size() = "+ sdata.size());
 								}
 								for(int len = 0; len < bfdata.length; len++){
@@ -523,7 +525,7 @@ public class GUITest extends Application{
 								if (sdata.size() >= 0) {
 									sdata.clear();
 								}
-								if (debuglevel == 1) {
+								if (debuglevel >= 1) {
 									System.out.println("sdata.size() = " + sdata.size());
 								}
 								for (int len = 0; len < bfdata.length; len++) {
@@ -562,7 +564,7 @@ public class GUITest extends Application{
 								if (sdata.size() >= 0) {
 									sdata.clear();
 								}
-								if (debuglevel == 1) {
+								if (debuglevel >= 1) {
 									System.out.println("sdata.size() = " + sdata.size());
 								}
 								for (int len = 0; len < bfdata.length; len++) {
@@ -610,7 +612,7 @@ public class GUITest extends Application{
 								if(sdata.size() >= 0){
 									sdata.clear();
 								}
-								if(debuglevel == 1){
+								if(debuglevel >= 1){
 									System.out.println("sdata.size() = "+ sdata.size());
 								}
 								for(int len = 0; len < bfdata.length; len++){
@@ -649,7 +651,7 @@ public class GUITest extends Application{
 								if(sdata.size() >= 0){
 									sdata.clear();
 								}
-								if(debuglevel == 1){
+								if(debuglevel >= 1){
 									System.out.println("sdata.size() = "+ sdata.size());
 								}
 								for(int len = 0; len < bfdata.length; len++){
@@ -685,7 +687,7 @@ public class GUITest extends Application{
 								if (sdata.size() >= 0) {
 									sdata.clear();
 								}
-								if (debuglevel == 1) {
+								if (debuglevel >= 1) {
 									System.out.println("sdata.size() = " + sdata.size());
 								}
 								for (int len = 0; len < bfdata.length; len++) {
@@ -788,10 +790,12 @@ public class GUITest extends Application{
 						card_cl.setText(rcpprty[2]);
 
 						chkclc = false;
-						//これ冗長じゃないか...?
-						//なんでbooleanを設定したの...?
-						//ほんとにboolean必要...?
-						//もっといい処理ないの...?
+						/*
+						 * これ冗長じゃないか...?
+						 * なんでbooleanを設定したの...?
+						 * ほんとにboolean必要...?
+						 * もっといい処理ないの...?
+						 */
 					}
 				}
 			});
@@ -808,8 +812,6 @@ public class GUITest extends Application{
 						//}
 						//*ファイル読み込み
 						FileWriter fw = new FileWriter(System.getProperty("user.dir")+"\\Character_data.ini", true);
-						//BufferedWriter bw = new BufferedWriter(fw);
-						//PrintWriter pw = new PrintWriter(bw);
 						PrintWriter pw = new PrintWriter(new BufferedWriter(fw));
 
 
@@ -913,7 +915,6 @@ public class GUITest extends Application{
 							System.out.println("filepath = " + fcopen.getPath());
 						}
 						if(fcopen != null){
-							//maxNum = Card_read.getMaxnum(fcopen);
 							Card_datas[] bfcdata = Card_read.dc_cdatas(fcopen);
 							maxNum = bfcdata.length;
 							if(cdatas.size() != 0){
@@ -1269,20 +1270,31 @@ public class GUITest extends Application{
 						fcstr = "fullcombo!";
 					}
 					try {
-						PrintWriter rely_pw = new PrintWriter(new BufferedWriter(new FileWriter(rely_datapath)));
-						rely_pw.println(music_name.getText()+"\t"+fcstr+ "\t"+perfecttf.getText()+"\t"+greattf.getText()+"\t"+goodtf.getText()+ "\t" +badtf.getText() + "\t" + misstf.getText());
 						int perfects = Integer.parseInt(perfecttf.getText());
 						int greats = Integer.parseInt(greattf.getText());
 						int goods = Integer.parseInt(goodtf.getText());
 						int bads = Integer.parseInt(badtf.getText());
 						int missies = Integer.parseInt(misstf.getText());
 						rely_list.add(new Rely(music_name.getText(),fullcombocb.isSelected(),perfects, greats, goods, bads, missies));
+						PrintWriter rely_pw = new PrintWriter(new BufferedWriter(new FileWriter(rely_datapath)),true);
+						rely_pw.println(
+							music_name.getText() + "\t" + fcstr + "\t" + perfecttf.getText() + "\t" + greattf.getText()
+									+ "\t" + goodtf.getText() + "\t" + badtf.getText() + "\t" + misstf.getText());
 						analyzedlbl.setText(Rely.analysed_data(rely_list));
 						rely_pw.close();
 					} catch (IOException e) {
 						System.err.println(printlogc + ":楽曲リザルト分析表示タブのファイル書き込み処理においてエラーが発生しました。");
 						System.err.println(e);
 						printlogc++;
+						tpane.getSelectionModel().select(3);
+					} catch (NumberFormatException e){
+						System.err.println(printlogc + ":楽曲リザルト分析表示タブの保存する際において数値に変換できないエラーが発生しました。");
+						System.err.println("正しい数値を入力してください");
+						System.err.println(e);
+						printlogc++;
+						tpane.getSelectionModel().select(3);
+						perfecttf.setText("");
+						greattf.setText("");
 					}
 				}
 			});
@@ -1378,8 +1390,25 @@ public class GUITest extends Application{
 			System.out.println("sdata.size() = " + sdata.size());
 			printlogc++;
 			tpane.getSelectionModel().select(3);
+		}else if(printlogc == -5){
+			printlogc = 1;
+			System.err.println(printlogc + ":エラー発生:起動時エラー:データ読み込み:ファイル読み込みエラー:ファイルが見つかりません");
+			printlogc++;
+			tpane.getSelectionModel().select(3);
+		}else if(printlogc == -6){
+			printlogc = 1;
+			System.err.println(printlogc+":エラー発生:起動時エラー:デバッグレベルの指定:デバッグレベルの指定に失敗しました");
+			System.err.println(errstr);
+			printlogc++;
+			tpane.getSelectionModel().select(3);
 		}
 	}
+
+//****************************************************************************************************************************************
+//========================================================================================================================================
+//GUI settings end.
+//========================================================================================================================================
+//****************************************************************************************************************************************
 
 	private static class CalcScoreService extends Service<Boolean>{
 		//スコア計算するスレッド.
@@ -1409,8 +1438,10 @@ public class GUITest extends Application{
 	}
 
 	private void initializeListeners() {
-		//http://www.java2s.com/Tutorials/Java/JavaFX/0640__JavaFX_ListView.htm
-		//上記のサイトを参考にした。
+		/*
+		 * http://www.java2s.com/Tutorials/Java/JavaFX/0640__JavaFX_ListView.htm
+		 * 上記のサイトを参考にした。
+		 */
 
 		//card_list -> unitListview.
 		card_list.setOnDragDetected(new EventHandler<MouseEvent>() {
@@ -1447,7 +1478,9 @@ public class GUITest extends Application{
 			public void handle(DragEvent event) {
 				if (ctou == true && unitList.size() < 9) {
 					String getcard_data = event.getDragboard().getString();
-					//System.out.println(getcard_data);
+					if(debuglevel >= 1){
+						System.out.println(getcard_data);
+					}
 					String[] temp = getcard_data.split(",", 0);
 					int cnum = Integer.parseInt(temp[0]);
 					String name = temp[1];
@@ -1538,7 +1571,9 @@ public class GUITest extends Application{
 				if (utoc == true) {
 					int index = unitListview.getSelectionModel().getSelectedIndex();
 					String getcard_data = event.getDragboard().getString();
-					//System.out.println(getcard_data);
+					if(debuglevel >= 1){
+						System.out.println(getcard_data);
+					}
 					String[] temp = getcard_data.split(",", 0);
 					int cnum = Integer.parseInt(temp[0]);
 					String name = temp[1];
@@ -1640,7 +1675,7 @@ public class GUITest extends Application{
 						+ "装備済みトリック:" + card.gptrick() + "個\n" + "装備済み" + Card_datas.getSISimagename(card) + ":"
 						+ card.gpimage() + "個\n" + "装備済みノネット:" + card.gpnnet() + "個\t" + "装備済みウィンク:" + card.gpwink()
 						+ "個\n" + "装備済みトリル:" + card.gptrill() + "個\t" + "装備済みブルーム:" + card.gpbloom() + "個"));
-				/*setOnMouseClicked(new EventHandler<MouseEvent>() {
+				setOnMouseClicked(new EventHandler<MouseEvent>() {
 					public void handle(MouseEvent event) {
 						if (event.getClickCount() == 2 && event.getButton().equals(MouseButton.PRIMARY)) {
 							Stage setSIS = new Stage();
@@ -1774,8 +1809,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gppfm();
 												temp.spkiss(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spkiss(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spkiss(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpkiss()) {
 													System.out.println("キッスをセットしました。");
@@ -1790,8 +1829,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpkiss();
 												temp.spkiss(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spkiss(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spkiss(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpkiss()) {
 													System.out.println("キッスのセットを外しました。");
@@ -1807,8 +1850,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gppfm();
 												temp.sppfm(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).sppfm(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).sppfm(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (temp.gppfm() != getNowdata) {
 													System.out.println("パフュームをセットしました。");
@@ -1823,8 +1870,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gppfm();
 												temp.sppfm(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).sppfm(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).sppfm(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gppfm()) {
 													System.out.println("パフュームのセットを外しました。");
@@ -1840,8 +1891,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpring();
 												temp.spring(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spring(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spring(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpring()) {
 													System.out.println("リングをセットしました。");
@@ -1856,8 +1911,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpring();
 												temp.spring(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spring(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spring(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpring()) {
 													System.out.println("リングのセットを外しました。");
@@ -1873,8 +1932,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpcross();
 												temp.spcross(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spcross(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spcross(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpcross()) {
 													System.out.println("クロスをセットしました。");
@@ -1889,8 +1952,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpcross();
 												temp.spcross(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spcross(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spcross(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpcross()) {
 													System.out.println("クロスのセットを外しました。");
@@ -1906,8 +1973,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpaura();
 												temp.spaura(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spaura(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spaura(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpaura()) {
 													System.out.println("オーラをセットしました。");
@@ -1922,8 +1993,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpaura();
 												temp.spaura(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spaura(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spaura(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpaura()) {
 													System.out.println("オーラのセットを外しました。");
@@ -1939,8 +2014,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpveil();
 												temp.spveil(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spveil(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spveil(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpveil()) {
 													System.out.println("ヴェールをセットしました。");
@@ -1955,8 +2034,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpveil();
 												temp.spveil(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spveil(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spveil(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpveil()) {
 													System.out.println("ヴェールのセットを外しました。");
@@ -1972,8 +2055,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpcharm();
 												temp.spcharm(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spcharm(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spcharm(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpcharm()) {
 													System.out.println("チャームをセットしました。");
@@ -1988,8 +2075,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpcharm();
 												temp.spcharm(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spcharm(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spcharm(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpcharm()) {
 													System.out.println("チャームのセットを外しました。");
@@ -2005,8 +2096,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpheal();
 												temp.spheal(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spheal(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spheal(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpheal()) {
 													System.out.println("ヒールをセットしました。");
@@ -2021,8 +2116,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpheal();
 												temp.spheal(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spheal(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spheal(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpheal()) {
 													System.out.println("ヒールのセットを外しました。");
@@ -2038,8 +2137,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gptrick();
 												temp.sptrick(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).sptrick(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).sptrick(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gptrick()) {
 													System.out.println("トリックをセットしました。");
@@ -2054,8 +2157,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gptrick();
 												temp.sptrick(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).sptrick(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).sptrick(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gptrick()) {
 													System.out.println("トリックのセットを外しました。");
@@ -2071,8 +2178,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpimage();
 												temp.spimage(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spimage(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spimage(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpimage()) {
 													System.out.println(Card_datas.getSISimagename(card) + "をセットしました。");
@@ -2088,12 +2199,15 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpimage();
 												temp.spimage(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spimage(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spimage(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpimage()) {
-													System.out
-															.println(Card_datas.getSISimagename(card) + "のセットを外しました。");
+													System.out.println(Card_datas.getSISimagename(card) + "のセットを外しました。");
 													System.out.println(cdatas.get(len).getname() + ":"
 															+ Card_datas.getSISimagename(card) + "装備数:"
 															+ cdatas.get(len).gpimage());
@@ -2107,8 +2221,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpnnet();
 												temp.spnnet(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spnnet(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spnnet(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpnnet()) {
 													System.out.println("ノネットをセットしました。");
@@ -2123,8 +2241,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpnnet();
 												temp.spnnet(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spnnet(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(unitList.get(k).equals(temp)){
+														unitList.get(k).spnnet(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpnnet()) {
 													System.out.println("ノネットのセットを外しました。");
@@ -2140,8 +2262,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpwink();
 												temp.spwink(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spwink(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spwink(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpwink()) {
 													System.out.println("ウインクをセットしました。");
@@ -2156,8 +2282,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gpwink();
 												temp.spwink(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).spwink(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).spwink(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gpwink()) {
 													System.out.println("ウインクのセットを外しました。");
@@ -2173,8 +2303,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gptrill();
 												temp.sptrill(1);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).sptrill(1);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).sptrill(1);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gptrill()) {
 													System.out.println("トリルをセットしました。");
@@ -2189,8 +2323,12 @@ public class GUITest extends Application{
 												Card_datas temp = cdatas.get(len);
 												int getNowdata = temp.gptrill();
 												temp.sptrill(0);
-												cdatas.set(len, temp);
-												unitList.set(len, temp);
+												cdatas.get(len).sptrill(0);
+												for(int k = 0;k < unitList.size();k++){
+													if(card.equals(unitList.get(k))){
+														unitList.get(k).sptrill(0);
+													}
+												}
 												unitListview.setItems(unitList);
 												if (getNowdata != temp.gptrill()) {
 													System.out.println("トリルのセットを外しました。");
@@ -2208,7 +2346,7 @@ public class GUITest extends Application{
 												temp.spbloom(1);
 												cdatas.get(len).spbloom(1);
 												for(int k = 0;k < unitList.size();k++){
-													if(card.equals(unitList.ger(k))){
+													if(card.equals(unitList.get(k))){
 														unitList.get(k).spbloom(1);
 													}
 												}
@@ -2242,8 +2380,6 @@ public class GUITest extends Application{
 										}
 									}
 									initializeComponents();
-									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
-									//tpane.getSelectionModel().select(3);
 									setSIS.close();
 								}
 							});
@@ -2269,7 +2405,7 @@ public class GUITest extends Application{
 							setSIS.show();
 						}
 					}
-				});*/
+				});
 			}
 		}
 	}
@@ -3015,8 +3151,6 @@ public class GUITest extends Application{
 										}
 									}
 									initializeComponents();
-									//System.out.println("リストをスライドして、一度更新するとリストに反映されます。");
-									//tpane.getSelectionModel().select(3);
 									setSIS.close();
 								}
 							});
@@ -3049,8 +3183,10 @@ public class GUITest extends Application{
 	}
 
 	private static void redirectConsole(TextArea textarea, Button resetButton){
-		//https://qiita.com/snipsnipsnip/items/281bd6ad20417b10fa04
-		//上記のサイトを参考にjavafx仕様に書き直した。
+		/*
+		 * https://qiita.com/snipsnipsnip/items/281bd6ad20417b10fa04
+		 * 上記のサイトを参考にjavafx仕様に書き直した。
+		 */
 		final ByteArrayOutputStream bytes = new ByteArrayOutputStream(){
 			@Override
 			public synchronized void flush() throws IOException{
@@ -3089,7 +3225,12 @@ public class GUITest extends Application{
 	public static void main(String[] args){
 		int argc = args.length;
 		if(argc >= 1){
-			debuglevel = Integer.parseInt(args[0]);
+			try{
+				debuglevel = Integer.parseInt(args[0]);
+			}catch(NumberFormatException e){
+				printlogc = -6;
+				errstr = e.toString();
+			}
 		}
 		try{
 			String inipath = System.getProperty("user.dir");
@@ -3107,7 +3248,7 @@ public class GUITest extends Application{
 					listtounit.add(Card_read.one_carddata(Card_read.reading_rdata(dfilePath), len));
 				}
 			}
-			rely_list = Rely.setfrtolistrely(rely_datapath);
+			rely_list = Rely.setfrtolistrely(rely_datapath, printlogc);
 			analyzedstr = Rely.analysed_data(rely_list);
 			card_list.setItems(listtounit);
 			brinifile.close();
