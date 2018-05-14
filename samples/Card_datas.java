@@ -1207,12 +1207,11 @@ class Card_datas{
 			if(len == 2){
 				bs = 0;
 			}else{
-				//bs = Integer.parseInt(chkliner);
-				try{
-					bs = Integer.parseInt(buffer_a[len]);
-				}catch(NumberFormatException e){
+				if(buffer_a[len].indexOf(".") != -1){
 					double tmpdbl = Double.parseDouble(buffer_a[len]);
-					bs = (int)(tmpdbl*100.0 - 100);
+					bs = (int) (tmpdbl * 100.0 - 100);
+				}else{
+					bs = Integer.parseInt(buffer_a[len]);
 				}
 			}
 			rtn_array[len] = bs;
