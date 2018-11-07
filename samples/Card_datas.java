@@ -203,56 +203,56 @@ class Card_datas{
 
 //=============================================================
 
-	final public void scnum(int cnum){
+	public final void scnum(int cnum){
 		this.cnum = cnum;
 	}
 
-	final public int gcnum(){
+	public final int gcnum(){
 		return cnum;
 	}
 
 //=============================================================
-	final public void setname(String name){
+	public final void setname(String name){
 		this.name = name;
 	}
 
-	final public String getname(){
+	public final String getname(){
 		return name;
 	}
 //=============================================================
-	final public void spprty(String pprty){
+	public final void spprty(String pprty){
 		this.pprty = pprty;
 	}
 
-	final public String gpprty(){
+	public final String gpprty(){
 		return pprty;
 	}
 //=============================================================
-	final public void srrity(String rrity){
+	public final void srrity(String rrity){
 		this.rrity = rrity;
 	}
 
-	final public String grrity(){
+	public final String grrity(){
 		return rrity;
 	}
 //=============================================================
-	final public void setskinm(String skinm){
+	public final void setskinm(String skinm){
 		this.skinm = skinm;
 	}
 
-	final public String getskinm(){
+	public final String getskinm(){
 		return skinm;
 	}
 //=============================================================
-	final public void sawake(boolean awake){
+	public final void sawake(boolean awake){
 		this.awake = awake;
 	}
 
-	final public boolean gawake(){
+	public final boolean gawake(){
 		return awake;
 	}
 
-	final public String gsawk(){
+	public final String gsawk(){
 		//get string awake
 		String rtnawk = "";
 
@@ -265,7 +265,7 @@ class Card_datas{
 		return rtnawk;
 	}
 
-	final public void sstrawake(String strawake){
+	public final void sstrawake(String strawake){
 		Boolean setawake = true;
 		setawake = chkrawake(strawake);
 		awake = setawake;
@@ -273,135 +273,135 @@ class Card_datas{
 
 	//if you set string awake, you check ctrl+f "chkrawake"; plz.
 //=============================================================
-	final public void ssislt(int sislt){
+	public final void ssislt(int sislt){
 		this.sislt = sislt;
 	}
 
-	final public int gsislt(){
+	public final int gsislt(){
 		return sislt;
 	}
 //=============================================================
-	final public void sskilv(int skilv){
+	public final void sskilv(int skilv){
 		this.skilv = skilv;
 	}
 
-	final public int gskilv(){
+	public final int gskilv(){
 		return skilv;
 	}
 //=============================================================
-	final public void ssksha(String sksha){
+	public final void ssksha(String sksha){
 		this.sksha = sksha;
 	}
 
-	final public String gsksha(){
+	public final String gsksha(){
 		return sksha;
 	}
 //=============================================================
-	final public void sskitp(String skitp){
+	public final void sskitp(String skitp){
 		this.skitp = skitp;
 	}
 
-	final public String gskitp(){
+	public final String gskitp(){
 		return skitp;
 	}
 //=============================================================
-	final public void sfactv(int factv){
+	public final void sfactv(int factv){
 		this.factv = factv;
 	}
 
-	final public int gfactv(){
+	public final int gfactv(){
 		return factv;
 	}
 //=============================================================
-	final public void sprob(int prob){
+	public final void sprob(int prob){
 		this.prob = prob;
 	}
 
-	final public int gprob(){
+	public final int gprob(){
 		return prob;
 	}
 //=============================================================
-	final public void saccut(double accut){
+	public final void saccut(double accut){
 		this.accut = accut;
 	}
 
-	final public double gaccut(){
+	public final double gaccut(){
 		return accut;
 	}
 //=============================================================
-	final public void sefsz(int efsz){
+	public final void sefsz(int efsz){
 		this.efsz = efsz;
 	}
 
-	final public int gefsz(){
+	public final int gefsz(){
 		return efsz;
 	}
 //=============================================================
-	final public void scsm(int csm){
+	public final void scsm(int csm){
 		this.csm = csm;
 	}
 
-	final public int gcsm(){
+	public final int gcsm(){
 		return csm;
 	}
 //=============================================================
-	final public void sccl(int ccl){
+	public final void sccl(int ccl){
 		this.ccl = ccl;
 	}
 
-	final public int gccl(){
+	public final int gccl(){
 		return ccl;
 	}
 //=============================================================
-	final public void scpr(int cpr){
+	public final void scpr(int cpr){
 		this.cpr = cpr;
 	}
 
-	final public int gcpr(){
+	public final int gcpr(){
 		return cpr;
 	}
 //=============================================================
-	final public void setcskin(String cskin){
+	public final void setcskin(String cskin){
 		this.cskin = cskin;
 	}
 
-	final public String getcskin(){
+	public final String getcskin(){
 		return cskin;
 	}
 //=============================================================
-	final public void setacskn(String acskn){
+	public final void setacskn(String acskn){
 		this.acskn = acskn;
 	}
 
-	final public String getacskn(){
+	public final String getacskn(){
 		return acskn;
 	}
 //=============================================================
-	final public void setunitnm(String unitnm){
+	public final void setunitnm(String unitnm){
 		this.unitnm = unitnm;
 	}
 
-	final public String getunitnm(){
+	public final String getunitnm(){
 		return unitnm;
 	}
 //=============================================================
-	final public void setsubuntnm(String subuntnm){
+	public final void setsubuntnm(String subuntnm){
 		this.subuntnm = subuntnm;
 	}
 
-	final public String getsubuntnm(){
+	public final String getsubuntnm(){
 		return subuntnm;
 	}
 //=============================================================
-	final public void setgrade(String grade){
+	public final void setgrade(String grade){
 		this.grade = grade;
 	}
 
-	final public String getgrade(){
+	public final String getgrade(){
 		return grade;
 	}
 
-	final public int getparseGrade(){
+	public final int getparseGrade(){
 		if(grade.indexOf("1") != -1){
 			return 1;
 		}else if(grade.indexOf("2") != -1){
@@ -413,194 +413,194 @@ class Card_datas{
 		}
 	}
 //=============================================================
-	final public void setexpefsz(int expefsz){
+	public final void setexpefsz(int expefsz){
 		this.expefsz = expefsz;
 	}
 
-	final public int getexpefsz(){
+	public final int getexpefsz(){
 		return expefsz;
 	}
 //=============================================================
-	final public void spkiss(int pkiss){
+	public final void spkiss(int pkiss){
 		this.pkiss = pkiss;
 	}
 
-	final public int gpkiss(){
+	public final int gpkiss(){
 		if(pkiss <= 1 && pkiss >= 0){
 			return pkiss;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void sppfm(int ppfm){
+	public final void sppfm(int ppfm){
 		this.ppfm = ppfm;
 	}
 
-	final public int gppfm(){
+	public final int gppfm(){
 		if(ppfm <= 1 && ppfm >= 0){
 			return ppfm;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spring(int pring){
+	public final void spring(int pring){
 		this.pring = pring;
 	}
 
-	final public int gpring(){
+	public final int gpring(){
 		if(pring <= 1 && pring >= 0){
 			return pring;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spaura(int paura){
+	public final void spaura(int paura){
 		this.paura = paura;
 	}
 
-	final public int gpaura(){
+	public final int gpaura(){
 		if(paura <= 1 && paura >= 0){
 			return paura;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spcross(int pcross){
+	public final void spcross(int pcross){
 		this.pcross = pcross;
 	}
 
-	final public int gpcross(){
+	public final int gpcross(){
 		if(pcross <= 1 && pcross >= 0){
 			return pcross;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spveil(int pveil){
+	public final void spveil(int pveil){
 		this.pveil = pveil;
 	}
 
-	final public int gpveil(){
+	public final int gpveil(){
 		if(pveil <= 1 && pveil >= 0){
 			return pveil;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void sactcnt(int actcnt){
+	public final void sactcnt(int actcnt){
 		this.actcnt = actcnt;
 	}
 
-	final public int gactcnt(){
+	public final int gactcnt(){
 		return actcnt;
 	}
 //=============================================================
-	final public void supactcnt(int upactcnt){
+	public final void supactcnt(int upactcnt){
 		this.upactcnt = upactcnt;
 	}
 
-	final public int gupactcnt(){
+	public final int gupactcnt(){
 		return upactcnt;
 	}
 //=============================================================
-	final public void spcharm(int pcharm){
+	public final void spcharm(int pcharm){
 		this.pcharm = pcharm;
 	}
 
-	final public int gpcharm(){
+	public final int gpcharm(){
 		if (pcharm <= 1 && pcharm >= 0) {
 			return pcharm;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spheal(int pheal){
+	public final void spheal(int pheal){
 		this.pheal = pheal;
 	}
 
-	final public int gpheal(){
+	public final int gpheal(){
 		if (pheal <= 1 && pheal >= 0) {
 			return pheal;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void sptrick(int ptrick){
+	public final void sptrick(int ptrick){
 		this.ptrick = ptrick;
 	}
 
-	final public int gptrick(){
+	public final int gptrick(){
 		if(ptrick <= 1 && ptrick >= 0){
 			return ptrick;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spwink(int pwink){
+	public final void spwink(int pwink){
 		this.pwink = pwink;
 	}
 
-	final public int gpwink(){
+	public final int gpwink(){
 		if(pwink <= 1 && pwink >= 0){
 			return pwink;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spimage(int pimage){
+	public final void spimage(int pimage){
 		this.pimage = pimage;
 	}
 
-	final public int gpimage(){
+	public final int gpimage(){
 		if(pimage <= 1 && pimage >= 0){
 			return pimage;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spbloom(int pbloom){
+	public final void spbloom(int pbloom){
 		this.pbloom = pbloom;
 	}
 
-	final public int gpbloom(){
+	public final int gpbloom(){
 		if(pbloom <= 1 && pbloom >= 0){
 			return pbloom;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void sptrill(int ptrill){
+	public final void sptrill(int ptrill){
 		this.ptrill = ptrill;
 	}
 
-	final public int gptrill(){
+	public final int gptrill(){
 		if(ptrill >= 0 && ptrill <= 1){
 			return ptrill;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void spnnet(int pnnet){
+	public final void spnnet(int pnnet){
 		this.pnnet = pnnet;
 	}
 
-	final public int gpnnet(){
+	public final int gpnnet(){
 		if(pnnet <= 1 && pnnet >= 0){
 			return pnnet;
 		}
 		return -1;
 	}
 //=============================================================
-	final public void setskillleveleffectsize(Skill_data slef){
+	public final void setskillleveleffectsize(Skill_data slef){
 		skillleveleffectsize = slef;
 	}
 
-	final public Skill_data getskillleveleffectsize(){
+	public final Skill_data getskillleveleffectsize(){
 		return skillleveleffectsize;
 	}
 //--------------------------------------------------------------
 //以上が単純なgetterとsetter.以下は実際に使用するgetterとsetter.
-	final public void setlisttoskilldata(Skill_data[] sdata){
+	public final void setlisttoskilldata(Skill_data[] sdata){
 		boolean matchbl = false;
 		for(Skill_data temp : sdata){
 			if(temp.getskinm().equals(skinm)){
@@ -615,7 +615,7 @@ class Card_datas{
 		}
 	}
 	//特技レベルブーストに対応するためのメソッド
-	final public double[] getskilldatatoefsz(Card_datas boostcard){
+	public final double[] getskilldatatoefsz(Card_datas boostcard){
 		double[] leveluptoefsz = new double[2];
 		int boosted_skill_level = skilv + boostcard.gefsz();
 		String arraystr = Skill_read.getefsz(boosted_skill_level, skillleveleffectsize);
@@ -635,7 +635,7 @@ class Card_datas{
 		return leveluptoefsz;//leveluptoefsz[0]がint efsz. leveluptoefsz[1]がdouble accut.に対応する。
 	}
 	//特技レベルブースト後のユニットを返すメソッド。
-	final public Card_datas[] skilllevelboostedtoUnits(Card_datas[] unit, Card_datas boostcard){
+	public final Card_datas[] skilllevelboostedtoUnits(Card_datas[] unit, Card_datas boostcard){
 		int len = 0;
 		for(Card_datas temp : unit){
 			if(!(temp.gsksha().equals(boostcard.gsksha()))){

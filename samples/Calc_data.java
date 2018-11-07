@@ -62,63 +62,63 @@ class Calc_data{
 		super();
 	}
 	//---------------------------------------------------------
-	final public void setregular_probably(double regular_probably){
+	public final void setregular_probably(double regular_probably){
 		this.regular_probably = regular_probably;
 	}
-	final public double getregular_probably(){
+	public final double getregular_probably(){
 		return regular_probably;
 	}
 	//---------------------------------------------------------
-	final public void set_up_regular_probably(double up_regular_probably){
+	public final void set_up_regular_probably(double up_regular_probably){
 		this.up_regular_probably = up_regular_probably;
 	}
-	final public double get_up_regular_probably(){
+	public final double get_up_regular_probably(){
 		return up_regular_probably;
 	}
 	//---------------------------------------------------------
-	final public void setskill_up_score(int skill_up_score){
+	public final void setskill_up_score(int skill_up_score){
 		this.skill_up_score = skill_up_score;
 	}
-	final public int getskill_up_score(){
+	public final int getskill_up_score(){
 		return skill_up_score;
 	}
 	//---------------------------------------------------------
-	final public void set_probably_up_skillupscore(int probably_up_skillupscore){
+	public final void set_probably_up_skillupscore(int probably_up_skillupscore){
 		this.probably_up_skillupscore = probably_up_skillupscore;
 	}
-	final public int get_probably_up_skillupscore(){
+	public final int get_probably_up_skillupscore(){
 		return probably_up_skillupscore;
 	}
 	//---------------------------------------------------------
-	final public void setbase_score(int base_score){
+	public final void setbase_score(int base_score){
 		this.base_score = base_score;
 	}
-	final public int getbase_score(){
+	public final int getbase_score(){
 		return base_score;
 	}
 	//---------------------------------------------------------
-	final public void setcalculation_time(long calculation_time){
+	public final void setcalculation_time(long calculation_time){
 		this.calculation_time = calculation_time;
 	}
-	final public long getcalculation_time(){
+	public final long getcalculation_time(){
 		return calculation_time;
 	}
 	//---------------------------------------------------------
-	final public String toString(){
+	public final String toString(){
 		return regular_probably+","+up_regular_probably+","+skill_up_score+","+probably_up_skillupscore+","+base_score+","+calculation_time;
 	}
 	//---------------------------------------------------------
-	final public void setunit_pprty(int unit_pprty){
+	public final void setunit_pprty(int unit_pprty){
 		this.unit_pprty = unit_pprty;
 	}
-	final public int getunit_pprty(){
+	public final int getunit_pprty(){
 		return unit_pprty;
 	}
 	//---------------------------------------------------------
-	final public void setcenterskill_up_unit_pprty(int centerskill_up_unit_pprty){
+	public final void setcenterskill_up_unit_pprty(int centerskill_up_unit_pprty){
 		this.centerskill_up_unit_pprty = centerskill_up_unit_pprty;
 	}
-	final public int getcenterskill_up_unit_pprty(){
+	public final int getcenterskill_up_unit_pprty(){
 		return centerskill_up_unit_pprty;
 	}
 	//---------------------------------------------------------

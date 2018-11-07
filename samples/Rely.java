@@ -37,27 +37,27 @@ class Rely {
 		this.missies = missies;
 	}
 
-	final public void setmusicnm(String musicnm) {
+	public final void setmusicnm(String musicnm) {
 		this.musicnm = musicnm;
 	}
 
-	final public String getmusicnm() {
+	public final String getmusicnm() {
 		return musicnm;
 	}
 
-	final public void setfullcombobl(boolean fullcombobl) {
+	public final void setfullcombobl(boolean fullcombobl) {
 		this.fullcombobl = fullcombobl;
 	}
 
-	final public boolean getfullcombobl() {
+	public final boolean getfullcombobl() {
 		return fullcombobl;
 	}
 
-	final public void setstrfcbl(String fullcombostr) {
+	public final void setstrfcbl(String fullcombostr) {
 		fullcombobl = fullcombostr.equals("fullcombo!");
 	}
 
-	final public String getstrfcbl() {
+	public final String getstrfcbl() {
 		String fcstr = new String();
 		fcstr = "miss!";
 		if (fullcombobl) {
@@ -66,47 +66,47 @@ class Rely {
 		return fcstr;
 	}
 
-	final public void setperfects(int perfects) {
+	public final void setperfects(int perfects) {
 		this.perfects = perfects;
 	}
 
-	final public int getperfects() {
+	public final int getperfects() {
 		return perfects;
 	}
 
-	final public void setgreats(int greats) {
+	public final void setgreats(int greats) {
 		this.greats = greats;
 	}
 
-	final public int getgreats() {
+	public final int getgreats() {
 		return greats;
 	}
 
-	final public void setgoods(int goods) {
+	public final void setgoods(int goods) {
 		this.goods = goods;
 	}
 
-	final public int getgoods() {
+	public final int getgoods() {
 		return goods;
 	}
 
-	final public void setbads(int bads) {
+	public final void setbads(int bads) {
 		this.bads = bads;
 	}
 
-	final public int getbads() {
+	public final int getbads() {
 		return bads;
 	}
 
-	final public void setmissies(int missies) {
+	public final void setmissies(int missies) {
 		this.missies = missies;
 	}
 
-	final public int getmissies() {
+	public final int getmissies() {
 		return missies;
 	}
 
-	final public static List<Rely> setfrtolistrely(String rely_datapath, int printlogc){
+	public final static List<Rely> setfrtolistrely(String rely_datapath, int printlogc){
 		List<Rely> rely_list = new ArrayList<Rely>();
 		try{
 			BufferedReader bfrely = new BufferedReader(new FileReader(rely_datapath));
